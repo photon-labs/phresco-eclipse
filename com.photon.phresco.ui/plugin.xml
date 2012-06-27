@@ -169,7 +169,7 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="com.photon.phresco.ui.PhrescoPropertyPage"
+            class="com.photon.phresco.ui.propertypages.PhrescoPropertyPage"
             id="com.photon.phresco.ui.propertypage"
             name="%project.propertypage.appinfo.name">
             <!-- <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/> -->
@@ -181,7 +181,7 @@
       </page>
       <page
             category="com.photon.phresco.ui.propertypage"
-            class="com.photon.phresco.ui.FeaturesPropertyPage"
+            class="com.photon.phresco.ui.propertypages.FeaturesPropertyPage"
             id="com.photon.phresco.ui.featurespage"
             name="%project.propertypage.features.name">
            <!-- <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/> -->

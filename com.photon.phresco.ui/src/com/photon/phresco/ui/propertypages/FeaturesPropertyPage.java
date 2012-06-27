@@ -16,7 +16,7 @@
  * limitations under the License.
  * ###
  */
-package com.photon.phresco.ui;
+package com.photon.phresco.ui.propertypages;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -27,10 +27,10 @@ import org.eclipse.ui.dialogs.PropertyPage;
  * @author arunachalam.lakshmanan@photoninfotech.net
  *
  */
-public class PhrescoPropertyPage extends PropertyPage implements
+public class FeaturesPropertyPage extends PropertyPage implements
 		IWorkbenchPropertyPage {
 
-	public PhrescoPropertyPage() {
+	public FeaturesPropertyPage() {
 		// TODO Auto-generated constructor stub
 	}
 
