@@ -191,6 +191,18 @@
 	            </adapt>
 	         </enabledWhen>
       </page>
+      <page
+            category="com.photon.phresco.ui.propertypage"
+            class="com.photon.phresco.ui.propertypages.ConfigurationsPropertyPage"
+            id="com.photon.phresco.ui.configurationspage"
+            name="%project.propertypage.configurations.name">
+           <!-- <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/> -->
+	         <enabledWhen>
+	            <adapt
+	                  type="org.eclipse.core.resources.IProject">
+	            </adapt>
+	         </enabledWhen>
+      </page>
    </extension>
 
 </plugin>
