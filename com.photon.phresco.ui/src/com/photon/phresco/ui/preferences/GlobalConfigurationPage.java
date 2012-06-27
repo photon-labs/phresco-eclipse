@@ -19,12 +19,18 @@
 
 package com.photon.phresco.ui.preferences;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+
+import com.photon.phresco.ui.internal.controls.PhrescoConfigControl;
 
 /**
  * Global configuration preference page
@@ -72,7 +78,9 @@ public class GlobalConfigurationPage extends PreferencePage implements
 	 */
 	@Override
 	protected Control createContents(Composite parent) {
-		return null;
+		IPath configPath = ResourcesPlugin.getWorkspace().getRoot().getLocation().append(".phresco").append("phresco-env-config.xml");
+		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath);
+		return configParent;
 	}
 
 }
