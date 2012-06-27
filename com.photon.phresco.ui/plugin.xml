@@ -166,5 +166,31 @@
             name="%import.checkout.scm.label">
       </wizard>
    </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="com.photon.phresco.ui.PhrescoPropertyPage"
+            id="com.photon.phresco.ui.propertypage"
+            name="%project.propertypage.appinfo.name">
+            <!-- <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/> -->
+	         <enabledWhen>
+	            <adapt
+	                  type="org.eclipse.core.resources.IProject">
+	            </adapt>
+	         </enabledWhen>
+      </page>
+      <page
+            category="com.photon.phresco.ui.propertypage"
+            class="com.photon.phresco.ui.FeaturesPropertyPage"
+            id="com.photon.phresco.ui.featurespage"
+            name="%project.propertypage.features.name">
+           <!-- <filter name="nature" value="org.eclipse.m2e.core.maven2Nature"/> -->
+	         <enabledWhen>
+	            <adapt
+	                  type="org.eclipse.core.resources.IProject">
+	            </adapt>
+	         </enabledWhen>
+      </page>
+   </extension>
 
 </plugin>
