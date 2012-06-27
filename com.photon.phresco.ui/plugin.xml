@@ -104,13 +104,13 @@
       <page
             class="com.photon.phresco.ui.preferences.PhrescoPreferencePage"
             id="com.photon.phresco.ui.preferences.PhrescoPreferencePage"
-            name="Phresco">
+            name="%preferences.main.page.name">
       </page>
       <page
             category="com.photon.phresco.ui.preferences.PhrescoPreferencePage"
             class="com.photon.phresco.ui.preferences.GlobalConfigurationPage"
             id="com.photon.phresco.ui.configPage"
-            name="Configurations">
+            name="%configurations.name">
       </page>
    </extension>
    <extension
@@ -134,7 +134,7 @@
          point="org.eclipse.ui.newWizards">
       <category
             id="com.photon.phresco.ui.appCategory"
-            name="Phresco">
+            name="%wizards.category.name">
       </category>
       <wizard
             canFinishEarly="false"
@@ -143,8 +143,27 @@
             finalPerspective="org.eclipse.debug.ui.DebugPerspective"
             hasPages="true"
             id="com.photon.phresco.ui.newPhrescoProject"
-            name="Phresco Phresco"
+            name="%wizards.newproject.name"
             project="true">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="com.photon.phresco.category"
+            name="%import.category.name">
+      </category>
+      <wizard
+            category="com.photon.phresco.category"
+            class="com.photon.phresco.ui.wizards.ProjectImportWizard"
+            id="com.photon.phresco.ui.importProject"
+            name="%import.existing.label">
+      </wizard>
+      <wizard
+            category="com.photon.phresco.category"
+            class="com.photon.phresco.ui.wizards.ImportProjectFromScmWizard"
+            id="com.photon.phresco.ui.importscmproject"
+            name="%import.checkout.scm.label">
       </wizard>
    </extension>
 
