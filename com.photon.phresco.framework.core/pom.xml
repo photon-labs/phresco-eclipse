@@ -7,8 +7,8 @@
         <relativePath>../</relativePath>
     </parent> -->
 	 <modelVersion>4.0.0</modelVersion>
-	 <groupId>com.photon.phresco.framework.core</groupId>
-    <artifactId>phresco-framework-core</artifactId>
+	 <groupId>com.photon.phresco.framework</groupId>
+    <artifactId>core</artifactId>
     <version>2.0.0.1000-SNAPSHOT</version>
     <packaging>bundle</packaging>
   
@@ -46,10 +46,9 @@
             <Embed-Dependency>
 			   phresco-commons;phresco-framework;
 			   phresco-framework-impl
-			 <!--   plexus-utils -->
             </Embed-Dependency>
             <_exportcontents>
-			 com.photon.phresco.commons.*;com.photon.phresco.framework.*;version="1.2.0.3002-SNAPSHOT" 
+			 "com.photon.phresco.*" 
 			 <!-- com.photon.phresco.framework.*;version="1.2.0.3002-SNAPSHOT"
 			     org.codehaus.plexus.util.*;version="2.0.7"-->
             </_exportcontents>
@@ -57,6 +56,7 @@
             <Embed-Transitive>true</Embed-Transitive>
             <Embed-Directory>jars</Embed-Directory>
             <Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
+            <Require-Bundle>org.eclipse.core.runtime</Require-Bundle>
             <_failok>true</_failok>
             <_nouses>true</_nouses>
           </instructions>
@@ -68,11 +68,15 @@
           <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
+            
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+        <outputDirectory>jars</outputDirectory>
+        </configuration>
       </plugin>
     </plugins>
 
