@@ -142,6 +142,7 @@
             class="com.photon.phresco.ui.wizards.PhrescoProjectWizard"
             finalPerspective="org.eclipse.debug.ui.DebugPerspective"
             hasPages="true"
+            icon="icons/phresco_app_project.png"
             id="com.photon.phresco.ui.newPhrescoProject"
             name="%wizards.newproject.name"
             project="true">
@@ -156,12 +157,14 @@
       <wizard
             category="com.photon.phresco.category"
             class="com.photon.phresco.ui.wizards.ProjectImportWizard"
+            icon="icons/phresco_app_project.png"
             id="com.photon.phresco.ui.importProject"
             name="%import.existing.label">
       </wizard>
       <wizard
             category="com.photon.phresco.category"
             class="com.photon.phresco.ui.wizards.ImportProjectFromScmWizard"
+            icon="icons/phresco_project_import_scm.png"
             id="com.photon.phresco.ui.importscmproject"
             name="%import.checkout.scm.label">
       </wizard>

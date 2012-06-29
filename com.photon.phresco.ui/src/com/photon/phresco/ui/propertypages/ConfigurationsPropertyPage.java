@@ -54,7 +54,6 @@ public class ConfigurationsPropertyPage extends PropertyPage implements
 		}
 		
 		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath);
-		configParent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_CYAN));
 		return configParent;
 	}
 }
