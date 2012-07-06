@@ -68,6 +68,7 @@ public class PhrescoPreferencePage
 		serviceComposite.setLayout(layout);
 		StringFieldEditor serviceURL = new StringFieldEditor(PreferenceConstants.SERVICE_URL, Messages.PhrescoPreferencePage_service_url, serviceComposite);
 		addField(serviceURL);
+		serviceURL.setEnabled(false, serviceComposite);
 		new Label(serviceComposite, SWT.None).setText(Messages.PhrescoPreferencePage_username_label);
 		userTxt = new Text(serviceComposite, SWT.BORDER);
 		userTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));

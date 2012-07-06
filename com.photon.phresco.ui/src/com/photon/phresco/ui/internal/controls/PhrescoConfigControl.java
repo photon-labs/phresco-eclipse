@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
 /**
  * Control to handle the phresco configurations.
@@ -40,13 +41,19 @@ import org.eclipse.swt.widgets.Table;
  */
 public class PhrescoConfigControl extends Composite {
 	
+	/**
+	 * Configuration table
+	 */
 	private Table table;
+	
+	/**
+	 * Config file path
+	 */
 	private IPath configPath;
 
 	public PhrescoConfigControl(Composite parent, int style, IPath configFilePath) {
 		super(parent, style);
-//		Composite configParent = new Composite(parent, SWT.NONE);
-		
+
 		GridLayout layout = new GridLayout(1, false);
 		setLayout(layout);
 		
@@ -91,7 +98,15 @@ public class PhrescoConfigControl extends Composite {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		checkboxTableViewer.setColumnProperties(new String[]{"Name"});
+//		checkboxTableViewer.setColumnProperties(new String[]{"Name"});
+		
+		TableColumn tblNameColumn = new TableColumn(table, SWT.NONE);
+		tblNameColumn.setWidth(100);
+		tblNameColumn.setText("Name");
+		
+		TableColumn tblValueColumn = new TableColumn(table, SWT.NONE);
+		tblValueColumn.setWidth(300);
+		tblValueColumn.setText("Values");
 
 	}
 
