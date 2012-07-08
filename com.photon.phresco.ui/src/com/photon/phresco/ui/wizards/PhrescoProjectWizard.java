@@ -50,10 +50,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		super.addPages();
 		appInfoPage = new AppInfoPage("AppInfoPage");
 		addPage(appInfoPage);
-		featuresPage = new FeaturesPage("FeaturesPage");
-		addPage(featuresPage);
-		configurationsPage = new ConfigurationsPage("ConfigurationsPage");
-		addPage(configurationsPage);
+//		featuresPage = new FeaturesPage("FeaturesPage");
+//		addPage(featuresPage);
+//		configurationsPage = new ConfigurationsPage("ConfigurationsPage");
+//		addPage(configurationsPage);
 	}
 
 	@Override

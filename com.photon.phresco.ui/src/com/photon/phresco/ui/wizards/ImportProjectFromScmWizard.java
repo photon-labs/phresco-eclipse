@@ -23,6 +23,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.photon.phresco.ui.wizards.pages.PhrescoProjectImportPage;
+
 /**
  * Check out existing project from SCM. The SCM can be either of SVN or GIT
  * 
@@ -45,6 +47,10 @@ public class ImportProjectFromScmWizard extends Wizard implements IImportWizard 
 	public boolean performFinish() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	@Override
+	public void addPages() {
+		addPage(new PhrescoProjectImportPage(this));
 	}
 
 }
