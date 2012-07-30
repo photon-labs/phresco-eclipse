@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: hariharan_t
+Build-Jdk: 1.6.0_20
+Specification-Title: Phresco Framework
+Specification-Version: 1.2.0.8004-SNAPSHOT
+Specification-Vendor: Photon Infotech Inc.
+Implementation-Title: Phresco Framework
+Implementation-Version: 1.2.0.8004-SNAPSHOT
+Implementation-Vendor-Id: com.photon.phresco.framework
+Implementation-Vendor: Photon Infotech Inc.
+Build-Source-Version: 1.6
+Build-Target-Version: 1.6
+
