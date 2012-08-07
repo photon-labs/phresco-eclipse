@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IProject;
@@ -38,11 +36,8 @@ import org.eclipse.m2e.core.ui.internal.wizards.MavenImportWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IWorkbench;
 
-import com.photon.phresco.framework.PhrescoFrameworkFactory;
-import com.photon.phresco.framework.api.ProjectAdministrator;
 import com.photon.phresco.ui.builder.PhrescoNature;
 import com.photon.phresco.ui.wizards.pages.ProjectImportPage;
-import com.photon.phresco.util.Credentials;
 
 
 /**
@@ -93,28 +88,6 @@ public class ProjectImportWizard extends MavenImportWizard{
 
 	  @SuppressWarnings("deprecation")
 	  public boolean performFinish() {
-		  
-		  try {
-				
-			   	String server = PhrescoFrameworkFactory.getFrameworkConfig().getServerPath();
-			  	System.out.println("Server is :: " + server);
-			   	ProjectAdministrator projectAdministrator = PhrescoFrameworkFactory.getProjectAdministrator();
-		  		Map<String,com.photon.phresco.model.Technology> technologies = projectAdministrator.getAllTechnologies();
-		  		Iterator it = technologies.entrySet().iterator();
-		  	    while (it.hasNext()) {
-		  	        Map.Entry pairs = (Map.Entry)it.next();
-		  	        com.photon.phresco.model.Technology tech = (com.photon.phresco.model.Technology)pairs.getValue();
-		  	        System.out.println(pairs.getKey() + " = " + tech.getName());
-		  	        it.remove(); // avoids a ConcurrentModificationException
-		  	    }
-
-				System.out.println("Size is  " + technologies.size());
-				
-				
-			} catch (com.photon.phresco.exception.PhrescoException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		  
 		  //mkleint: this sounds wrong.
 		  if(!page.isPageComplete()) {
