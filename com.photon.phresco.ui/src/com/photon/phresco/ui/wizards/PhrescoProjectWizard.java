@@ -18,9 +18,8 @@
  */
 package com.photon.phresco.ui.wizards;
 
-import java.util.Properties;
+import java.io.File;
 
-import org.apache.maven.properties.internal.EnvironmentUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -32,18 +31,16 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.photon.phresco.commons.model.User;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.framework.PhrescoFrameworkFactory;
 import com.photon.phresco.framework.api.ProjectAdministrator;
 import com.photon.phresco.model.ProjectInfo;
 import com.photon.phresco.model.Technology;
-import com.photon.phresco.model.UserInfo;
 import com.photon.phresco.ui.Activator;
 import com.photon.phresco.ui.builder.PhrescoNature;
 import com.photon.phresco.ui.preferences.PreferenceConstants;
 import com.photon.phresco.ui.wizards.pages.AppInfoPage;
-import com.photon.phresco.ui.wizards.pages.ConfigurationsPage;
-import com.photon.phresco.ui.wizards.pages.FeaturesPage;
 import com.photon.phresco.util.Credentials;
 
 /**
@@ -54,13 +51,13 @@ import com.photon.phresco.util.Credentials;
 public class PhrescoProjectWizard extends Wizard implements INewWizard {
 
 	private AppInfoPage appInfoPage;
-	private FeaturesPage featuresPage;
-	private ConfigurationsPage configurationsPage;
+	//private FeaturesPage featuresPage;
+	//private ConfigurationsPage configurationsPage;
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// TODO Auto-generated method stub
-
+		User user = doLogin();
 	}
 	
 	@Override
@@ -71,35 +68,57 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		addPage(appInfoPage);
 	}
 
+	
+	
 	@Override
 	public boolean performFinish() {
-		// TODO Auto-generated method stub
+		
+		 if(!appInfoPage.isPageComplete()) {
+			  return false;
+		  }
+		
+		//pilot project
+		//List<ProjectInfo> pilots = appInfoPage.pilots;
 		ProjectInfo projectInfo = new ProjectInfo();
-		projectInfo.setApplication("apptype-webapp");
+		projectInfo.setCustomerId("photon");
+		//int pilotIndex = appInfoPage.pilotProjectCombo.getSelectionIndex();
+		//ProjectInfo pilot = null;
+//		if(pilots !=null && pilots.size()> 0 && pilotIndex>-1){
+//			projectInfo = pilots.get(pilotIndex);
+//		}
+		//project name
+		projectInfo.setName(appInfoPage.projectTxt.getText());
+		//project code
 		String projectName = "PHR_" + appInfoPage.projectTxt.getText();
 		projectInfo.setCode(projectName);
-		projectInfo.setName(appInfoPage.projectTxt.getText());
-		projectInfo.setVersion("1.0.0");
-		IProjectDescription description;
-		
-		Technology technology = new Technology("tech-java-standalone", "Java Standalone");
+		//project projectcode
+		projectInfo.setProjectCode(projectName);
+		//project description
+		//projectInfo.setDescription(appInfoPage.descriptionTxt.getText());
+		//project version
+		if(appInfoPage.versionTxt.getText().isEmpty()){
+			projectInfo.setVersion("1.0.0");
+		}else {
+			projectInfo.setVersion(appInfoPage.versionTxt.getText());
+		}
+		//project Application Type
+		projectInfo.setApplication(appInfoPage.appTypeConstant);
+		//project Technology
+		Technology technology = appInfoPage.technologies.get(appInfoPage.technologyCombo.getSelectionIndex());
 		projectInfo.setTechnology(technology);
-		
-		String path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + "/workspace/projects/" + projectName;	
-		
+		projectInfo.setTechId(technology.getId());
+		//project technology version
+				
+		IProjectDescription description;
+		String path = "C:/PHRESCO/workspace/projects/" + projectName;
+		//String path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + "/workspace/projects/" + projectName;	
 		//TODO:set the env variable PHRESCO_HOME value :: " + ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString()
-		
-		
 		try {
 			//Create Phresco Project
 			ProjectAdministrator admin = PhrescoFrameworkFactory.getProjectAdministrator();
-			
-			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-			String username = store.getString(PreferenceConstants.USER_NAME);
-			String password = store.getString(PreferenceConstants.PASSWORD);
-			Credentials credentials = new Credentials(username, password);
-			UserInfo user = admin.doLogin(credentials);
-			admin.createProject(projectInfo, null, user);
+			File file = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+			User user = doLogin();
+			admin.createProject(projectInfo, file, user);
 			
 			//Link the created Project to Eclipse
 			description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
@@ -126,6 +145,22 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		}
 		return true;
 	}
-		
+	
+	
+	private User doLogin(){
+		try {
+			ProjectAdministrator admin = PhrescoFrameworkFactory.getProjectAdministrator();
+			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+			String username = store.getString(PreferenceConstants.USER_NAME);
+			String password = store.getString(PreferenceConstants.PASSWORD);
+			Credentials credentials = new Credentials(username, password);
+			User user = admin.doLogin(credentials);
+			return user;
+		} catch (PhrescoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 }

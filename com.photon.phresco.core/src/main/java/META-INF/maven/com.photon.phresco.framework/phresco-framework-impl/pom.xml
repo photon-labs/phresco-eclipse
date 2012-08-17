@@ -4,7 +4,7 @@
      <parent>
         <groupId>com.photon.phresco.framework</groupId>
         <artifactId>phresco-framework-root</artifactId>
-        <version>1.2.0.8004-SNAPSHOT</version>
+        <version>2.0.0.10003-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
    
@@ -30,71 +30,77 @@
             <version>${project.version}</version>
         </dependency>
         
-            <dependency>
+        <dependency>
             <groupId>com.photon.phresco.pom</groupId>
             <artifactId>phresco-pom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		
+		<dependency>
+            <groupId>com.photon.phresco.service.client</groupId>
+            <artifactId>phresco-service-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>1.9-ea07</version>
+            <version>${jersey-client.version}</version>
         </dependency>
         
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-            <version>1.9-ea07</version>
+            <version>${jersey-json.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>cli</artifactId>
-            <version>1.442</version>
+            <version>${cli.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.7.1</version>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.2</version>
+            <version>${commons-lang.version}</version>
         </dependency>
         
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
+            <version>${commons-collections.version}</version>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.0.1</version>
+            <version>${commons-io.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>3.0</version>
+            <version>${plexus-utils.version}</version>
         </dependency>
         
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.9</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
-            <version>1.1.2</version>
+            <version>${jdom.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>maven-findbugs-plugin</artifactId>
@@ -110,7 +116,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.1.2</version>
+            <version>${httpclient.version}</version>
         </dependency>
     </dependencies>
     
@@ -119,7 +125,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.3.2</version>
+                    <version>${maven-jar-plugin.version}</version>
                 <inherited>true</inherited>
                 <configuration>
                     <archive>
@@ -130,20 +136,21 @@
                     </archive>
                 </configuration>
             </plugin>
-			<plugin>
-					<groupId>org.apache.geronimo.genesis.plugins</groupId>
-					<artifactId>tools-maven-plugin</artifactId>
-					<version>1.1</version>
-					<executions>
-						<execution>
-						<id>install-legal-files</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy-legal-files</goal>
-						</goals>
-						</execution>
-					</executions>
-				</plugin>
+            
+            <plugin>
+                <groupId>org.apache.geronimo.genesis.plugins</groupId>
+                <artifactId>tools-maven-plugin</artifactId>
+                <version>${tools-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>install-legal-files</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-legal-files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     

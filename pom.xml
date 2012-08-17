@@ -8,7 +8,9 @@
   <packaging>pom</packaging>
   <modules>
     <module>com.photon.phresco.core</module>
+    <module>com.photon.phresco.feature</module>
     <module>com.photon.phresco.ui</module>
+	<module>PhrescoEclipsePluginUpdateSite</module>
   </modules>
   <build>
     <plugins>

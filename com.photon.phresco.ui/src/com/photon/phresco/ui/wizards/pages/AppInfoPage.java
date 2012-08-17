@@ -24,10 +24,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -36,17 +40,24 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.photon.phresco.commons.model.User;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.framework.PhrescoFrameworkFactory;
-import com.photon.phresco.framework.api.ServiceManager;
+import com.photon.phresco.framework.api.ProjectAdministrator;
 import com.photon.phresco.model.ApplicationType;
-import com.photon.phresco.model.Database;
+import com.photon.phresco.model.ProjectInfo;
 import com.photon.phresco.model.Technology;
 import com.photon.phresco.model.WebService;
+import com.photon.phresco.ui.Activator;
+import com.photon.phresco.ui.dialog.ServerDialog;
+import com.photon.phresco.ui.preferences.PreferenceConstants;
+import com.photon.phresco.util.Credentials;
 
 /**
  * App info page
@@ -57,9 +68,50 @@ import com.photon.phresco.model.WebService;
 public class AppInfoPage extends WizardPage implements IWizardPage {
 
 	
-	public Label projectName;
+	//project name;
 	public Text projectTxt;
+	//project code
+	public Text codeTxt;
+	//project description
+	public StyledText descriptionTxt;
+	//project version
+	public Text versionTxt;
+	//project Application Type	
+	public String appTypeConstant;
+	//project Technology
+	public Combo technologyCombo; 
+	//project Technologies
+	public List<Technology> technologies;
+	//project Technology version
+	public Combo technologyVersionCombo;
+	//project pilot
+	public Combo pilotProjectCombo;
+	// pilots
+	public List<ProjectInfo> pilots = new ArrayList<ProjectInfo>();
 	
+	List<Technology> webTechnologies = new ArrayList<Technology>();
+	List<Technology> mobTechnologies = new ArrayList<Technology>();
+	List<Technology> webServiceTechnologies = new ArrayList<Technology>();
+	
+	//Table Titles
+	String titles[] = new String[] {"Server", "version"};
+	//private DefaultTableModel dataModel;
+	//private JTable table;
+	//private JScrollPane scrollPane;
+	private boolean nextPage = false;
+	
+	
+	public boolean isNextPage() {
+		return nextPage;
+	}
+	
+	public void setNextPage(boolean nextPage) {
+		this.nextPage = nextPage;
+		setPageComplete(nextPage);
+	}
+
+
+
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -73,32 +125,51 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		
+		setPageComplete(false);
+		
 		Composite parentComposite = new Composite(parent, SWT.NULL);
 		parentComposite.setLayout(new GridLayout(2,false));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		projectName = new Label(parentComposite, SWT.NONE);
+		Label projectName = new Label(parentComposite, SWT.NONE);
 		projectName.setText("Project name");
 
 		projectTxt = new Text(parentComposite,SWT.BORDER);
 		projectTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		projectTxt.addKeyListener(new KeyListener() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(projectTxt.getText().trim().length()>0){
+					setNextPage(true);
+				}else{
+					setNextPage(false);
+				}
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+		});
 
+		
 		Label code = new Label(parentComposite, SWT.NONE);
 		code.setText("Code");
 
-		Text codeTxt = new Text(parentComposite, SWT.BORDER);
+		codeTxt = new Text(parentComposite, SWT.BORDER);
 		//		codeTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label description = new Label(parentComposite, SWT.NONE);
 		description.setText("Description");
 
-		StyledText descriptionTxt = new StyledText(parentComposite, SWT.BORDER);
+		descriptionTxt = new StyledText(parentComposite, SWT.BORDER);
 		descriptionTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		Label version = new Label(parentComposite, SWT.NONE);
 		version.setText("Version");
 
-		Text versionTxt = new Text(parentComposite, SWT.BORDER);
+		versionTxt = new Text(parentComposite, SWT.BORDER);
 		//		versionTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		new Label(parentComposite, SWT.NONE);		
@@ -113,7 +184,7 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 
 		Composite technologyComposite = new Composite(parentComposite, SWT.NULL);
 		technologyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		//		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		//composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		technologyComposite.setLayout(new GridLayout(4, false));
 
 		final Label lblTechnology = new Label(technologyComposite, SWT.NONE);
@@ -122,7 +193,7 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 		lblTechnology.setLayoutData(gd_technology);
 		lblTechnology.setText("Technology");
 
-		final Combo technologyCombo = new Combo(technologyComposite, SWT.NONE);
+		technologyCombo = new Combo(technologyComposite, SWT.NONE);
 		technologyCombo.setText("SELECT");
 		GridData gd_technologyCombo = new GridData(GridData.FILL_BOTH);
 		gd_technologyCombo.widthHint = 154;
@@ -132,25 +203,84 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 		final Label lblTechnologyVersion = new Label(technologyComposite, SWT.NONE);
 		lblTechnologyVersion.setText("Version");
 
-		final Combo technologyVersionCombo = new Combo(technologyComposite, SWT.BORDER);
+		technologyVersionCombo = new Combo(technologyComposite, SWT.BORDER);
 		technologyVersionCombo.setText("SELECT VERSION");
 
 		Label lblPilotProject = new Label(parentComposite, SWT.NONE);
 		lblPilotProject.setText("Pilot Project");
 
-		Combo pilotProjectCombo = new Combo(parentComposite, SWT.NONE);
-		String[] pilotProjectComboItems = {"None","PhpBlog"};
+		pilotProjectCombo = new Combo(parentComposite, SWT.NONE);
+		//String[] pilotProjectComboItems = {"None","PhpBlog"};
 		GridData gd_pilotProjectCombo = new GridData();
 		gd_pilotProjectCombo.widthHint = 154;
 		pilotProjectCombo.setLayoutData(gd_pilotProjectCombo);
-		pilotProjectCombo.setItems(pilotProjectComboItems);
+		//pilotProjectCombo.setItems(pilotProjectComboItems);
 
 		Label supportedServers = new Label(parentComposite, SWT.NONE);
 		supportedServers.setText("SupportedServers");
 
-		final Button addSupportedServersBtn = new Button(parentComposite, SWT.NONE);
-		addSupportedServersBtn.setText("Add");
-
+		
+		
+		//TODO Popup changes starts here
+		
+		Button button = new Button (parentComposite, SWT.PUSH);
+		button.setText("Configure");
+		
+		
+		
+		button.addListener (SWT.Selection, new Listener () {
+			public void handleEvent (Event e) {
+				ServerDialog dialog = new ServerDialog(null);
+				dialog.create();
+				if (dialog.open() == Window.OK) {
+				  System.out.println(dialog.getServer());
+				  System.out.println(dialog.getVersion());
+				} 
+			}
+		});
+		
+		//TODO Popup changes end here
+		
+		/**Composite serverComposite = new Composite(parentComposite, SWT.NONE);
+		serverComposite.setLayoutData(new GridData(SWT.LEFT, SWT.LEFT, true, true, 1, 1));
+		serverComposite.setLayout(new GridLayout(4, false));
+		final Table rightTable = new Table (serverComposite, SWT.NONE);		 
+		Button button = new Button (serverComposite, SWT.PUSH);
+		button.setText("Add");
+		final Table leftTable = new Table (serverComposite, SWT.NONE);
+		
+		button.addListener (SWT.Selection, new Listener () {
+			List<TableItem> items = new ArrayList<TableItem>();
+			public void handleEvent (Event e) {	
+			 	TableItem item = new TableItem(rightTable, SWT.NONE);
+			 	items.add(item);
+			 	for(int i=0; i< items.size(); i++){
+			 		item.setText(i, "Tomcat 7.0");
+			 	}
+			 	openCompliancePreferencePage();
+			 	System.out.println("size is :: " + items.size());
+		    }
+		});
+		
+		*/
+		  //final TableColumn [] columns = table.getColumns ();
+		  
+		
+		/*Object[][] stats = getTableRecords();
+		dataModel = new DefaultTableModel(stats, titles){
+			
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		table = new JTable(dataModel);
+		defineTableColumn(table);
+		scrollPane = new JScrollPane();
+		scrollPane.setViewportView(table);
+		//parentComposite
+		scrollPane.setBounds(0, 0, 0, 0);
+		*/
 		Label supportedDatebases = new Label(parentComposite, SWT.NONE);
 		supportedDatebases.setText("SupportedDatebases");
 
@@ -204,30 +334,36 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 			e2.printStackTrace();
 		}
 		try {
-			final ServiceManager serviceManager = PhrescoFrameworkFactory.getServiceManager();
-			final List<ApplicationType> applicationTypes = serviceManager.getApplicationTypes();
-
-			final ApplicationType applicationTypeWeb = serviceManager.getApplicationType("apptype-webapp");
-			final List<Technology> webTechnologies = applicationTypeWeb.getTechnologies();
-
-			final ApplicationType applicationTypeMob = serviceManager.getApplicationType("apptype-mobile");
-			final List<Technology> mobTechnologies = applicationTypeMob.getTechnologies();
+			//Create Phresco Project
+			ProjectAdministrator admin = PhrescoFrameworkFactory.getProjectAdministrator();
 			
-			final ApplicationType applicationTypeWebService = serviceManager.getApplicationType("apptype-web-services");
-			final List<Technology> webServiceTechnologies = applicationTypeWebService.getTechnologies();
+			
+		
+			
+			final List<ApplicationType> applicationTypes = admin.getApplicationTypes("photon");
+			for(ApplicationType app: applicationTypes){
+				if(app.getId().equalsIgnoreCase("apptype-webapp")){
+					webTechnologies = app.getTechnologies();
+				}else if(app.getId().equalsIgnoreCase("apptype-mobile")){
+					mobTechnologies = app.getTechnologies();
+				}else if(app.getId().equalsIgnoreCase("apptype-web-services")){
+					webServiceTechnologies = app.getTechnologies();
+				}
+			}
+		
 
 			for (final ApplicationType appTypes : applicationTypes) {
 
-				if(appTypes.getName().equals("apptype-webapp")){
-					btnWeb.setText(appTypes.getDisplayName());
+				if(appTypes.getId().equals("apptype-webapp")){
+					btnWeb.setText(appTypes.getName());
 				}
-				if(appTypes.getName().equals("apptype-mobile")){
+				if(appTypes.getId().equals("apptype-mobile")){
 					btnMobileApp.setBounds(0, 0, 91, 18);
-					btnMobileApp.setText(appTypes.getDisplayName());
+					btnMobileApp.setText(appTypes.getName());
 				}
-				if(appTypes.getName().equals("apptype-web-services")){
+				if(appTypes.getId().equals("apptype-web-services")){
 					btnWebServices.setBounds(0, 0, 91, 18);
-					btnWebServices.setText(appTypes.getDisplayName());
+					btnWebServices.setText(appTypes.getName());
 				}
 			}
 
@@ -240,7 +376,8 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 					}
 					String[] technologyItems = new String[listTechnologyItems.size()];
 					technologyItems = listTechnologyItems.toArray(technologyItems);
-
+					appTypeConstant = "apptype-webapp";
+					technologies = webTechnologies;
 					technologyCombo.setItems(technologyItems);
 				}
 			});
@@ -254,7 +391,8 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 					}
 					String[] technologyItems = new String[listTechnologyItems.size()];
 					technologyItems = listTechnologyItems.toArray(technologyItems);
-
+					appTypeConstant = "apptype-mobile";
+					technologies = mobTechnologies;
 					technologyCombo.setItems(technologyItems);
 				}
 			});
@@ -268,7 +406,8 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 					}
 					String[] technologyItems = new String[listTechnologyItems.size()];
 					technologyItems = listTechnologyItems.toArray(technologyItems);
-
+					appTypeConstant = "apptype-web-services";
+					technologies = webServiceTechnologies;
 					technologyCombo.setItems(technologyItems);
 				}
 			});
@@ -284,18 +423,18 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 					soapCheckButton.setVisible(true);
 					soap1CheckButton.setVisible(true);
 					List<String> versions = new ArrayList<String>();
+					//List<ProjectInfo> pilots = new ArrayList<ProjectInfo>();
 					for (ApplicationType appType : applicationTypes) {
 						List<Technology> technologies = appType.getTechnologies();
 						for (final Technology technology : technologies) {
-							if(technologyCombo.getText().equals(technology.getName())) {
-								versions = technology.getVersions();
-							}
 							if(technologyCombo.getText().equals("iPhone Native") || technologyCombo.getText().equals("iPhone Hybrid")){
 								technologyVersionCombo.setVisible(false);
 								lblTechnologyVersion.setVisible(false);
 							}
 							if(technologyCombo.getText().equals(technology.getName())) {
-								List<WebService> webServices = technology.getWebservices();
+								versions = technology.getVersions();
+								pilots = getPilots(technology.getId());
+								List<WebService> webServices = getServices(technology.getId()); //technology.getWebservices();
 								for (WebService webService : webServices) {
 									if("REST/JSON".equals(webService.getName())){
 										restJsonCheckButton.setText(webService.getName());
@@ -311,7 +450,7 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 									}
 								}								
 							}
-							addSupportedServersBtn.addSelectionListener(new SelectionAdapter() {
+							/*addSupportedServersBtn.addSelectionListener(new SelectionAdapter() {
 								@Override
 								public void widgetSelected(SelectionEvent e) {
 									if(technology.getName().equals(technologyCombo.getItem(technologyCombo.getSelectionIndex()))){
@@ -321,13 +460,21 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 										}
 									}
 								}
-							});
+							});*/
 						}
 					}
 					if(versions !=null && versions.size() >0){
 						String[] version = new String[versions.size()];
 						version = versions.toArray(version);
 						technologyVersionCombo.setItems(version);
+					}
+					
+					if(pilots !=null && pilots.size() >0){
+						String[] pilotNames = new String[pilots.size()];
+						for(int i=0; i < pilots.size(); i++){
+							pilotNames[i] = pilots.get(i).getName();
+						}
+						pilotProjectCombo.setItems(pilotNames);
 					}
 					
 				}
@@ -340,9 +487,48 @@ public class AppInfoPage extends WizardPage implements IWizardPage {
 		}
 		setControl(parentComposite);
 	}
+	
 
 	@Override
 	public boolean canFlipToNextPage() {
-		return true;
+		return nextPage;
 	}
+	
+	public Object[][] getTableRecords() {
+	    Object[][] results = new Object[0][titles.length];
+	    return results;
+	}
+	
+	private List<ProjectInfo> getPilots(String technology){
+		try{
+			ProjectAdministrator admin = PhrescoFrameworkFactory.getProjectAdministrator();
+	        List<ProjectInfo> pi = admin.getPilots( technology, "photon");
+	        return pi;
+			
+		}catch(PhrescoException ex){
+			ex.printStackTrace();
+		}
+		return null;
+		
+	}
+	
+	private List<WebService> getServices(String technology){
+		try{
+			ProjectAdministrator admin = PhrescoFrameworkFactory.getProjectAdministrator();
+			List<WebService> pi = admin.getWebServices( technology, "photon" );
+	        return pi;
+			
+		}catch(PhrescoException ex){
+			ex.printStackTrace();
+		}
+		return null;
+		
+	}
+	
+	
+	//private 
+	
+	
+	
+	
 }

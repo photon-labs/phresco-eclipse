@@ -12,22 +12,32 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   
+  <properties>
+     <phresco.version>2.0.0.10003-SNAPSHOT</phresco.version>
+  </properties>
+  
   <dependencies>
-    <dependency>
-		<groupId>com.photon.phresco.framework</groupId>
-      <artifactId>phresco-framework</artifactId>
-      <version>1.2.0.8004-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.photon.phresco.framework</groupId>
-      <artifactId>phresco-framework-impl</artifactId>
-      <version>1.2.0.8004-SNAPSHOT</version>
-    </dependency>
-	<dependency>
-      <groupId>com.photon.phresco.commons</groupId>
-      <artifactId>phresco-commons</artifactId>
-      <version>1.2.0.8004-SNAPSHOT</version>
-    </dependency>
+  		<dependency>
+            <groupId>com.photon.phresco.framework</groupId>
+            <artifactId>phresco-framework</artifactId>
+            <version>${phresco.version}</version>
+        </dependency>
+        <!-- TODO: To be used only during runtime -->
+        <dependency>
+            <groupId>com.photon.phresco.framework</groupId>
+            <artifactId>phresco-framework-impl</artifactId>
+            <version>${phresco.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.photon.phresco.service.client</groupId>
+            <artifactId>phresco-service-client</artifactId>
+            <version>${phresco.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>com.photon.phresco.pom</groupId>
+            <artifactId>phresco-pom</artifactId>
+            <version>${phresco.version}</version>
+        </dependency>
   </dependencies>
 
   <build>
@@ -74,23 +84,30 @@
 			<configuration>
 				<artifactItems>
 					<artifactItem>
-						<groupId>com.photon.phresco.commons</groupId>
-						<artifactId>phresco-commons</artifactId>
-						<version>1.2.0.8004-SNAPSHOT</version>
-						<outputDirectory>src\main\java</outputDirectory>
-						<includes>**\/*.*</includes>
-					</artifactItem>
-					<artifactItem>
 						<groupId>com.photon.phresco.framework</groupId>
 						<artifactId>phresco-framework-impl</artifactId>
-						<version>1.2.0.8004-SNAPSHOT</version>
+						<version>${phresco.version}</version>
 						<outputDirectory>src\main\java</outputDirectory>
 						<includes>**\/*.*</includes>
 					</artifactItem>
 					<artifactItem>
 						<groupId>com.photon.phresco.framework</groupId>
 						<artifactId>phresco-framework</artifactId>
-						<version>1.2.0.8004-SNAPSHOT</version>
+						<version>${phresco.version}</version>
+						<outputDirectory>src\main\java</outputDirectory>
+						<includes>**\/*.*</includes>
+					</artifactItem>
+					<artifactItem>
+						<groupId>com.photon.phresco.service.client</groupId>
+						<artifactId>phresco-service-client</artifactId>
+						<version>${phresco.version}</version>
+						<outputDirectory>src\main\java</outputDirectory>
+						<includes>**\/*.*</includes>
+					</artifactItem>
+					<artifactItem>
+						<groupId>com.photon.phresco.pom</groupId>
+						<artifactId>phresco-pom</artifactId>
+						<version>${phresco.version}</version>
 						<outputDirectory>src\main\java</outputDirectory>
 						<includes>**\/*.*</includes>
 					</artifactItem>
@@ -156,5 +173,6 @@
     </pluginManagement>
 
   </build>
+  
   
 </project>

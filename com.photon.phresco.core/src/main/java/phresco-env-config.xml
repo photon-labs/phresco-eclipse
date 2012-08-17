@@ -1,0 +1,13 @@
+<environments>
+    <environment default="true" name="Production">
+        <WebService name="webservice">
+			<port>3030</port>
+            <password/>
+            <context>service</context>
+			<additional_context>/rest/api</additional_context>
+            <host>localhost</host>
+            <protocol>http</protocol>
+            <username/>
+        </WebService>
+    </environment>
+</environments>
