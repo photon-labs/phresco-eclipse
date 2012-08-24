@@ -11,7 +11,8 @@
   <artifactId>PhrescoEclipsePluginUpdateSite</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>eclipse-update-site</packaging>
-	<build>
+  
+  <build>
 		<plugins>
 			<plugin>
 				<groupId>com.github.goldin</groupId>
@@ -45,30 +46,4 @@
 			</plugin>
 		</plugins>
 	</build>
-<!--<build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-				<overwrite>true</overwrite>
-				<outputDirectory>${basedir}/target/site</outputDirectory>
-				  <resources>          
-					<resource>
-					  <directory>web</directory>
-					</resource>
-				  </resources>              
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>-->
 </project>

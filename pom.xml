@@ -7,10 +7,10 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
+    <module>PhrescoEclipsePluginUpdateSite</module>
     <module>com.photon.phresco.core</module>
     <module>com.photon.phresco.feature</module>
     <module>com.photon.phresco.ui</module>
-	<module>PhrescoEclipsePluginUpdateSite</module>
   </modules>
   <build>
     <plugins>
