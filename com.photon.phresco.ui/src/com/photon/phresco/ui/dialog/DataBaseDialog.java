@@ -21,21 +21,21 @@ import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.framework.PhrescoFrameworkFactory;
 import com.photon.phresco.framework.api.ProjectAdministrator;
 import com.photon.phresco.framework.api.ServiceManager;
-import com.photon.phresco.model.Server;
-import com.photon.phresco.ui.wizards.pages.AppInfoPage;
+import com.photon.phresco.model.Database;
 
-public class ServerDialog extends TitleAreaDialog {
+public class DataBaseDialog extends TitleAreaDialog {
 
 	//TODO Comboviewer needs to be used instead of combo
-	private Combo serverCombo;
+	private Combo dataBaseCombo;
 	private Combo versionCombo;
 	
 	  //private Text versionText;
-	  private String server;
+	  private String dataBase;
 	  private String version;
 	  private String techId;
 
-	public ServerDialog(Shell parentShell) {
+
+	public DataBaseDialog(Shell parentShell) {
 	    super(parentShell);
 	  }
 
@@ -43,12 +43,16 @@ public class ServerDialog extends TitleAreaDialog {
 	  public void create() {
 	    super.create();
 	    // Set the title
-	    setTitle("Select Server");
+	    setTitle("Select DataBase");
+//	    File file = new File("icons/phresco.jpeg");
+//	    System.out.println("Path========>" + file.getAbsolutePath());
+//	    Image image = new Image(null, file.getAbsolutePath());
+//	    setDefaultImage(image);
 	    // Set the message
 	    //setMessage("This is a TitleAreaDialog", IMessageProvider.INFORMATION);
-	 
+
 	  }
-	  
+
 	  public String getTechId() {
 			return techId;
 		}
@@ -56,7 +60,7 @@ public class ServerDialog extends TitleAreaDialog {
 		public void setTechId(String techId) {
 			this.techId = techId;
 		}
-
+		
 	  @Override
 	  protected Control createDialogArea(Composite parent) {
 	    GridLayout layout = new GridLayout();
@@ -70,16 +74,17 @@ public class ServerDialog extends TitleAreaDialog {
 	    gridData.horizontalAlignment = GridData.FILL;
 
 	    Label label1 = new Label(parent, SWT.NONE);
-	    label1.setText("Server");
+	    label1.setText("DataBase");
 	    
-	    serverCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
-	    serverCombo.setText("SELECT");
-	    serverCombo.setLayoutData(gridData);
-	    List<String> serverNames = getServerNames();
-	    String[] serverNameArray = new String[serverNames.size()];
-	    serverNameArray = serverNames.toArray(serverNameArray);
-	    serverCombo.setItems(serverNameArray);
-	    serverCombo.select(0);
+	    dataBaseCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+	    dataBaseCombo.setText("SELECT");
+	    dataBaseCombo.setLayoutData(gridData);
+	    List<String> dataBaseNames = getDataBaseNames();
+	    String[] dataBaseNameArray = new String[dataBaseNames.size()];
+	    dataBaseNameArray = dataBaseNames.toArray(dataBaseNameArray);
+	    dataBaseCombo.setItems(dataBaseNameArray);
+	    dataBaseCombo.select(0);
+	    
 	    
 	    Label label2 = new Label(parent, SWT.NONE);
 	    label2.setText("Version");
@@ -92,10 +97,11 @@ public class ServerDialog extends TitleAreaDialog {
 	    versionCombo.setText("SELECT");
 	    versionCombo.setLayoutData(gridData);
 	    versionCombo.select(0);
-	    serverCombo.addSelectionListener(new SelectionAdapter() {
+	    
+	    dataBaseCombo.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					onServerSelect(e);
+					onDataBaseSelect(e);
 				}
 			});
 	    return parent;
@@ -153,35 +159,38 @@ public class ServerDialog extends TitleAreaDialog {
 	    return button;
 	  }
 	  
-	  private List<Server> getServers(){
-		  try {
+	  private List<Database> getDataBase(){
+		  try{
 			  ProjectAdministrator administrator = PhrescoFrameworkFactory.getProjectAdministrator();
-			  List<Server> servers = administrator.getServers(techId, "photon");
-			  return servers;
+			  List<Database> dataBase = administrator.getDatabases(techId, "photon");
+			  for (Database data : dataBase) {
+				  System.out.println(data.getName());
+			}
+			  return dataBase;
 		  }catch(PhrescoException ex){
 			  ex.printStackTrace();  
 		  }
 		  return null; 
 	  }
 	  
-	  private List<String> getServerNames(){
-		  List<Server> servers = this.getServers();
-		  List<String> serverNames = new ArrayList<String>();
-		  for(Server server : servers){
-			  serverNames.add(server.getName());
+	  private List<String> getDataBaseNames(){
+		  List<Database> dataBases = this.getDataBase();
+		  List<String> DataBaseNames = new ArrayList<String>();
+		  for(Database dataBase : dataBases){
+			  DataBaseNames.add(dataBase.getName());
 		  }
-		  return serverNames; 
+		  return DataBaseNames; 
 	  }
 	  
-	  private List<String> getVersions(Server server){
-		  return server.getVersions();		  
+	  private List<String> getVersions(Database dataBase){
+		  return dataBase.getVersions();		  
 	  }
 	  
-	  private void onServerSelect(SelectionEvent e){
-		  int index = serverCombo.getSelectionIndex();
-		  List<Server> servers = getServers();
-		  Server server = servers.get(index);
-		  List<String> versions = getVersions(server);
+	  private void onDataBaseSelect(SelectionEvent e){
+		  int index = dataBaseCombo.getSelectionIndex();
+		  List<Database> dataBases = getDataBase();
+		  Database dataBase = dataBases.get(index);
+		  List<String> versions = getVersions(dataBase);
 		  String[] versionStrings = new String[versions.size()];
 		  versionStrings =  versions.toArray(versionStrings);
 		  versionCombo.setItems(versionStrings);
@@ -193,8 +202,8 @@ public class ServerDialog extends TitleAreaDialog {
 	      setErrorMessage("Please select the version to add");
 	      valid = false;
 	    }
-	    if (serverCombo.getText().length() == 0) {
-	      setErrorMessage("Please select the server to add");
+	    if (dataBaseCombo.getText().length() == 0) {
+	      setErrorMessage("Please select the DataBase to add");
 	      valid = false;
 	    }
 	    
@@ -209,7 +218,7 @@ public class ServerDialog extends TitleAreaDialog {
 	  // Copy textFields because the UI gets disposed
 	  // and the Text Fields are not accessible any more.
 	  private void saveInput() {
-		server = serverCombo.getText();
+		dataBase = dataBaseCombo.getText();
 	    version = versionCombo.getText();
 	  }
 
@@ -219,8 +228,8 @@ public class ServerDialog extends TitleAreaDialog {
 	    super.okPressed();
 	  }
 
-	  public String getServer() {
-	    return server;
+	  public String getdataBase() {
+	    return dataBase;
 	  }
 
 	  public String getVersion() {
