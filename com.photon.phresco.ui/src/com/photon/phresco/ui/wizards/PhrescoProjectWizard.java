@@ -148,7 +148,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		projectInfo.setTechId(technology.getId());
 		//project technology version
 				
-		path = "C:/PHRESCO/workspace/projects/" + projectName;
+		//path = "C:/PHRESCO/workspace/projects/" + projectName;
+		path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + "/workspace/projects/" + projectName;	
 		//String path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + "/workspace/projects/" + projectName;	
 		//TODO:set the env variable PHRESCO_HOME value :: " + ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString()
 		//User user = doLogin();
