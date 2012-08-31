@@ -3,14 +3,14 @@
    <!--  <parent>
         <groupId>com.photon.phresco</groupId>
         <artifactId>phresco-parent</artifactId>
-        <version>2.0.0.10003-SNAPSHOT</version>
+        <version>2.0.0.11001-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent> -->
 
     <modelVersion>4.0.0</modelVersion>
 	<groupId>com.photon.phresco.pom</groupId>
 	<artifactId>phresco-pom</artifactId>
-	<version>2.0.0.10003-SNAPSHOT</version>
+	<version>2.0.0.11001-SNAPSHOT</version>
 	<name>Phresco Pom</name>
 	<url>http://www.phresco.org</url>
 	<description>phresco-Pom</description>

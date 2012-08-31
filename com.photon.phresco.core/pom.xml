@@ -13,7 +13,7 @@
   <packaging>eclipse-plugin</packaging>
   
   <properties>
-     <phresco.version>2.0.0.10003-SNAPSHOT</phresco.version>
+     <phresco.version>2.0.0.11001-SNAPSHOT</phresco.version>
   </properties>
   
   <dependencies>

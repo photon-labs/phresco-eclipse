@@ -1,11 +1,11 @@
 <environments>
     <environment default="true" name="Production">
         <WebService name="webservice">
-            <port>2020</port>
+            <port>3030</port>
             <password/>
-            <context>service-testing</context>
+            <context>service</context>
 			<additional_context>/rest/api</additional_context>
-            <host>172.16.18.178</host>
+            <host>localhost</host>
             <protocol>http</protocol>
             <username/>
         </WebService>
