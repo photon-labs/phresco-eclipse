@@ -18,20 +18,37 @@
  */
 package com.photon.phresco.ui.internal.controls;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.PhrescoFrameworkFactory;
+import com.photon.phresco.framework.api.Project;
+import com.photon.phresco.framework.api.ProjectAdministrator;
+import com.photon.phresco.model.PropertyInfo;
+import com.photon.phresco.model.SettingsInfo;
+import com.photon.phresco.ui.dialog.ConfigDialog;
+import com.photon.phresco.ui.dialog.ManageEnvironmentsDialog;
 
 /**
  * Control to handle the phresco configurations.
@@ -50,8 +67,14 @@ public class PhrescoConfigControl extends Composite {
 	 * Config file path
 	 */
 	private IPath configPath;
+	
+    private List<PropertyInfo> propertyInfoList;
+    
+    private List<SettingsInfo> settingsInfoList;
+    
+    private String projectCode;
 
-	public PhrescoConfigControl(Composite parent, int style, IPath configFilePath) {
+	public PhrescoConfigControl(Composite parent, int style, IPath configFilePath,String projectCode) {
 		super(parent, style);
 
 		GridLayout layout = new GridLayout(1, false);
@@ -78,36 +101,125 @@ public class PhrescoConfigControl extends Composite {
 		
 		Button envManageBtn = new Button(envComposite, SWT.PUSH);
 		envManageBtn.setText("Manage Environments");
-//		try {
-//			ConfigReader reader = new ConfigReader(configPath.toFile());
-//			comboViewer.setInput(reader.getEnvironments().toArray());
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		envManageBtn.setLayoutData(new GridData(SWT.DEFAULT, SWT.CENTER, false, false, 1, 1));
 		
+		final ManageEnvironmentsDialog environmentsDialog = new ManageEnvironmentsDialog(null, projectCode);
+		envManageBtn.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				environmentsDialog.create();
+				environmentsDialog.open();
+			}
+		});
 		
-		Composite ConfigComposite = new Composite(this, SWT.NONE);
+		Button addConfigBtn = new Button(envComposite, SWT.PUSH);
+		addConfigBtn.setText("Add");
+		
+		
+		final Composite ConfigComposite = new Composite(this, SWT.NONE);
 		ConfigComposite.setLayout(new GridLayout(1, false));
 		ConfigComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
 		
-		CheckboxTableViewer checkboxTableViewer = CheckboxTableViewer.newCheckList(ConfigComposite, SWT.BORDER | SWT.FULL_SELECTION);
+		final CheckboxTableViewer checkboxTableViewer = CheckboxTableViewer.newCheckList(ConfigComposite, SWT.BORDER | SWT.FULL_SELECTION);
 		table = checkboxTableViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-//		checkboxTableViewer.setColumnProperties(new String[]{"Name"});
 		
 		TableColumn tblNameColumn = new TableColumn(table, SWT.NONE);
 		tblNameColumn.setWidth(100);
 		tblNameColumn.setText("Name");
 		
 		TableColumn tblValueColumn = new TableColumn(table, SWT.NONE);
-		tblValueColumn.setWidth(300);
-		tblValueColumn.setText("Values");
+		tblValueColumn.setWidth(100);
+		tblValueColumn.setText("Description");
+		
+		TableColumn tblDescColumn = new TableColumn(table, SWT.NONE);
+		tblDescColumn.setWidth(200);
+		tblDescColumn.setText("Environment");
+		
+		TableColumn tblStatusColumn = new TableColumn(table, SWT.NONE);
+		tblStatusColumn.setWidth(100);
+		tblStatusColumn.setText("Status");
+		
+		settingsInfoList = getConfigValues(projectCode);
+		checkboxTableViewer.setContentProvider(new ArrayContentProvider());
+		checkboxTableViewer.setLabelProvider(new ITableLabelProvider() {
+			
+			@Override
+			public void removeListener(ILabelProviderListener listener) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public boolean isLabelProperty(Object element, String property) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+			
+			@Override
+			public void dispose() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void addListener(ILabelProviderListener listener) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public String getColumnText(Object element, int columnIndex) {
+				SettingsInfo settingsInfo = (SettingsInfo) element;
+				switch (columnIndex){
+				case 0:
+					return settingsInfo.getName();
+				case 1:
+					return settingsInfo.getDescription();
+				case 2:
+					return settingsInfo.getType() +" ["+ settingsInfo.getEnvName()+"]";
+				
+				}
+				return "";
+			}
+			@Override
+			public Image getColumnImage(Object element, int columnIndex) {
+				return null;
+			}
+		});
+			
+		checkboxTableViewer.setInput(settingsInfoList);
+		
+		final ConfigDialog dialog = new ConfigDialog(null,projectCode);
+		
+		addConfigBtn.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				dialog.create();
+				if(dialog.open() == Window.OK) {
+//					dialog.addSave();
+					checkboxTableViewer.add(dialog.getSettingsInfo());
+				}
+			}
+		});
 
+	}
+	
+	private List<SettingsInfo> getConfigValues(String projectCode) {
+		try {
+			ProjectAdministrator administrator = PhrescoFrameworkFactory.getProjectAdministrator();		
+			Project project = administrator.getProject(projectCode);
+			List<SettingsInfo> configurations = administrator.configurations(project);
+			return configurations;
+		} catch (PhrescoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

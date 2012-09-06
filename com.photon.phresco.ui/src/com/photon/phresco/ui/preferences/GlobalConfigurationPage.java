@@ -78,7 +78,7 @@ public class GlobalConfigurationPage extends PreferencePage implements
 	@Override
 	protected Control createContents(Composite parent) {
 		IPath configPath = ResourcesPlugin.getWorkspace().getRoot().getLocation().append(".phresco").append("phresco-env-config.xml");
-		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath);
+		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath,"");
 		return configParent;
 	}
 

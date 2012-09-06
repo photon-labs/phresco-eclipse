@@ -27,7 +27,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.photon.phresco.commons.model.User;
+import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.PhrescoFrameworkFactory;
+import com.photon.phresco.framework.api.ProjectAdministrator;
+import com.photon.phresco.ui.dialog.ManageEnvironmentsDialog;
 import com.photon.phresco.ui.internal.controls.PhrescoConfigControl;
+import com.photon.phresco.util.Credentials;
 
 /**
  * Configuration page for project
@@ -37,22 +43,47 @@ import com.photon.phresco.ui.internal.controls.PhrescoConfigControl;
 public class ConfigurationsPropertyPage extends PropertyPage implements
 		IWorkbenchPropertyPage {
 	private IPath configPath;
-
+	
+	private String projectCode ;
+	
 	public ConfigurationsPropertyPage() {
 		setTitle("Configurations");
 		setDescription("Project local configurations. Select Enviroments to view the configurations");
+		try {
+			doLogin();
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String getProjectCode() {
+		return projectCode;
+	}
+	
+	private void doLogin() throws PhrescoException {
+		try {
+			ProjectAdministrator administrator = PhrescoFrameworkFactory
+					.getProjectAdministrator();
+			String username = "suresh_ma";//store.getString(PreferenceConstants.USER_NAME);
+			String password = "SureshE3510";//store.getString(PreferenceConstants.PASSWORD);
+			Credentials credentials = new Credentials(username, password);
+			administrator.doLogin(credentials);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new PhrescoException();
+		}
 	}
 
 	@Override
 	protected Control createContents(Composite parent) {
 		IAdaptable element2 = getElement();
 		Object adapter = element2.getAdapter(IProject.class);
-		if(adapter instanceof IProject){
+		if(adapter instanceof IProject) {
 			IProject project = (IProject) adapter;
 			configPath = project.getFolder(".phresco").getFile("phresco-env-config.xml").getFullPath();
+			projectCode = project.getName();
 		}
-		
-		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath);
+		PhrescoConfigControl configParent = new PhrescoConfigControl(parent, SWT.NONE, configPath,projectCode);
 		return configParent;
 	}
 }

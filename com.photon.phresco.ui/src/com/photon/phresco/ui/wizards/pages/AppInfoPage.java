@@ -352,8 +352,6 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 							return "";
 						}
 					});
-					System.out.println(dbDialog.getdataBase());
-					System.out.println(dbDialog.getVersion());
 					elementList.add(dbDialog.getdataBase() +" "+ dbDialog.getVersion());
 					customItemListforDb.addElement(elementList);
 				} 
@@ -508,12 +506,10 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 						String[] pilotNames = new String[pilots.size()];
 						for(int i=0; i < pilots.size();i++) {
 							pilotNames[i] = pilots.get(i).getName();
-							System.out.println("pilots " + pilots.get(i));
 						}
 						pilotProjectCombo.setItems(pilotNames);
 						pilotProjectCombo.select(0);
 					}
-					
 					serverDialog.setTechId(techId);
 					dbDialog.setTechId(techId);
 				}
