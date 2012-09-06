@@ -47,18 +47,20 @@ public class PhrescoUtils {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			projectInfo.setCode("main");
+			String projectCode = projectInfo.getCode();
+			String mainProjectName =projectCode + ".main"; 
+			projectInfo.setCode(mainProjectName);
 			String sourcePath = path + "/source";
 			CreateAndroidProject(projectInfo, user, sourcePath, monitor);
-			projectInfo.setCode("functional");
+			projectInfo.setCode(projectCode + ".functional");
 			String functionalPath = path + "/test/functional";
-			CreateAndroidProject(projectInfo, user, functionalPath, monitor);
-			projectInfo.setCode("performance");
+			CreateAndroidProject(projectInfo, user, functionalPath, monitor, mainProjectName);
+			projectInfo.setCode(projectCode + ".performance");
 			String performancePath = path + "/test/performance";
-			CreateAndroidProject(projectInfo, user, performancePath, monitor);
-			projectInfo.setCode("unit");
+			CreateAndroidProject(projectInfo, user, performancePath, monitor, mainProjectName);
+			projectInfo.setCode(projectCode + ".unit");
 			String unitPath = path + "/test/unit";
-			CreateAndroidProject(projectInfo, user, unitPath, monitor);
+			CreateAndroidProject(projectInfo, user, unitPath, monitor, mainProjectName);
 		}else{
 			CreateGeneralProject(projectInfo, user, path, monitor);
 		}
@@ -146,19 +148,7 @@ public class PhrescoUtils {
 			
 			IPath outPath= javaProject.getPath().append("bin/classes");
 			javaProject.setRawClasspath(newEntries, outPath, monitor);
-			
-			//IJavaProject javaProject = JavaCore.create(project);
-			//IClasspathEntry[] entries = javaProject.getRawClasspath();
-
-			//IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-			//System.arraycopy(entries, 0, newEntries, 0, entries.length);
-
-			//IPath srcPath= javaProject.getPath().append("src");
-			//IClasspathEntry srcEntry= JavaCore.newSourceEntry(srcPath, null);
-
-			//newEntries[entries.length] = JavaCore.newSourceEntry(srcEntry.getPath());
-			//javaProject.setRawClasspath(newEntries, null);
-			
+						
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -166,94 +156,73 @@ public class PhrescoUtils {
 		
 	}
 	
-		private static void printICompilationUnitInfo(IPackageFragment mypackage)
-		      throws JavaModelException {
-		    for (ICompilationUnit unit : mypackage.getCompilationUnits()) {
-		      printCompilationUnitDetails(unit);
-
-		    }
-		  }
-
-		  private static void printIMethods(ICompilationUnit unit) throws JavaModelException {
-		    IType[] allTypes = unit.getAllTypes();
-		    for (IType type : allTypes) {
-		      printIMethodDetails(type);
-		    }
-		  }
-
-		  private static void printCompilationUnitDetails(ICompilationUnit unit)
-		      throws JavaModelException {
-		    System.out.println("Source file " + unit.getElementName());
-		    Document doc = new Document(unit.getSource());
-		    System.out.println("Has number of lines: " + doc.getNumberOfLines());
-		    printIMethods(unit);
-		  }
-
-		  private static void printIMethodDetails(IType type) throws JavaModelException {
-		    IMethod[] methods = type.getMethods();
-		    for (IMethod method : methods) {
-
-		      System.out.println("Method name " + method.getElementName());
-		      System.out.println("Signature " + method.getSignature());
-		      System.out.println("Return Type " + method.getReturnType());
-
-		    }
-		  }
-
-	private static IProject setSrcFolder(IProject project){
-		try{
+	private static void CreateAndroidProject(ProjectInfo projectInfo, User user, String path, IProgressMonitor monitor, String mainProjectName){
+		try {
+			//System.out.println("Android Path is :: " + path );
+			
+			
+			//Link the created Project to Eclipse
+			IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectInfo.getCode());
+			BuildCommand buildCommand1 = new BuildCommand();
+			buildCommand1.setName("com.android.ide.eclipse.adt.ResourceManagerBuilder");
+			BuildCommand buildCommand2 = new BuildCommand();
+			buildCommand2.setName("com.android.ide.eclipse.adt.PreCompilerBuilder");
+			BuildCommand buildCommand3 = new BuildCommand();
+			buildCommand3.setName("org.eclipse.jdt.core.javabuilder");
+			BuildCommand buildCommand4 = new BuildCommand();
+			buildCommand4.setName("com.android.ide.eclipse.adt.ApkBuilder");
+			BuildCommand[] buildSpec = {buildCommand1,buildCommand2,buildCommand3,buildCommand4};
+			description.setBuildSpec(buildSpec);
+			//BuildCommand buildCommand2 = new BuildCommand();
+			//buildCommand2.setName("org.maven.ide.eclipse.maven2Builder");
+			//[] buildSpec = {buildCommand2};
+			//description.setBuildSpec(buildSpec);
+			description.setLocation(new Path(path));
+			String[] natures = {"com.android.ide.eclipse.adt.AndroidNature", JavaCore.NATURE_ID };
+			description.setNatureIds(natures);
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
+			
+			
+			project.create( description, monitor);
+			project.open(monitor);
+			
 			IJavaProject javaProject = JavaCore.create(project);
-			IClasspathEntry[] entries = javaProject.getRawClasspath();
-
-			IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-
+			IClasspathEntry[] newEntries = new IClasspathEntry[5];
+			
+			//src path
 			IPath srcPath= javaProject.getPath().append("src");
 			IClasspathEntry srcEntry= JavaCore.newSourceEntry(srcPath, null);
-
-			newEntries[entries.length] = JavaCore.newSourceEntry(srcEntry.getPath());
-			javaProject.setRawClasspath(newEntries, null);
-			return (IProject)javaProject;
-		}catch(Exception ex){
-			ex.printStackTrace();
+			newEntries[0]= srcEntry;
+			
+			//gen path
+			IPath genPath= javaProject.getPath().append("gen");
+			IClasspathEntry genEntry= JavaCore.newSourceEntry(genPath, null);
+			newEntries[1]= genEntry;
+			
+			//frm container path
+			IPath frmPath= new Path("com.android.ide.eclipse.adt.ANDROID_FRAMEWORK");
+			IClasspathEntry frmEntry= JavaCore.newContainerEntry(frmPath, false);
+			newEntries[2]= frmEntry;
+			
+			//frm container path
+			IPath libPath= new Path("com.android.ide.eclipse.adt.LIBRARIES");
+			IClasspathEntry libEntry= JavaCore.newContainerEntry(libPath, false);
+			newEntries[3]= libEntry;
+			
+			//Dependency Project Entry
+			IPath mainPath= javaProject.getPath().append("../").append(mainProjectName);
+			IClasspathEntry mainEntry= JavaCore.newProjectEntry(mainPath, null, false, null, false);
+			newEntries[4]= mainEntry;
+			
+			
+			IPath outPath= javaProject.getPath().append("bin/classes");
+			javaProject.setRawClasspath(newEntries, outPath, monitor);
+						
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return project;
 		
 	}
 	
-	private static void setClassPathToNewLibs(String projectName,String[] jarPathList){
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-        try {
-            IJavaProject javaProject = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
-            IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-            List list = new LinkedList(java.util.Arrays.asList(rawClasspath));
-            for(String path:jarPathList){
-                String jarPath = path.toString();
-                boolean isAlreadyAdded=false;
-                for(IClasspathEntry cpe:rawClasspath){
-                    isAlreadyAdded=cpe.getPath().toOSString().equals(jarPath);
-                    if (isAlreadyAdded) break;
-                }
-                if (!isAlreadyAdded){
-                    IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath),null,null);
-                    list.add(jarEntry);
-                }
-            }
-            IClasspathEntry[] newClasspath = (IClasspathEntry[])list.toArray(new IClasspathEntry[0]);
-            javaProject.setRawClasspath(newClasspath,null);
-        } catch (CoreException e) {
-            e.printStackTrace();
-        }
-	}
-	
-	
-	
-	
-	
-
-
-	public PhrescoUtils() {
-		// TODO Auto-generated constructor stub
-	}
-
 }
