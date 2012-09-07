@@ -104,9 +104,9 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		configurationsPage = new ConfigurationsPage("Configuration");
 	
 		addPage(appInfoPage);
-		//addPage(featuresPage);
-		//addPage(customModuleFeaturesPage);
-		//addPage(featurePageJsLibrary);
+		addPage(featuresPage);
+		addPage(customModuleFeaturesPage);
+		addPage(featurePageJsLibrary);
 		//TODO This needs to be added to the project properties
 		//addPage(configurationsPage);
 	}
