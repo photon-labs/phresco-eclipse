@@ -114,8 +114,7 @@ public class PhrescoConfigControl extends Composite {
 		});
 		
 		Button addConfigBtn = new Button(envComposite, SWT.PUSH);
-		addConfigBtn.setText("Add");
-		
+		addConfigBtn.setText("Add...");
 		
 		final Composite ConfigComposite = new Composite(this, SWT.NONE);
 		ConfigComposite.setLayout(new GridLayout(1, false));

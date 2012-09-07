@@ -49,7 +49,9 @@ public class CoreModuleFeaturesPage extends WizardPage implements IWizardPage {
 	private String tech;
 	private String pilotProject;
 	private Text pilotProjectTxt;
+	private List<ModuleGroup> features;
 
+	
 	public ScrolledComposite scrolledCompositeCoreModules;
 	public Group coreModuleComposite;
 	
@@ -101,11 +103,21 @@ public class CoreModuleFeaturesPage extends WizardPage implements IWizardPage {
 		setControl(parentComposite);
 	}
 
-	public void populateCoreModules(List<ModuleGroup> features) {
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if(visible) {
+			populateCoreModules();
+		}
+	}
+	public void populateCoreModules() {
 		if(features == null) {
 			scrolledCompositeCoreModules.setVisible(false);
 			return;
 		}
+			for (ModuleGroup moduleGroup : features) {
+				System.out.println(moduleGroup.getName());
+			}
 			coreModuleComposite = new Group(scrolledCompositeCoreModules, SWT.BAR);
 			coreModuleComposite.setLayout(new GridLayout(1,false));
 			coreModuleComposite.setBackground(new Color(null, 255, 255, 255));
@@ -140,4 +152,19 @@ public class CoreModuleFeaturesPage extends WizardPage implements IWizardPage {
 			
 		return super.getNextPage();
 	}
+	/**
+	 * @return the features
+	 */
+	public List<ModuleGroup> getFeatures() {
+		return features;
+	}
+
+
+	/**
+	 * @param features the features to set
+	 */
+	public void setFeatures(List<ModuleGroup> features) {
+		this.features = features;
+	}
+
 }

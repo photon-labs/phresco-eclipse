@@ -24,14 +24,9 @@ public class JsLibraryFeaturePage extends WizardPage implements IWizardPage{
 	public Group jsLibrariesComposite;
 	private String tech;
 	
-	public String getTech() {
-		return tech;
-	}
-
-	public void setTech(String tech) {
-		this.tech = tech;
-	}
-
+	private List<ModuleGroup> features;
+	
+	
 	public JsLibraryFeaturePage(String pageName) {
 		super(pageName);
 		setTitle("{ js Phresco}");
@@ -50,7 +45,13 @@ public class JsLibraryFeaturePage extends WizardPage implements IWizardPage{
 		setControl(parentComposite);
 	}
 	
-	public void populateJsLibraries(List<ModuleGroup> features) {
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		populateJsLibraries();
+	}
+	
+	public void populateJsLibraries() {
 		if(features == null) {
 			scrolledCompositejsLibraries.setVisible(false);
 			return;
@@ -75,5 +76,27 @@ public class JsLibraryFeaturePage extends WizardPage implements IWizardPage{
 		scrolledCompositejsLibraries.setExpandVertical(true);
 		Rectangle r = scrolledCompositejsLibraries.getClientArea();
 		scrolledCompositejsLibraries.setMinSize(scrolledCompositejsLibraries.computeSize(r.width, vertical_scroll_size));
+	}
+	
+	/**
+	 * @return the features
+	 */
+	public List<ModuleGroup> getFeatures() {
+		return features;
+	}
+
+	/**
+	 * @param features the features to set
+	 */
+	public void setFeatures(List<ModuleGroup> features) {
+		this.features = features;
+	}
+
+	public String getTech() {
+		return tech;
+	}
+
+	public void setTech(String tech) {
+		this.tech = tech;
 	}
 }

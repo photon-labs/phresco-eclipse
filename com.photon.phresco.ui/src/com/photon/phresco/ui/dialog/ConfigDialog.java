@@ -119,6 +119,7 @@ private Composite configComposite;
 		
 		typeCombo = new Combo(envComposite, SWT.READ_ONLY);
 		ComboViewer typeComboViewer = new ComboViewer(typeCombo);
+		List<SettingsTemplate> types = getSettingsTemplates("photon");
 		typeComboViewer.setContentProvider(new ArrayContentProvider());
 		typeComboViewer.setLabelProvider(new LabelProvider() {
 			@Override
@@ -129,7 +130,6 @@ private Composite configComposite;
 				return super.getText(element);
 			}
 		});
-		List<SettingsTemplate> types = getSettingsTemplates("photon");
 		typeComboViewer.setInput(types);
 
 		configComposite = new Composite(parent, SWT.NONE);

@@ -34,6 +34,8 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -54,8 +56,10 @@ import com.photon.phresco.framework.api.ProjectAdministrator;
 import com.photon.phresco.framework.api.ServiceManager;
 import com.photon.phresco.framework.impl.ClientHelper;
 import com.photon.phresco.model.ApplicationType;
+import com.photon.phresco.model.Database;
 import com.photon.phresco.model.ModuleGroup;
 import com.photon.phresco.model.ProjectInfo;
+import com.photon.phresco.model.Server;
 import com.photon.phresco.model.Technology;
 import com.photon.phresco.model.WebService;
 import com.photon.phresco.ui.dialog.DataBaseDialog;
@@ -110,6 +114,8 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 	
 	private Button tech;
 	
+	private String techId;
+	
 	/**
 	 *  Initialization of Feature pages
 	 *
@@ -128,11 +134,11 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 	/**
 	 * @wbp.parser.constructor
 	 */
-	public AppInfoPage(String pageName) {
-		super(pageName);
-		setTitle("{Phresco}");
-		setDescription("Project Creation Page");
-	}
+//	public AppInfoPage(String pageName) {
+//		super(pageName);
+//		setTitle("{Phresco}");
+//		setDescription("Project Creation Page");
+//	}
 	
 	/**
 	 * @wbp.parser.constructor
@@ -280,13 +286,7 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 		lblPilotProject.setText("Pilot Project");
 
 		pilotProjectCombo = new Combo(basicComposite, SWT.NONE | SWT.READ_ONLY);
-		pilotProjectCombo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				coreModuleFeaturesPage.setPilotProject(pilotProjectCombo.getText());
-				coreModuleFeaturesPage.getPilotProjectName();
-			}
-		});
+		
 		GridData gd_pilotProjectCombo = new GridData();
 		gd_pilotProjectCombo.widthHint = 154;
 		pilotProjectCombo.setLayoutData(gd_pilotProjectCombo);
@@ -311,14 +311,14 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 			}
 		});
 		customItemListforServer.setVisible(false);
+		final List<Object> elementListforServer = new ArrayList<Object>();
 		addSupportedServersBtn.addListener (SWT.Selection, new Listener() {
 			public void handleEvent (Event e) {
-				List<Object> elementList = new ArrayList<Object>();
 				serverDialog.create();
 				if (serverDialog.open() == Window.OK) {
 					customItemListforServer.setVisible(true);
-					elementList.add(serverDialog.getServer() +" "+ serverDialog.getVersion());
-					customItemListforServer.addElement(elementList);
+					elementListforServer.add(serverDialog.getServer() +" "+ serverDialog.getVersion());
+					customItemListforServer.addElement(elementListforServer);
 					customItemListforServer.getParent().layout(true,true);
 				} 
 			}
@@ -334,26 +334,25 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 		Button addSupportedDatabasesBtn = new Button(dbComposite, SWT.NONE);
 		addSupportedDatabasesBtn.setText("Add");
 		
-		final CustomItemList customItemListforDb = new CustomItemList(dbComposite, SWT.DEFAULT);
+		final CustomItemList customItemListforDb = new CustomItemList(dbComposite, SWT.NONE);
+		customItemListforDb.setDecorator(new CustomListLabelDecorator() {
+			@Override
+			public String getdisplayName(Object element) {
+				if(element instanceof String){
+					return element.toString();
+				}
+				return "";
+			}
+		});
 		customItemListforDb.setVisible(false);
-		customItemListforDb.setVisible(false);
+		final List<Object> elementListforDB = new ArrayList<Object>();
 		addSupportedDatabasesBtn.addListener (SWT.Selection, new Listener() {
 			public void handleEvent (Event e) {
-				List<Object> elementList = new ArrayList<Object>();
 				dbDialog.create();
 				if (dbDialog.open() == Window.OK) {
 					customItemListforDb.setVisible(true);
-					customItemListforDb.setDecorator(new CustomListLabelDecorator() {
-						@Override
-						public String getdisplayName(Object element) {
-							if(element instanceof String){
-								return element.toString();
-							}
-							return "";
-						}
-					});
-					elementList.add(dbDialog.getdataBase() +" "+ dbDialog.getVersion());
-					customItemListforDb.addElement(elementList);
+					elementListforDB.add(dbDialog.getdataBase() +" "+ dbDialog.getVersion());
+					customItemListforDb.addElement(elementListforDB);
 				} 
 			}
 		});
@@ -423,24 +422,22 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 				}
 			});
 
-			technologyCombo.addSelectionListener(new SelectionAdapter() {
+			technologyCombo.addModifyListener(new ModifyListener() {
+				
 				@Override
-				public void widgetSelected(SelectionEvent e) {
-//					String technologyName = technologyCombo.getText();
+				public void modifyText(ModifyEvent e) {
 					coreModuleFeaturesPage.setTech(technologyCombo.getText());
 					customModuleFeaturesPage.setTech(technologyCombo.getText());
 					jsLibraryFeaturePage.setTech(technologyCombo.getText());
 					technologyVersionCombo.setVisible(true);
 					lblTechnologyVersion.setVisible(true);
 					List<String> versions = new ArrayList<String>();
-					String techId = "";
 					
 					for (ApplicationType appType : applicationTypes) {
 						List<Technology> technologies = appType.getTechnologies();						
 						for (final Technology technology : technologies) {
 							if(technologyCombo.getText().equals(technology.getName())) {
 								techId = technology.getId();
-								
 								versions = technology.getVersions();
 								pilots = getPilots(techId,"photon");
 //							}
@@ -480,26 +477,25 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 						technologyVersionCombo.select(0);
 					}
 
-//					getFeatures(technologyName);
 					coreModules = getCoreModules(techId,"photon");
 					if(coreModules != null && coreModules.size() > 0){
-						coreModuleFeaturesPage.populateCoreModules(coreModules);
+						coreModuleFeaturesPage.setFeatures(coreModules);
 					} else {
-						coreModuleFeaturesPage.populateCoreModules(null);
+						coreModuleFeaturesPage.setFeatures(null);
 					}
 
 					customModules = getCustomModules(techId,"photon");
 					if(customModules != null && customModules.size() > 0) {
-						customModuleFeaturesPage.populateCustomModules(customModules);
+						customModuleFeaturesPage.setFeatures(customModules);
 					} else {
-						customModuleFeaturesPage.populateCustomModules(null);
+						customModuleFeaturesPage.setFeatures(null);
 					}
 
 					jsLibraries = getjsLibraries(techId,"photon");
 					if(jsLibraries != null && jsLibraries.size() > 0){
-						jsLibraryFeaturePage.populateJsLibraries(jsLibraries);
+						jsLibraryFeaturePage.setFeatures(jsLibraries);
 					} else {
-						jsLibraryFeaturePage.populateJsLibraries(null);
+						jsLibraryFeaturePage.setFeatures(null);
 					}
 
 					if(pilots !=null && pilots.size() >0) {
@@ -509,12 +505,36 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 						}
 						pilotProjectCombo.setItems(pilotNames);
 						pilotProjectCombo.select(0);
-					}
+					} 
 					serverDialog.setTechId(techId);
 					dbDialog.setTechId(techId);
 				}
 			});
 			technologyCombo.select(0);
+			pilotProjectCombo.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					coreModuleFeaturesPage.setPilotProject(pilotProjectCombo.getText());
+					coreModuleFeaturesPage.getPilotProjectName();
+					List<ProjectInfo> pilots = getPilots(techId, "photon");
+					for (ProjectInfo pilotProjectInfo : pilots) {
+							List<Database> databases = pilotProjectInfo.getTechnology().getDatabases();
+							for (Database database : databases) {
+								elementListforDB.add(database.getName() +" "+ database.getVersions());
+							}
+						    List<Server> servers = pilotProjectInfo.getTechnology().getServers();
+						    for (Server server : servers) {
+						    	elementListforServer.add(server.getName() +" "+ server.getVersions());
+							}
+					}
+					customItemListforServer.setVisible(true);
+					customItemListforServer.addElement(elementListforServer);
+					customItemListforServer.getParent().layout(true,true);
+					customItemListforDb.setVisible(true);
+					customItemListforDb.addElement(elementListforDB);
+					customItemListforDb.getParent().layout(true,true);
+				}
+			});
 		} catch (PhrescoException e1) {
 
 		}
@@ -532,8 +552,9 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 		try{
 			ProjectAdministrator administrator = PhrescoFrameworkFactory.getProjectAdministrator();
 			List<ProjectInfo> pi = administrator.getPilots(techId, customerId);
+			if(pi != null) {
 			return pi;
-
+			}
 		}catch(PhrescoException ex){
 			ex.printStackTrace();
 		}
@@ -649,5 +670,5 @@ public class AppInfoPage extends WizardPage implements IWizardPage{
 //		} else {
 //			jsLibraryFeaturePage.populateJsLibraries(null);
 //		}
-//	}
+//	}	
 }

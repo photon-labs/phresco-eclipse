@@ -24,6 +24,8 @@ public class CustomModuleFeaturesPage extends WizardPage implements IWizardPage{
 	public Group customModuleComposite;
 	private String tech;
 	
+	private List<ModuleGroup> features;
+	
 	public CustomModuleFeaturesPage(String pageName) {
 		super(pageName);
 		setTitle("{custom Phresco}");
@@ -50,7 +52,13 @@ public class CustomModuleFeaturesPage extends WizardPage implements IWizardPage{
 		setControl(parentComposite);
 	}
 	
-	public void populateCustomModules(List<ModuleGroup> features) {
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		populateCustomModules();
+	}
+	
+	public void populateCustomModules() {
 		if(features == null) {
 			scrolledCompositeCustomModules.setVisible(false);
 			return;
@@ -81,5 +89,19 @@ public class CustomModuleFeaturesPage extends WizardPage implements IWizardPage{
 	@Override
 	public boolean canFlipToNextPage() {
 		return true;
+	}
+	
+	/**
+	 * @return the features
+	 */
+	public List<ModuleGroup> getFeatures() {
+		return features;
+	}
+
+	/**
+	 * @param features the features to set
+	 */
+	public void setFeatures(List<ModuleGroup> features) {
+		this.features = features;
 	}
 }

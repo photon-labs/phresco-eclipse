@@ -72,15 +72,6 @@ public class ManageEnvironmentsDialog extends TitleAreaDialog {
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		GridLayout layout = new GridLayout();
-	    layout.numColumns = 1;
-	    // layout.horizontalAlignment = GridData.FILL;
-	    parent.setLayout(layout);
-
-	    // The text fields will grow with the size of the dialog
-	    GridData gridData = new GridData();
-	    gridData.grabExcessHorizontalSpace = true;
-	    gridData.horizontalAlignment = GridData.FILL;
 
 	    Composite composite = new Composite(parent, SWT.NONE);
 	    composite.setLayout(new GridLayout(2, false));
@@ -114,15 +105,33 @@ public class ManageEnvironmentsDialog extends TitleAreaDialog {
 		controlComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		
 		Button addBtn = new Button(controlComposite, SWT.PUSH);
-		addBtn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-		addBtn.setText("Add");
+		addBtn.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		addBtn.setText("Add...");
 		
 		Button deleteBtn = new Button(controlComposite, SWT.PUSH);
-		deleteBtn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		deleteBtn.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		deleteBtn.setText("Delete");
 		
-		Button DefaultEvn = new Button(controlComposite, SWT.PUSH);
-		DefaultEvn.setText("Default Environment");
+		Button defaultEvnBtn = new Button(controlComposite, SWT.PUSH);
+		defaultEvnBtn.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		defaultEvnBtn.setText("Default Environment");
+		
+		defaultEvnBtn.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				Object[] checkedElements = checkboxTableViewer.getCheckedElements();
+				for (Object object : checkedElements) {
+					if (object instanceof Environment) {
+						Environment environment = (Environment) object;
+						if(!environment.isDefaultEnv() && environment.getName().equals("ss")) {
+							
+							environment.setDefaultEnv(true);
+						}
+					}
+				}
+			}
+		});
 		
 		deletableEnvs = new ArrayList<String>();
 		deleteBtn.addListener(SWT.Selection, new Listener() {
@@ -408,7 +417,7 @@ public class ManageEnvironmentsDialog extends TitleAreaDialog {
 	    	}
 	    		return "";
 	    }
-	  
+
 	  private List<SettingsInfo> getConfiguration(String envName,String projectCode) {
 		  try {
 			  ProjectAdministrator administrator = PhrescoFrameworkFactory.getProjectAdministrator();
@@ -420,7 +429,7 @@ public class ManageEnvironmentsDialog extends TitleAreaDialog {
 		  }
 		  return null;
 	  }
-	  
+
 	  private void refresh() {
 		  nameTxt.setText("");
 		  descriptionTxt.setText("");

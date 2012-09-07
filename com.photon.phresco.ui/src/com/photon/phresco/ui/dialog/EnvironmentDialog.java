@@ -115,10 +115,12 @@ public class EnvironmentDialog extends TrayDialog {
 	private boolean isValidInput() {
 		boolean valid = true;
 		if (nameTxt.getText().length() == 0) {
+			 nameTxt.setMessage("Please Enter the Name");
 //			setErrorMessage("Please Enter the Name");
 			valid = false;
 		}
-		if (descriptionTxt.getText().length() == 0) {
+		else if (descriptionTxt.getText().length() == 0) {
+			descriptionTxt.setMessage("Please Enter the Description");
 //			setErrorMessage("Please Enter the Description");
 			valid = false;
 		}
