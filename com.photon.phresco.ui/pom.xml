@@ -5,10 +5,10 @@
   <parent>
     <groupId>com.photon.phresco</groupId>
     <artifactId>phresco-eclipse</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>2.0.0.14000</version>
   </parent>
   <groupId>com.photon.phresco</groupId>
   <artifactId>com.photon.phresco.ui</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0.14000</version>
   <packaging>eclipse-plugin</packaging>
 </project>

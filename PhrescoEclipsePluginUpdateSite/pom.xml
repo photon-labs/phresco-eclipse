@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.photon.phresco</groupId>
     <artifactId>phresco-eclipse</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>2.0.0.14000</version>
   </parent>
   <groupId>com.photon.phresco</groupId>
   <artifactId>PhrescoEclipsePluginUpdateSite</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>2.0.0.14000</version>
   <packaging>eclipse-update-site</packaging>
   
   <build>

@@ -41,11 +41,11 @@
 	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.equinox.preferences_3.5.0.v20120522-1841.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.equinox.registry_3.5.200.v20120522-1841.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.osgi_3.8.0.v20120529-1548.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/phresco-commons-2.0.0.10003-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/phresco-framework-2.0.0.10003-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/phresco-framework-impl-2.0.0.10003-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/phresco-pom-2.0.0.10003-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/phresco-service-client-2.0.0.10003-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/phresco-commons-2.0.0.14000.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/phresco-framework-2.0.0.14000.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/phresco-framework-impl-2.0.0.14000.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/phresco-pom-2.0.0.14000.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/phresco-service-client-2.0.0.14000.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-archiver-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-classworlds-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-component-annotations-1.5.5.jar"/>
