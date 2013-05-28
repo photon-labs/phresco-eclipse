@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: com.photon.phresco.core; singleton:=true
-Bundle-Version: 2.0.0.14000
+Bundle-Version: 3.0.0.10001-SNAPSHOT
 Bundle-Activator: com.photon.phresco.core.Activator
 Bundle-Vendor: PHOTON
 Require-Bundle: org.eclipse.core.runtime
