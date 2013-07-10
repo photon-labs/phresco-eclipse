@@ -1,4 +1,0 @@
-phresco-eclipse
-===============
-
-phresco-eclipse

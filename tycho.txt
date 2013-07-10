@@ -1,3 +1,0 @@
-mvn org.sonatype.tycho:maven-tycho-plugin:generate-poms -DgroupId=com.photon.phresco -Dtycho.targetPlatform=D:\work\projects\PhrescoEclipseBuildSetUp\Eclipse\Dev\eclipse
-
-mvn clean install -Dtycho.targetPlatform=D:\work\projects\PhrescoEclipseBuildSetUp\Eclipse\Dev\eclipse
