@@ -25,11 +25,11 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		addProjectPage = (AddProjectPage) getWizard().getPreviousPage(this);
-		Composite parentComposite = new Composite(parent, SWT.NULL | SWT.LEFT);
+		Composite parentComposite = new Composite(parent, SWT.NULL);
 		parentComposite.setLayout(new GridLayout(1,true));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		/*System.out.println("AppSelection =====> " + addProjectPage.layerButton.getSelection());
+		System.out.println("AppSelection =====> " + addProjectPage.layerButton.getSelection());
 		Label appLayerLabel = new Label(parentComposite, SWT.BOLD);
 		appLayerLabel.setFont(DesignUtil.getHeaderFont());
 		appLayerLabel.setText("Application Layer");
@@ -61,14 +61,14 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		Combo versionCombo = new Combo(appComposite, SWT.NONE | SWT.READ_ONLY);
 		String[] versionItems = {"1.2","2.4"};
 		versionCombo.setItems(versionItems);
-		versionCombo.select(0);*/
+		versionCombo.select(0);
 		
 		Label webLayerLabel = new Label(parentComposite, SWT.BOLD);
 		webLayerLabel.setFont(DesignUtil.getHeaderFont());
 		webLayerLabel.setText("Web Layer");
 
 		Composite webComposite = new Composite(parentComposite, SWT.BORDER);
-		webComposite.setLayout(new GridLayout(4, true));
+		webComposite.setLayout(new GridLayout(2, true));
 		webComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label webAppCodeLabel = new Label(webComposite, SWT.BOLD);

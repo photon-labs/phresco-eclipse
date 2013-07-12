@@ -147,7 +147,7 @@
             class="com.photon.phresco.ui.wizards.PhrescoProjectWizard"
             finalPerspective="org.eclipse.debug.ui.DebugPerspective"
             hasPages="true"
-            icon="icons/phresco_app_project.png"
+            icon="icons/sample.gif"
             id="com.photon.phresco.ui.newPhrescoProject"
             name="%wizards.newproject.name"
             project="true">
