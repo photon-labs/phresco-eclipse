@@ -45,7 +45,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
 		ImageDescriptor myImage = ImageDescriptor.createFromURL(FileLocator.find(PhrescoPlugin.getDefault().getBundle(),
-				new Path("icons/phresco.png"),null));
+				new Path("icons/sample.gif"),null));
 		super.setDefaultPageImageDescriptor(myImage);
 		super.setNeedsProgressMonitor(true);
 		super.setWindowTitle("Phresco");
@@ -55,12 +55,12 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		appInfoPage = new AddProjectPage("AppInfoPage");
+		appInfoPage = new AddProjectPage("AddProjectPage");
 		technologyPage = new TechnologyPage("Technology Page");
 		addPage(appInfoPage);
 		addPage(technologyPage);
 	}
-
+	
 	@Override
 	public boolean performFinish() {
 		return false;
