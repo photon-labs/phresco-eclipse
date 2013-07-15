@@ -2,35 +2,31 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-   <parent>
-    <groupId>com.photon.phresco</groupId>
-    <artifactId>phresco-eclipse</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent> 
+  <groupId>com.photon.phresco</groupId>
   <artifactId>com.photon.phresco.core</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   
   <properties>
-     <phresco.version>3.0.0.14002-SNAPSHOT</phresco.version>
+     <phresco.version>3.0.0.17001-SNAPSHOT</phresco.version>
   </properties>
   
   <dependencies>
-  		<dependency>
+  		<!-- <dependency>
             <groupId>com.photon.phresco.framework</groupId>
             <artifactId>phresco-framework</artifactId>
             <version>${phresco.version}</version>
-        </dependency>
+        </dependency> -->
         <!-- TODO: To be used only during runtime -->
-        <dependency>
+        <!-- <dependency>
             <groupId>com.photon.phresco.framework</groupId>
             <artifactId>phresco-framework-impl</artifactId>
             <version>${phresco.version}</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>com.photon.phresco.service.client</groupId>
             <artifactId>phresco-service-client</artifactId>
-            <version>3.0.0.14002-SNAPSHOT</version>
+            <version>3.0.0.17001-SNAPSHOT</version>
         </dependency>
          <dependency>
             <groupId>com.photon.phresco.pom</groupId>
@@ -57,6 +53,12 @@
 
   <build>
     <plugins>
+	<plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>0.11.1</version>
+        <extensions>true</extensions>
+      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -98,7 +100,7 @@
 			</goals>
 			<configuration>
 				<artifactItems>
-					<artifactItem>
+					<!-- <artifactItem>
 						<groupId>com.photon.phresco.framework</groupId>
 						<artifactId>phresco-framework-impl</artifactId>
 						<version>${phresco.version}</version>
@@ -111,7 +113,7 @@
 						<version>${phresco.version}</version>
 						<outputDirectory>src\main\java</outputDirectory>
 						<includes>**\/*.*</includes>
-					</artifactItem>
+					</artifactItem> -->
 					<artifactItem>
 						<groupId>com.photon.phresco.service.client</groupId>
 						<artifactId>phresco-service-client</artifactId>
