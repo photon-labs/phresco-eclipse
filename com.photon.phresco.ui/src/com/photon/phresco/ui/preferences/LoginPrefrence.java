@@ -70,7 +70,7 @@ public class LoginPrefrence
         composite.setLayout(layout);
 
         Label userNameLabel = new Label(composite, SWT.LEFT);
-        userNameLabel.setText(USER_NAME);
+        userNameLabel.setText(USER_ID);
         userName = new Text(composite, SWT.BORDER);
         userNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
         userName.setLayoutData(new GridData(140,13));
@@ -112,7 +112,7 @@ public class LoginPrefrence
         });
 
         if (isLoggedIn) {
-            prefStore.setValue(USER_NAME, userName.getText());
+            prefStore.setValue(USER_ID, userName.getText());
             prefStore.setValue(PASSWORD, password.getText());
             PhrescoPlugin.getDefault().savePluginPreferences();
             result = true;
@@ -132,7 +132,7 @@ public class LoginPrefrence
     private void setDefaultValues() {
 
     	prefStore = getPreferenceStore();
-        String regUserName = prefStore.getString(USER_NAME);
+        String regUserName = prefStore.getString(USER_ID);
         String regPassword = prefStore.getString(PASSWORD);
 
         if(PhrescoConstants.STR_EMPTY.equals(regUserName)) {

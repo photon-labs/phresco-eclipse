@@ -1,8 +1,9 @@
 package com.photon.phresco.ui.wizards.pages;
 
-import org.eclipse.jface.wizard.IWizard;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -15,18 +16,27 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.INewWizard;
 
+import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.model.ApplicationType;
+import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.DesignUtil;
+import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.service.client.api.ServiceManager;
+
+import freemarker.core.Macro;
 
 /**
  * App Info Page
  * @author suresh_ma
  *
  */
-public class AddProjectPage extends WizardPage implements IWizardPage {
+public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoConstants {
 
 	//project name;
 	public Text projectTxt;
@@ -45,13 +55,15 @@ public class AddProjectPage extends WizardPage implements IWizardPage {
 	//project pilot
 	public Combo pilotProjectCombo;
 	//Layer Button
-	public Button layerButton;
+	public Button layerButtons;
 
 	public Button webServiceBtn;
 
 	private boolean projectNameValidation = false;
 	
 	private boolean layerValidation = false;
+	
+	private int layer;
 	
 	/**
 	 * @wbp.parser.constructor
@@ -84,6 +96,12 @@ public class AddProjectPage extends WizardPage implements IWizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		BaseAction baseAction = new BaseAction();
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		if(serviceManager == null) {
+			PhrescoDialog.ErrorDialog(getShell(),"Error", "Please Login before making Request");
+			return;
+		}
 		Composite parentComposite = new Composite(parent, SWT.NULL);
 		parentComposite.setLayout(new GridLayout(1,false));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -138,50 +156,45 @@ public class AddProjectPage extends WizardPage implements IWizardPage {
 		versionTxt = new Text(basicComposite, SWT.BORDER);
 		versionTxt.setText("1.0.0");
 
-//		new Label(basicComposite, SWT.NONE);		
-
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		composite.setLayout(new GridLayout(3, false));
-		
-		layerButton = new Button(composite, SWT.CHECK);
-		layerButton.setText("Application Layer");
-		layerButton.setFont(DesignUtil.getLabelFont());
-		
-		/*Label appLayerLbl = new Label(composite, SWT.BOLD);
-		appLayerLbl.setText("Application Layer");
-		appLayerLbl.setFont(DesignUtil.getLabelFont());*/
-		
-		layerButton = new Button(composite, SWT.CHECK);
-		layerButton.setText("Web Layer");
-		layerButton.setFont(DesignUtil.getLabelFont());
-		
-		/*Label webLayerLbl = new Label(composite, SWT.BOLD);
-		webLayerLbl.setText("Web Layer");
-		webLayerLbl.setFont(DesignUtil.getLabelFont());*/
-		
-		layerButton = new Button(composite, SWT.CHECK);
-		layerButton.setText("Mobile Layer");
-		layerButton.setFont(DesignUtil.getLabelFont());
-		
-		layerButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if(layerButton.getSelection()) {
-					layerValidation = true;
-				} else {
-					layerValidation = false;
-				}
-				checkStatus();
+		List<Button> list = new ArrayList<Button>();
+		try {
+			List<ApplicationType> applicationTypes = serviceManager.getApplicationTypes(baseAction.getCustomerId());
+			for (ApplicationType applicationType : applicationTypes) {
+				layerButtons = new Button(composite, SWT.CHECK);
+				layerButtons.setText(applicationType.getName());
+				layerButtons.setFont(DesignUtil.getLabelFont());
+				layerButtons.setData(applicationType.getName(), applicationType.getId());
+				list.add(layerButtons);
 			}
-		});
-		/*Label mobileLayerLbl = new Label(composite, SWT.BOLD);
-		mobileLayerLbl.setText("Mobile Layer");
-		mobileLayerLbl.setFont(DesignUtil.getLabelFont());*/
+		} catch (PhrescoException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		for (final Button button : list) {
+			button.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if(button.getSelection()) {
+						layerValidation = true;
+					} else {
+						layerValidation = false;
+					}
+					checkStatus();
+				}
+			});
+		}
 		
 		new Label(composite, SWT.NONE);
 		
 		setControl(parentComposite);
+	}
+	
+	public void onEnterPage() {
+		
 	}
 	
 	
@@ -192,6 +205,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage {
 	
 	@Override
 	public IWizardPage getNextPage() {
+		onEnterPage();
 		return super.getNextPage();
 	}
 }

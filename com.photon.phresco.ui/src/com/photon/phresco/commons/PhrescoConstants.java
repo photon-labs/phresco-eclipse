@@ -6,8 +6,9 @@ public interface PhrescoConstants {
 	
 	String STR_EMPTY = "";
 	
-    String USER_NAME = "User Name :";
-    String PASSWORD = "Password :";
+    String USER_ID = "userId";
+    String PASSWORD = "Password";
+    String CUSTOMER_ID = "customerId";
     
     String DEFAULT_USER_NAME = "admin";
     String DEFAULT_PASSWORD = "manage";

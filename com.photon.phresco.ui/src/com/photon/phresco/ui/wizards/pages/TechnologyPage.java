@@ -7,6 +7,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -14,8 +15,6 @@ import com.photon.phresco.commons.util.DesignUtil;
 
 public class TechnologyPage extends WizardPage implements IWizardPage {
 
-	AddProjectPage addProjectPage;
-	
 	public TechnologyPage(String pageName) {
 		super(pageName);
 		setTitle("{Phresco}");
@@ -24,44 +23,50 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		addProjectPage = (AddProjectPage) getWizard().getPreviousPage(this);
 		Composite parentComposite = new Composite(parent, SWT.NULL);
 		parentComposite.setLayout(new GridLayout(1,true));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		System.out.println("AppSelection =====> " + addProjectPage.layerButton.getSelection());
-		Label appLayerLabel = new Label(parentComposite, SWT.BOLD);
+		Group group = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
+		group.setText("Application Layer");
+		group.setLayout(new GridLayout(6, true));
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setFont(DesignUtil.getHeaderFont());
+		/*Label appLayerLabel = new Label(parentComposite, SWT.BOLD);
 		appLayerLabel.setFont(DesignUtil.getHeaderFont());
-		appLayerLabel.setText("Application Layer");
+		appLayerLabel.setText("Application Layer");*/
 
-		Composite appComposite = new Composite(parentComposite, SWT.BORDER);
+		/*Composite appComposite = new Composite(group, SWT.BORDER);
 		appComposite.setLayout(new GridLayout(6, true));
-		appComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		appComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));*/
 
-		Label appCodeLabel = new Label(appComposite, SWT.BOLD);
+		Label appCodeLabel = new Label(group, SWT.BOLD);
 		appCodeLabel.setText("AppCode");
 		appCodeLabel.setFont(DesignUtil.getLabelFont());
+		appCodeLabel.pack();
 
-		Text appCodeTxt = new Text(appComposite, SWT.NONE);
+		Text appCodeTxt = new Text(group, SWT.NONE);
 		appCodeTxt.setMessage("Enter AppCode");
 
-		Label techLabel = new Label(appComposite, SWT.BOLD);
+		Label techLabel = new Label(group, SWT.BOLD);
 		techLabel.setText("Technology");
 		techLabel.setFont(DesignUtil.getLabelFont());
 
-		Combo techCombo = new Combo(appComposite, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+		Combo techCombo = new Combo(group, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
 		String[] techItems = {"Java", "J2EE","Drupal"};
 		techCombo.setItems(techItems);
 		techCombo.select(0);
 
-		Label versionLabel = new Label(appComposite, SWT.BOLD);
+		Label versionLabel = new Label(group, SWT.BOLD);
 		versionLabel.setText("Version");
 		versionLabel.setFont(DesignUtil.getLabelFont());
 
-		Combo versionCombo = new Combo(appComposite, SWT.NONE | SWT.READ_ONLY);
+		Combo versionCombo = new Combo(group, SWT.NONE | SWT.READ_ONLY);
 		String[] versionItems = {"1.2","2.4"};
 		versionCombo.setItems(versionItems);
 		versionCombo.select(0);
+		
+		group.pack();
 		
 		Label webLayerLabel = new Label(parentComposite, SWT.BOLD);
 		webLayerLabel.setFont(DesignUtil.getHeaderFont());
