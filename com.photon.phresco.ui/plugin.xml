@@ -125,7 +125,7 @@
             id="com.photon.phresco.ui.import.phrescoImportCategory">
       </category>
       <wizard
-            name="Existing Phresco Projects"
+            name="%existing.phresch.project"
             icon="icons/sample.gif"
             category="com.photon.phresco.ui.import.phrescoImportCategory"
             class="com.photon.phresco.ui.wizards.PhrescoImportWizard"
@@ -135,7 +135,7 @@
          </description>
       </wizard>
             <wizard
-            name="Check out Phresco Projects from SCM"
+            name="%scm.phresco.project"
             icon="icons/sample.gif"
             category="com.photon.phresco.ui.import.phrescoImportCategory"
             class="com.photon.phresco.ui.wizards.PhrescoImportFromSCMWizard"
