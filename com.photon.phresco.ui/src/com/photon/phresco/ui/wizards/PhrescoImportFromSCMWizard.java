@@ -50,6 +50,6 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard 
 	}
 	@Override
 	public void addPages() {
-		addPage(new ImportFromSCMPage(this));
+		addPage(new ImportFromSCMPage("Import from SCM", "Provide SCM Details"));
 	}
 }
