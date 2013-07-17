@@ -14,23 +14,21 @@ public class PhrescoUtil implements PhrescoConstants {
 	
 	public static boolean doLogin(String userName, String password) throws PhrescoWebServiceException {
 		
-		if (!isLoggedIn) {
-			ServiceContext context = new ServiceContext();
-	        context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
-			System.out.println(" user name in phresco util : " + userName);
-			System.out.println(" password in phresco util : " + password);
-	        context.put(SERVICE_USERNAME, userName);
-	        context.put(SERVICE_PASSWORD, password);
-	        System.out.println("ServiceUrl--------> " + context.get(SERVICE_URL));
-	        try {
-	        	ServiceManager serviceManager = ServiceClientFactory.getServiceManager(context);
-	        	User userInfo = serviceManager.getUserInfo();
-	        	System.out.println(" user name : " + userInfo.getDisplayName());
-	        	isLoggedIn = true;
-	        } catch(Exception e) {
-	        	e.printStackTrace();
-	        }
-		}
+		ServiceContext context = new ServiceContext();
+        context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
+		System.out.println(" user name in phresco util : " + userName);
+		System.out.println(" password in phresco util : " + password);
+        context.put(SERVICE_USERNAME, userName);
+        context.put(SERVICE_PASSWORD, password);
+        System.out.println("ServiceUrl--------> " + context.get(SERVICE_URL));
+        try {
+        	ServiceManager serviceManager = ServiceClientFactory.getServiceManager(context);
+        	User userInfo = serviceManager.getUserInfo();
+        	System.out.println(" user name : " + userInfo.getDisplayName());
+        	isLoggedIn = true;
+        } catch(Exception e) {
+        	isLoggedIn = false;
+        }
 		
         return isLoggedIn;
 	}
