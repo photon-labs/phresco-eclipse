@@ -353,7 +353,15 @@
 			</menu>
 		</menu>
 	</menuContribution>
-	
+	 <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+		<menu 
+		   commandId="Phresco"
+		   icon="icons/phresco.gif"
+		   id="%project.phresco.menu.id"
+		   label="%project.phresco.menu.label"
+		   tooltip="%project.phresco.menu.tooltip">
+		   </menu>
+	</menuContribution>
    </extension>
    
 </plugin>
