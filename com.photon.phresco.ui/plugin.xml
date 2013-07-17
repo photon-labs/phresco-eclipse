@@ -121,17 +121,27 @@
    <extension
          point="org.eclipse.ui.importWizards">
       <category
-            name="Phresco"
-            id="com.photon.phresco.ui.import.sampleCategory">
+            name="%wizards.category.name"
+            id="com.photon.phresco.ui.import.phrescoImportCategory">
       </category>
       <wizard
-            name="Import Phresco Project"
+            name="Existing Phresco Projects"
             icon="icons/sample.gif"
-            category="com.photon.phresco.ui.import.sampleCategory"
+            category="com.photon.phresco.ui.import.phrescoImportCategory"
             class="com.photon.phresco.ui.wizards.PhrescoImportWizard"
             id="com.photon.phresco.ui.wizards.PhrescoImportWizard">
          <description>
             Import a file from the local file system into the workspace.
+         </description>
+      </wizard>
+            <wizard
+            name="Check out Phresco Projects from SCM"
+            icon="icons/sample.gif"
+            category="com.photon.phresco.ui.import.phrescoImportCategory"
+            class="com.photon.phresco.ui.wizards.PhrescoImportFromSCMWizard"
+            id="com.photon.phresco.ui.wizards.PhrescoImportSCMWizard">
+         <description>
+            Checkout Phresco Project from SCM.
          </description>
       </wizard>
    </extension>
@@ -250,7 +260,6 @@
   <extension
          point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-      
          <menu 
                commandId="Phresco"
                icon="icons/phresco.gif"
