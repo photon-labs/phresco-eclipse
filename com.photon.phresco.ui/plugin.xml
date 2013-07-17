@@ -27,19 +27,6 @@
       </builder>
    </extension>
    <extension
-         point="org.eclipse.ui.commands">
-      <category
-            name="Phresco Project Nature commands"
-            id="Phresco-Plugin.phrescoNature.category">
-      </category>
-      <command
-            name="Add/RemovePhresco Project Nature"
-            defaultHandler="com.photon.phresco.ui.AddRemovePhrescoNatureHandler"
-            categoryId="Phresco-Plugin.phrescoNature.category"
-            id="Phresco-Plugin.addRemovePhrescoNature">
-      </command>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
