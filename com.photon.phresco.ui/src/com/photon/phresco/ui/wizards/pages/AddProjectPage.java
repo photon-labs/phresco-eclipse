@@ -99,7 +99,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
-			PhrescoDialog.ErrorDialog(getShell(),"Error", "Please Login before making Request");
+			PhrescoDialog.errorDialog(getShell(),"Error", "Please Login before making Request");
 			return;
 		}
 		Composite parentComposite = new Composite(parent, SWT.NULL);

@@ -1,6 +1,5 @@
 package com.photon.phresco.ui.preferences;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -19,6 +18,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.ui.PhrescoPlugin;
 
@@ -119,11 +119,12 @@ public class LoginPrefrence
             setMessage(LOGIN_SUCCESSFUL);
         } else {
             result = false;
-            TitleAreaDialog dialog = new TitleAreaDialog(getShell());
+/*            TitleAreaDialog dialog = new TitleAreaDialog(getShell());
             dialog.create();
             dialog.setTitle(CONNECTION_TITLE);
             dialog.setMessage(LOGIN_FAILED);
-            dialog.open();
+            dialog.open();*/
+            PhrescoDialog.errorDialog(getShell(),"Error", LOGIN_FAILED);
         }
 
         return result;
