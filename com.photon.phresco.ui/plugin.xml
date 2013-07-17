@@ -239,90 +239,121 @@
       
        <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.ConfigurationPage"
-            id="config"
+            id="Config"
             name="Configuration">
         </command>
+        
+         <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.QualityPage"
+            id="Quality"
+            name="Quality">
+        </command>
+        
    </extension>
    
-  <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
-         <menu 
-               commandId="Phresco"
-               icon="icons/phresco.gif"
-               id="PhrescoDemo"
-               label="Phresco"
-               tooltip="Phresco Operations">
-               
-              <command
-                   commandId="Phresco"
-                   id="Feature updation"
-                   label="Feature  Update"
-                   style="push"
-                   tooltip="Feature updation">
-            </command>
-            
-            <command
-                  commandId="config"
-                  id="configuration"
-                  label="Configuration"
-                  style="push"
-                  tooltip="Configuration Creation">
-            </command>
-            
-            <command
-                  commandId="Phresco"
-                  label="Build"
-                  style="push"
-                  tooltip="Build Project">
-            </command>
-            
-             <command
-                  commandId="Phresco"
-                  label="Deploy"
-                  style="push"
-                  tooltip="Deploy project">
-            </command>
-            
-             <command
-                  commandId="Phresco"
-                  label="Code Validate"
-                  style="push"
-                  tooltip="Code validation">
-            </command>
-            
-             <command
-                  commandId="Phresco"
-                  label="Unit Test"
-                  style="push"
-                  tooltip="Unit test">
-            </command>
-            
-            <command
-                  commandId="Phresco"
-                  label="Functional Test"
-                  style="push"
-                  tooltip="Functional Test">
-            </command>
-            
-             <command
-                  commandId="Phresco"
-                  label="Performance Test"
-                  style="push"
-                  tooltip="Performance Test">
-            </command>
-            
-             <command
-                  commandId="Phresco"
-                  label="Manual Test"
-                  style="push"
-                  tooltip="Manual Test">
-            </command>
-            
-         </menu>
-      </menuContribution>
+   <extension
+  	  point="org.eclipse.ui.menus">
+	  <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+		<menu 
+		   commandId="Phresco"
+		   icon="icons/phresco.gif"
+		   id="%project.phresco.menu.id"
+		   label="%project.phresco.menu.label"
+		   tooltip="%project.phresco.menu.tooltip">
+		   
+			<command
+			   commandId="Phresco"
+			   id="%project.feature.id"
+			   label="%project.feature.label"
+			   style="push"
+			   tooltip="%project.feature.tooltip">
+			</command>
+	
+			<command
+			  commandId="Config"
+			  id="%project.configuration.id"
+			  label="%project.configuration.label"
+			  style="push"
+			  tooltip="%project.configuration.tooltip">
+			</command>
+	
+			<command
+				commandId="Phresco"
+				id="%project.codevalidate.id "
+				label="%project.codevalidate.label"
+				style="push"
+				tooltip="%project.codevalidate.tooltip">
+			</command>
+	
+			<command
+			  commandId="Phresco"
+			  label="%project.build.id"
+			  style="push"
+			  tooltip="%project.build.tooltip">
+			</command>
+	
+			<command
+			   commandId="Phresco"
+			   label="%project.deploy.label"
+			   style="push"
+			   tooltip="%project.deploy.tooltip">
+			</command>
+	
+			 <separator
+				   name="QualitySeparator"
+				   visible="true">
+			 </separator>
+		 
+			 <menu 
+				commandId="Quality"
+				icon="icons/phresco.gif"
+				id="%project.phresco.qualitymenu.id"
+				label="%project.phresco.qualitymenu.label"
+				tooltip="%project.phresco.qualitymenu.tooltip">
+			   
+				<command
+				   commandId="Quality"
+					id="%project.unittest.id"
+				  label="%project.unittest.label"
+				  style="push"
+				  tooltip="%project.unittest.tooltip">
+				</command>
+		
+				<command
+					commandId="Quality"
+					id="%project.functionaltest.id"
+				  label="%project.functionaltest.label"
+				  style="push"
+				  tooltip="%project.functionaltest.tooltip">
+				</command>
+		
+				<command
+				   commandId="Quality"
+				   id="%project.performance.id"
+				  label="%project.performance.label"
+				  style="push"
+				  tooltip="%project.performance.tooltip">
+				</command>
+		
+				<command
+				  commandId="Quality"
+				  id = "%project.loadtest.id"
+				  label="%project.loadtest.label"
+				  style="push"
+				  tooltip="%project.loadtest.tooltip">
+				</command>
+		
+				<command
+				  commandId="Quality"
+				  id="%project.manual.id" 
+				  label="%project.manual.label"
+				  style="push"
+				  tooltip="%project.manual.tooltip">
+				</command>
+			</menu>
+		</menu>
+	</menuContribution>
+	
    </extension>
-
    
-
 </plugin>
