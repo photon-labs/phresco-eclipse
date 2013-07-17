@@ -231,5 +231,102 @@
             file="contexts.xml">
       </contexts>
    </extension>
+   
+ <extension
+       point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.PhrescoHandler"
+            id="Phresco"
+            name="Phresco">
+      </command>
+      
+       <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.ConfigurationPage"
+            id="config"
+            name="Configuration">
+        </command>
+   </extension>
+   
+  <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+      
+         <menu 
+               commandId="Phresco"
+               icon="icons/phresco.gif"
+               id="PhrescoDemo"
+               label="Phresco"
+               tooltip="Phresco Operations">
+               
+              <command
+                   commandId="Phresco"
+                   id="Feature updation"
+                   label="Feature  Update"
+                   style="push"
+                   tooltip="Feature updation">
+            </command>
+            
+            <command
+                  commandId="config"
+                  id="configuration"
+                  label="Configuration"
+                  style="push"
+                  tooltip="Configuration Creation">
+            </command>
+            
+            <command
+                  commandId="Phresco"
+                  label="Build"
+                  style="push"
+                  tooltip="Build Project">
+            </command>
+            
+             <command
+                  commandId="Phresco"
+                  label="Deploy"
+                  style="push"
+                  tooltip="Deploy project">
+            </command>
+            
+             <command
+                  commandId="Phresco"
+                  label="Code Validate"
+                  style="push"
+                  tooltip="Code validation">
+            </command>
+            
+             <command
+                  commandId="Phresco"
+                  label="Unit Test"
+                  style="push"
+                  tooltip="Unit test">
+            </command>
+            
+            <command
+                  commandId="Phresco"
+                  label="Functional Test"
+                  style="push"
+                  tooltip="Functional Test">
+            </command>
+            
+             <command
+                  commandId="Phresco"
+                  label="Performance Test"
+                  style="push"
+                  tooltip="Performance Test">
+            </command>
+            
+             <command
+                  commandId="Phresco"
+                  label="Manual Test"
+                  style="push"
+                  tooltip="Manual Test">
+            </command>
+            
+         </menu>
+      </menuContribution>
+   </extension>
+
+   
 
 </plugin>
