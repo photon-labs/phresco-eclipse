@@ -112,4 +112,23 @@ public interface PhrescoConstants {
     String MERGE = "merge";
     String REF_HEAD_MASTER = "refs/heads/master";
     String REFS_HEADS_REMOTE_ORIGIN = "+refs/heads/*:refs/remotes/origin/*";
+    
+    String PROJECTS = "projects";
+	String DOT_PHRESCO_FOLDER = ".phresco";
+	String ENVIRONMENT_CONFIG_FILE = "phresco-env-config.xml";
+	
+	String ENVIROMENT       = "Environment";
+	String ENVIRONMENT_NAME = "Environment Name";
+	String DELETE           = "Delete";
+	String NAME		        = "Name"; 
+	String DESCRITPTION     = "Description";
+	String CONFIGURE        = "Configure";
+	String CLONE		    = "Clone";
+	String CANCEL 		    = "Cancel";
+	String SAVE				= "Save";
+	String STRING		    = "String";
+	String BOOLEAN		    = "Boolean";
+	String NUMBER 		    = "Number";
+	String DEFAULT			= "Default";
+	String CONFIGURATION 	= "Configuration";
 }
