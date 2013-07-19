@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.ui.resource.Messages;
 
 /**
  * Page to handle phresco import from scm
@@ -58,7 +59,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 	public void createControl(Composite parent) {
 		
 		if(!PhrescoUtil.isLoggedIn()) {
-			PhrescoDialog.errorDialog(getShell(),"Error", "Please Login before making Request");
+			PhrescoDialog.errorDialog(getShell(), Warning, Messages.PHRESCO_LOGIN_WARNING);
 			return;
 		}
 		
@@ -71,55 +72,55 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         composite.setLayout(layout);
         
 		Label lblScmUrl = new Label(composite, SWT.NONE);
-		lblScmUrl.setText("Type");
+		lblScmUrl.setText(Messages.SCM_TYPE);
 		Label empty = new Label(composite, SWT.NONE); // For the second column grid
 		
 		gitRadio = new Button(composite, SWT.RADIO);
 		gitRadio.setSelection(true);
-		gitRadio.setText(GIT);
+		gitRadio.setText(Messages.TYPE_GIT);
 		gitRadio.setLayoutData(new GridData(50,13));
 		
 		Button svnRadio = new Button(composite, SWT.RADIO);
-		svnRadio.setText(SVN);
+		svnRadio.setText(Messages.TYPE_SVN);
 		svnRadio.setLayoutData(new GridData(50,13));
 		
 		Label repoURL = new Label(composite, SWT.NONE);
-		repoURL.setText("*Repo URL");
+		repoURL.setText(Messages.REPO_RUL);
 		repoURLText = new Text(composite, SWT.BORDER);
 		repoURLText.setLayoutData(new GridData(230,15));
 		
 		final Label lblOtherCredentials = new Label(composite, SWT.NONE);
-		lblOtherCredentials.setText("Other Credentials");
+		lblOtherCredentials.setText(Messages.OTHER_CREDENTIALS);
 		final Button otherCredentialButton = new Button(composite, SWT.CHECK);
 		otherCredentialButton.setLayoutData(new GridData(15,13));
 		
         Label userNameLabel = new Label(composite, SWT.LEFT);
-        userNameLabel.setText("*Username");
+        userNameLabel.setText(Messages.USER_NAME);
         userName = new Text(composite, SWT.BORDER);
         userName.setText(ADMIN_USER);
         userName.setLayoutData(new GridData(160,15));
 
         Label passwordLabel = new Label(composite, SWT.LEFT);
-        passwordLabel.setText("*"+PASSWORD);
+        passwordLabel.setText(Messages.USER_PWD);
         password = new Text(composite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
         password.setText(ADMIN_PWD);
         password.setLayoutData(new GridData(160,15));
         
 		final Label lblHeadRevision = new Label(composite, SWT.NONE);
-		lblHeadRevision.setText("*Revision");
+		lblHeadRevision.setText(Messages.REVISION);
 		lblHeadRevision.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 		
 		headRevisionButton = new Button(composite, SWT.CHECK);
-		headRevisionButton.setText("HeadRevision");
-		headRevisionButton.setLayoutData(new GridData(75,13));
+		headRevisionButton.setText(Messages.HEAD_REVISION);
+		headRevisionButton.setLayoutData(new GridData(80,13));
 		
 		final Label revisionLabel = new Label(composite, SWT.NONE);
 		revisionText = new Text(composite, SWT.BORDER);
 		revisionText.setLayoutData(new GridData(160,13));
 		
 		final Label lblTestCheckout = new Label(composite, SWT.NONE);
-		lblTestCheckout.setText("Test Checkout");
+		lblTestCheckout.setText(Messages.TEST_CHECKOUT);
 		final Button testCheckOutButton = new Button(composite, SWT.CHECK);
 		testCheckOutButton.setLayoutData(new GridData(15,13));
 		

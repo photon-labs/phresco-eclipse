@@ -85,7 +85,6 @@ public class SCMManagerUtil implements PhrescoConstants {
     
 	public static ApplicationInfo importProject(String type, String url, String username,
 			String password, String branch, String revision, String workspacePath) throws Exception {
-		System.out.println(" type : " + type);
 		if (SVN.equals(type)) {
 
 			SVNURL svnURL = SVNURL.parseURIEncoded(url);
