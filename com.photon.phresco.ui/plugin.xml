@@ -244,10 +244,17 @@
         </command>
         
          <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.Build"
+            id="Build"
+            name="Build">
+        </command>
+        
+         <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.QualityPage"
             id="Quality"
             name="Quality">
         </command>
+        
         
    </extension>
    
@@ -286,7 +293,7 @@
 			</command>
 	
 			<command
-			  commandId="Phresco"
+			  commandId="Build"
 			  label="%project.build.id"
 			  style="push"
 			  tooltip="%project.build.tooltip">

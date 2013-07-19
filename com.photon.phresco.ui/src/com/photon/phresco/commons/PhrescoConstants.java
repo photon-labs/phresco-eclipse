@@ -79,6 +79,7 @@ public interface PhrescoConstants {
     String NONE = "None";
     String NEWLINE = "\n";
     String FOLDER_DOT_PHRESCO = ".phresco";
+    String POM_FILENAME	="pom.xml";
     
     /*
      * Project Import keys
@@ -116,6 +117,7 @@ public interface PhrescoConstants {
     String PROJECTS = "projects";
 	String DOT_PHRESCO_FOLDER = ".phresco";
 	String ENVIRONMENT_CONFIG_FILE = "phresco-env-config.xml";
+	String APPLICATION_HANDLER_INFO_FILE= "phresco-application-handler-info.xml";
 	
 	String ENVIROMENT       = "Environment";
 	String ENVIRONMENT_NAME = "Environment Name";
@@ -131,4 +133,7 @@ public interface PhrescoConstants {
 	String NUMBER 		    = "Number";
 	String DEFAULT			= "Default";
 	String CONFIGURATION 	= "Configuration";
+	String FRAMEWORK		= "framework";
+	String STR_SPACE        = " ";
+	String MAVEN_COMMAND	= "mvn";
 }
