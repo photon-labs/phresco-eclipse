@@ -333,30 +333,6 @@
 				  style="push"
 				  tooltip="%project.functionaltest.tooltip">
 				</command>
-		
-				<command
-				   commandId="Quality"
-				   id="%project.performance.id"
-				  label="%project.performance.label"
-				  style="push"
-				  tooltip="%project.performance.tooltip">
-				</command>
-		
-				<command
-				  commandId="Quality"
-				  id = "%project.loadtest.id"
-				  label="%project.loadtest.label"
-				  style="push"
-				  tooltip="%project.loadtest.tooltip">
-				</command>
-		
-				<command
-				  commandId="Quality"
-				  id="%project.manual.id" 
-				  label="%project.manual.label"
-				  style="push"
-				  tooltip="%project.manual.tooltip">
-				</command>
 			</menu>
 		</menu>
 	</menuContribution>
