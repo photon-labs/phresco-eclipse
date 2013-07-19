@@ -18,11 +18,15 @@
  */
 package com.photon.phresco.ui.wizards;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -55,10 +59,38 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		appInfoPage = new AddProjectPage("AddProjectPage");
 		technologyPage = new TechnologyPage("Technology Page");
+		appInfoPage = new AddProjectPage("AddProjectPage");
 		addPage(appInfoPage);
 		addPage(technologyPage);
+	}
+	
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		IWizardPage wizardPage = getContainer().getCurrentPage();
+
+		if (wizardPage instanceof TechnologyPage) {
+			
+			TechnologyPage technologyPage = (TechnologyPage) wizardPage;
+			
+			IWizardPage firstPage = getContainer().getCurrentPage().getPreviousPage();
+
+			AddProjectPage addProjectPage = (AddProjectPage) firstPage;
+			List<Button> layersList = addProjectPage.getLayersList();
+			System.out.println(" layersList :" + layersList.size());
+			technologyPage.renderLayer(layersList);
+			/*boolean isRendered = false;
+			for (Object object : layersList) {
+				Button layerButton = (Button) object;
+				System.out.println(" layerButton.getSelection() :" + layerButton.getSelection());
+				System.out.println(" layerButton.getText() :" + layerButton.getText());
+				if (!isRendered && layerButton.getSelection()) {
+					technologyPage.renderLayer(layerButton.getText());
+					isRendered = true;
+				}
+			}*/
+		}
+		return super.getNextPage(page);
 	}
 	
 	@Override

@@ -6,11 +6,11 @@ import org.eclipse.swt.graphics.Font;
 public class DesignUtil {
 	
 	public static Font getLabelFont() {
-		return new Font(null, "Times New Roman", 10, SWT.NONE);
+		return new Font(null, "", 8, SWT.NONE);
 	}
 	
 	public static Font getHeaderFont() {
-		return new Font(null, "Times New Roman", 10, SWT.BOLD);
+		return new Font(null, "", 8, SWT.BOLD);
 	}
 
 }

@@ -1,19 +1,49 @@
 package com.photon.phresco.ui.wizards.pages;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.model.ApplicationType;
+import com.photon.phresco.commons.model.TechnologyGroup;
+import com.photon.phresco.commons.model.TechnologyInfo;
+import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.DesignUtil;
+import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.service.client.api.ServiceManager;
 
 public class TechnologyPage extends WizardPage implements IWizardPage {
+
+	private Group layerGroup;
+
+	private static Map<String, List<TechnologyInfo>> techMap = new HashMap<String, List<TechnologyInfo>>();
+	private static Map<String, List<String>> techVersionMap = new HashMap<String, List<String>>();
+	private static Map<String, String> appTypeIdMap = new HashMap<String, String>();
+	private static Map<String, Group> layerMap = new HashMap<String, Group>();
+
+	public Label techNameLabel;
+	public Combo techNameCombo;
+	public Label techVersionLabel;
+	public Combo techVersionCombo;
 
 	public TechnologyPage(String pageName) {
 		super(pageName);
@@ -26,93 +56,171 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		Composite parentComposite = new Composite(parent, SWT.NULL);
 		parentComposite.setLayout(new GridLayout(1,true));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		Group group = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
-		group.setText("Application Layer");
-		group.setLayout(new GridLayout(6, true));
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setFont(DesignUtil.getHeaderFont());
-		/*Label appLayerLabel = new Label(parentComposite, SWT.BOLD);
-		appLayerLabel.setFont(DesignUtil.getHeaderFont());
-		appLayerLabel.setText("Application Layer");*/
-
-		/*Composite appComposite = new Composite(group, SWT.BORDER);
-		appComposite.setLayout(new GridLayout(6, true));
-		appComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));*/
-
-		Label appCodeLabel = new Label(group, SWT.BOLD);
-		appCodeLabel.setText("AppCode");
-		appCodeLabel.setFont(DesignUtil.getLabelFont());
-		appCodeLabel.pack();
-
-		Text appCodeTxt = new Text(group, SWT.NONE);
-		appCodeTxt.setMessage("Enter AppCode");
-
-		Label techLabel = new Label(group, SWT.BOLD);
-		techLabel.setText("Technology");
-		techLabel.setFont(DesignUtil.getLabelFont());
-
-		Combo techCombo = new Combo(group, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
-		String[] techItems = {"Java", "J2EE","Drupal"};
-		techCombo.setItems(techItems);
-		techCombo.select(0);
-
-		Label versionLabel = new Label(group, SWT.BOLD);
-		versionLabel.setText("Version");
-		versionLabel.setFont(DesignUtil.getLabelFont());
-
-		Combo versionCombo = new Combo(group, SWT.NONE | SWT.READ_ONLY);
-		String[] versionItems = {"1.2","2.4"};
-		versionCombo.setItems(versionItems);
-		versionCombo.select(0);
-		
-		group.pack();
-		
-		Label webLayerLabel = new Label(parentComposite, SWT.BOLD);
-		webLayerLabel.setFont(DesignUtil.getHeaderFont());
-		webLayerLabel.setText("Web Layer");
-
-		Composite webComposite = new Composite(parentComposite, SWT.BORDER);
-		webComposite.setLayout(new GridLayout(2, true));
-		webComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		Label webAppCodeLabel = new Label(webComposite, SWT.BOLD);
-		webAppCodeLabel.setText("AppCode");
-		webAppCodeLabel.setFont(DesignUtil.getLabelFont());
-
-		Text webAppCodeTxt = new Text(webComposite, SWT.NONE);
-		webAppCodeTxt.setMessage("Enter AppCode");
-
-		Label webWebLayerLabel = new Label(webComposite, SWT.BOLD);
-		webWebLayerLabel.setText("Web Layer");
-		webWebLayerLabel.setFont(DesignUtil.getLabelFont());
-
-		Combo webLayerCombo = new Combo(webComposite, SWT.NONE | SWT.READ_ONLY);
-		String[] webLayerItems = {"HTML5"};
-		webLayerCombo.setItems(webLayerItems);
-		webLayerCombo.select(0);
-
-		Label webWidgetLabel = new Label(webComposite, SWT.BOLD);
-		webWidgetLabel.setText("Widget");
-		webWidgetLabel.setFont(DesignUtil.getLabelFont());
-
-		Combo webWidgetCombo = new Combo(webComposite, SWT.NONE | SWT.READ_ONLY);
-		String[] webLayerWidgetItems = {"Jquery Mobile Widget", "YUI Mobile Widget", "Multi Channel JqueryWidget", "Multi Channel YUI Widget"};
-		webWidgetCombo.setItems(webLayerWidgetItems);
-		webWidgetCombo.setLayoutData(new GridData(GridData.CENTER));;
-		webWidgetCombo.select(0);
-
-		Label webVersion = new Label(webComposite, SWT.BOLD);
-		webVersion.setText("Version");
-		webVersion.setFont(DesignUtil.getLabelFont());
-
-		Combo webVersionCombo = new Combo(webComposite, SWT.NONE | SWT.READ_ONLY);
-		String[] webLayerVersionItems = {"2.0.2","2.0.1"};
-		webVersionCombo.setItems(webLayerVersionItems);
-		webVersionCombo.select(0);
-
-		parentComposite.pack();
 		setControl(parentComposite);
 	}
 
+	public void renderLayer(List<Button> selectedLayers) {
+		Composite parentComposite = (Composite) getControl();
+		BaseAction action = new BaseAction();
+		String userId = action.getUserId();
+		final String customerId = action.getCustomerId();
+		final ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
+		if(serviceManager == null) {
+			PhrescoDialog.ErrorDialog(getShell(), "Error", "Please Login before making Request");
+			return;
+		}
+
+		for (final Button button : selectedLayers) {
+			final String appTypeId = (String) button.getData(button.getText());
+
+			if("app-layer".equals(appTypeId)) {
+				Group appLayerGroup = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
+				appLayerGroup.setText(button.getText());
+				appLayerGroup.setLayout(new GridLayout(6, true));
+				appLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				appLayerGroup.setFont(DesignUtil.getHeaderFont());
+				layerGroup = appLayerGroup;
+				layerMap.put(appTypeId, appLayerGroup);
+				appTypeIdMap.put(button.getText(), appTypeId);
+			}
+			if("web-layer".equals(appTypeId)) {
+				Group webLayerGroup = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
+				webLayerGroup.setText(button.getText());
+				webLayerGroup.setLayout(new GridLayout(2, true));
+				webLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				webLayerGroup.setFont(DesignUtil.getHeaderFont());
+				layerGroup = webLayerGroup;
+				layerMap.put(appTypeId, webLayerGroup);
+				appTypeIdMap.put(button.getText(), appTypeId);
+			}
+			if("mob-layer".equals(appTypeId)) {
+				Group mobileLayerGroup = new Group(parentComposite, SWT.SHADOW_ETCHED_IN);
+				mobileLayerGroup.setText(button.getText());
+				mobileLayerGroup.setLayout(new GridLayout(2, true));
+				mobileLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				mobileLayerGroup.setFont(DesignUtil.getHeaderFont());
+				layerGroup = mobileLayerGroup;
+				layerMap.put(appTypeId, mobileLayerGroup);
+				appTypeIdMap.put(button.getText(), appTypeId);
+			}
+
+			Label appCodeLabel = new Label(layerGroup, SWT.BOLD);
+			appCodeLabel.setText("AppCode");
+			appCodeLabel.setFont(DesignUtil.getLabelFont());
+			appCodeLabel.pack();
+
+			Text appCodeTxt = new Text(layerGroup, SWT.NONE);
+			appCodeTxt.setMessage("Enter AppCode");
+
+			try {
+				ApplicationType applicationType = null;
+				List<ApplicationType> applicationTypes = serviceManager.getApplicationTypes(customerId);
+				for (ApplicationType appType : applicationTypes) {
+					if(appType.getId().equals(appTypeId)) {
+						applicationType = appType;
+					}
+				}
+				List<TechnologyGroup> techGroups = applicationType.getTechGroups();
+				List<String> technologyGroupNameList = new ArrayList<String>();
+				for (TechnologyGroup technologyGroup : techGroups) {
+					technologyGroupNameList.add(technologyGroup.getName());
+					List<TechnologyInfo> techInfos = technologyGroup.getTechInfos();
+					techMap.put(technologyGroup.getName(), techInfos);
+					for (TechnologyInfo technologyInfo : techInfos) {
+						System.out.println("name :: " + technologyInfo.getName() + " :::: Versions ::" + technologyInfo.getTechVersions());
+						techVersionMap.put(technologyInfo.getName(), technologyInfo.getTechVersions());
+					}
+				}
+				if(CollectionUtils.isNotEmpty(technologyGroupNameList)) {
+					String[] techGroupNameArray = technologyGroupNameList.toArray(new String[technologyGroupNameList.size()]);
+					Label techGroupNameLabel = new Label(layerGroup, SWT.BOLD);
+					techGroupNameLabel.setText("type");
+					techGroupNameLabel.setFont(DesignUtil.getLabelFont());
+
+					final Combo techGroupNameCombo = new Combo(layerGroup, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+					techGroupNameCombo.setItems(techGroupNameArray);
+					techGroupNameCombo.select(0);
+					techGroupNameCombo.setData(button.getText(), appTypeId);
+
+					List<TechnologyInfo> techInfolist = techMap.get(techGroupNameCombo.getItem(0));
+					List<String> technologyNameList = new ArrayList<String>();
+					for (TechnologyInfo technologyInfo : techInfolist) {
+						technologyNameList.add(technologyInfo.getName());
+					}
+					if (CollectionUtils.isNotEmpty(technologyNameList)) {
+						String[] techNameArray = technologyNameList.toArray(new String[technologyNameList.size()]);
+						techNameLabel = new Label(layerGroup, SWT.BOLD);
+						techNameLabel.setText("Technology");
+						techNameLabel.setFont(DesignUtil.getLabelFont());
+						techNameLabel.pack();
+
+						techNameCombo = new Combo(layerGroup, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+						techNameCombo.setItems(techNameArray);
+						techNameCombo.select(0);
+					}
+					List<String> techVersionList = techVersionMap.get(techNameCombo.getItem(0));
+					techVersionLabel = new Label(layerGroup, SWT.BOLD);
+					techVersionLabel.setText("Version");
+					techVersionLabel.setFont(DesignUtil.getLabelFont());
+
+					techVersionCombo = new Combo(layerGroup, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+					if(CollectionUtils.isNotEmpty(techVersionList)) {
+						for (int i = 0; i < techVersionList.size(); i++) {
+							techVersionCombo.add(techVersionList.get(i), i);
+						}
+						techVersionCombo.select(0);
+						techVersionCombo.pack();
+					}
+
+					techGroupNameCombo.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							layerGroup = layerMap.get(appTypeId);
+							List<TechnologyInfo> techInfolist = techMap.get(techGroupNameCombo.getText());
+							List<String> technologyNameList = new ArrayList<String>();
+							for (TechnologyInfo technologyInfo : techInfolist) {
+								technologyNameList.add(technologyInfo.getName());
+							}
+							String[] techNameArray = technologyNameList.toArray(new String[technologyNameList.size()]);
+							if (CollectionUtils.isNotEmpty(technologyNameList)) {
+								/*techNameLabel = new Label(layerGroup, SWT.BOLD);
+								techNameLabel.setText("Technology");
+								techNameLabel.setFont(DesignUtil.getLabelFont());
+								techNameLabel.pack();*/
+//								techNameCombo = new Combo(layerGroup, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+								
+								techNameCombo.setItems(techNameArray);
+								techNameCombo.select(0);
+							}
+							super.widgetSelected(e);
+						}
+					});
+					techNameCombo.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							List<String> techVersionList = techVersionMap.get(techNameCombo.getText());
+							techVersionLabel = new Label(layerGroup, SWT.BOLD);
+							techVersionLabel.setText("Version");
+							techVersionLabel.setFont(DesignUtil.getLabelFont());
+
+							techVersionCombo = new Combo(layerGroup, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
+							if(CollectionUtils.isNotEmpty(techVersionList)) {
+								for (int i = 0; i < techVersionList.size(); i++) {
+									techVersionCombo.add(techVersionList.get(i), i);
+								}
+								techVersionCombo.select(0);
+								techVersionCombo.pack();
+							}
+							super.widgetSelected(e);
+						}
+					});
+				}
+				layerGroup.pack();
+			} catch (PhrescoException e) {
+				e.printStackTrace();
+			}
+		}
+		parentComposite.pack();
+		setControl(parentComposite);
+	}
 }

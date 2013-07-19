@@ -16,7 +16,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -29,8 +28,6 @@ import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 
-import freemarker.core.Macro;
-
 /**
  * App Info Page
  * @author suresh_ma
@@ -40,6 +37,15 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 
 	//project name;
 	public Text projectTxt;
+	
+	public Text getProjectTxt() {
+		return projectTxt;
+	}
+
+	public void setProjectTxt(Text projectTxt) {
+		this.projectTxt = projectTxt;
+	}
+
 	//project code
 	public Text codeTxt;
 	//project description
@@ -63,13 +69,14 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 	
 	private boolean layerValidation = false;
 	
-	private int layer;
+	List<Button> selectedLayersList = new ArrayList<Button>();
 	
 	/**
 	 * @wbp.parser.constructor
 	 */
 	public AddProjectPage(String pageName) {
 		super(pageName);
+		selectedLayersList.clear();
 		setTitle("{Phresco}");
 		setDescription("Project Creation Page");
 	}
@@ -159,7 +166,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		composite.setLayout(new GridLayout(3, false));
-		List<Button> list = new ArrayList<Button>();
+		List<Button> layersList = new ArrayList<Button>();
 		try {
 			List<ApplicationType> applicationTypes = serviceManager.getApplicationTypes(baseAction.getCustomerId());
 			for (ApplicationType applicationType : applicationTypes) {
@@ -167,20 +174,22 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 				layerButtons.setText(applicationType.getName());
 				layerButtons.setFont(DesignUtil.getLabelFont());
 				layerButtons.setData(applicationType.getName(), applicationType.getId());
-				list.add(layerButtons);
+				layersList.add(layerButtons);
 			}
 		} catch (PhrescoException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		for (final Button button : list) {
+		for (final Button button : layersList) {
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					if(button.getSelection()) {
+						selectedLayersList.add(button);
 						layerValidation = true;
 					} else {
+						selectedLayersList.remove(button);
 						layerValidation = false;
 					}
 					checkStatus();
@@ -197,6 +206,10 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		
 	}
 	
+	public void saveData() {
+		setProjectTxt(projectTxt);
+	}
+	
 	
 	@Override
 	public boolean canFlipToNextPage() {
@@ -205,7 +218,10 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 	
 	@Override
 	public IWizardPage getNextPage() {
-		onEnterPage();
 		return super.getNextPage();
+	}
+	
+	public List<Button> getLayersList() {
+		return selectedLayersList;
 	}
 }
