@@ -21,4 +21,95 @@ public interface PhrescoConstants {
 	String SERVICE_USERNAME = "phresco.service.username";
 	String SERVICE_PASSWORD = "phresco.service.password";
 	String SERVICE_API_KEY = "phresco.service.api.key";
+	
+	String ADMIN_USER = "admin";
+	String ADMIN_PWD = "manage";
+	
+	//FOR SCMManagerUtil
+	
+	String SVN = "svn";
+    String GIT = "git";
+    String BITKEEPER = "bitkeeper";
+    String REPO_TYPE = "repoType";
+    String REPO = "repo";
+    String IS_NOT_WORKING_COPY = "is not a working copy";
+    String UPDATE_SVN_PROJECT = "updateProject";
+    String SVN_TYPE = "svnType";
+    String SVN_CHECKOUT_TEMP = "svn-checkout-temp";
+    String PHRESCO = "/.phresco";
+    String GITHUB_SCM = "hudson.plugins.git.GitSCM";
+    String SVN_SCM = "hudson.scm.SubversionSCM";
+    String GITHUB_SCM_FILE_NAME = "gitHubScm.xml";
+    String COLON = ":";
+    String HTTP_PROTOCOL = "http";
+    String PROTOCOL_POSTFIX = "://";
+    String SPLIT_DOT = "\\.";
+    String FORWARD_SLASH = "/";
+    String BACK_SLASH = "\\";
+    String GITIGNORE_FILE = "/.gitignore";
+    String SUCCESSFUL = "Successful";
+    String URL = "url";
+    
+    /*
+     * Common constants
+     */
+    String HYPHEN = "-";
+    String KEY_QUOTES = "\"";
+    String WORKSPACE_DIR = "workspace";
+    String SPACE = " ";
+    String UNDERSCORE = "_";
+    String PHRESCO_DOT = "phresco.";
+    
+    /**
+     * BitKeeper Commands
+     */
+    String BK_CLONE = "bk clone";
+    String BK_PARENT = "bk parent";
+    String BK_PULL = "bk pull";
+    String BK_PUSH = "bk push";
+    String BK_COMMIT = "bk commit";
+    String BK_ADD_FILES = "bk -x -r ci -i";
+    String BK_CI = "bk ci";
+    String BK_ADD_COMMENT = "-y\"";
+    String HEAD_REVISION = "HEAD";
+    String UNVERSIONED = "unversioned";
+    String ALREADY_EXISTS = "exists and is not empty";
+    String DO_NOT_CHECKIN_DIR = "do_not_checkin";
+    String DOT = ".";
+    String NONE = "None";
+    String NEWLINE = "\n";
+    String FOLDER_DOT_PHRESCO = ".phresco";
+    
+    /*
+     * Project Import keys
+     */
+    String IMPORT_PROJECT_FAIL = "import.project.fail";
+    String UPDATE_PROJECT_FAIL = "update.project.fail";
+    String INVALID_CREDENTIALS = "import.invalid.credential";
+    String APPLN_INVALID_CREDENTIALS = "import.appln.invalid.credential";
+    String INVALID_FOLDER = "import.invalid.folder";
+    String PROJECT_ALREADY = "import.project.already";
+    String SVN_FAILED = "failed";
+    String SVN_INTERNAL = "Internal";
+    String SVN_IS_NOT_WORKING_COPY = "is not a working copy";
+    String INVALID_URL = "import.invalid.url";
+    String INVALID_REVISION = "import.invalid.revision";
+    String NOT_WORKING_COPY = "not.working.dir";
+    String NO_POM_XML = "project.pom.not.exist";
+    String POM_URL_FAIL = "project.pomurlupdate.fail";
+    String PROJECT_INFO = "project.info";
+    String GIT_IMPORT_TEMP_DIR = "gitImportTemp";
+    String TEMP_FOLDER ="temp";
+    
+    String SCM = "scm";
+	String ZIP_FILE = "zip";
+    String MASTER = "master";
+    String UPDATE = "update";
+    String REMOTE = "remote";
+    String ORIGIN = "origin";
+    String FETCH = "fetch";
+    String BRANCH = "branch";
+    String MERGE = "merge";
+    String REF_HEAD_MASTER = "refs/heads/master";
+    String REFS_HEADS_REMOTE_ORIGIN = "+refs/heads/*:refs/remotes/origin/*";
 }

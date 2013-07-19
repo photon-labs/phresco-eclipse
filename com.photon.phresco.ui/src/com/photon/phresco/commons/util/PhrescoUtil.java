@@ -15,6 +15,7 @@ import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 public class PhrescoUtil implements PhrescoConstants {
 
 	static boolean isLoggedIn = false;
+	static String loggedInUserId;
 	public static final Map<String, ServiceManager> CONTEXT_MANAGER_MAP = new HashMap<String, ServiceManager>();
 	
 	public static boolean doLogin(String userName, String password) throws PhrescoWebServiceException {
@@ -36,7 +37,7 @@ public class PhrescoUtil implements PhrescoConstants {
         try {
         	ServiceManager serviceManager = ServiceClientFactory.getServiceManager(context);
         	User userInfo = serviceManager.getUserInfo();
-        	System.out.println(" user name : " + userInfo.getDisplayName());
+        	loggedInUserId = userInfo.getId();
         	isLoggedIn = true;
         } catch(Exception e) {
         	isLoggedIn = false;
@@ -50,5 +51,9 @@ public class PhrescoUtil implements PhrescoConstants {
 	
 	public static ServiceManager getServiceManager(String userId) {
 		return CONTEXT_MANAGER_MAP.get(userId);
+	}
+	
+	public static ServiceManager getServiceManager() {
+		return CONTEXT_MANAGER_MAP.get(loggedInUserId);
 	}
 }

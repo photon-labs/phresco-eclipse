@@ -23,6 +23,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,6 +32,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.util.PhrescoUtil;
 
 /**
  * Page to handle phresco import from scm
@@ -39,9 +42,12 @@ import com.photon.phresco.commons.PhrescoConstants;
  */
 public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 
-	private Text repoURLText;
-    private Text userName;
-    private Text password;
+	public Text repoURLText;
+    public Text userName;
+    public Text password;
+    public Button gitRadio;
+    public Button headRevisionButton;
+    public Text revisionText;
     
 	public ImportFromSCMPage(String pageName, String message) {
 		super(pageName);
@@ -50,6 +56,12 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 
 	@Override
 	public void createControl(Composite parent) {
+		
+		if(!PhrescoUtil.isLoggedIn()) {
+			PhrescoDialog.errorDialog(getShell(),"Error", "Please Login before making Request");
+			return;
+		}
+		
         Composite composite = new Composite(parent, 0);
         setControl(composite);
         GridLayout layout = new GridLayout(2, false);
@@ -60,43 +72,99 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         
 		Label lblScmUrl = new Label(composite, SWT.NONE);
 		lblScmUrl.setText("Type");
-		Label empty = new Label(composite, SWT.NONE);
+		Label empty = new Label(composite, SWT.NONE); // For the second column grid
 		
-		Button gitRadio = new Button(composite, SWT.RADIO);
-		gitRadio.setText("Git");
+		gitRadio = new Button(composite, SWT.RADIO);
+		gitRadio.setSelection(true);
+		gitRadio.setText(GIT);
 		gitRadio.setLayoutData(new GridData(50,13));
 		
 		Button svnRadio = new Button(composite, SWT.RADIO);
-		svnRadio.setText("SVN");
+		svnRadio.setText(SVN);
 		svnRadio.setLayoutData(new GridData(50,13));
 		
 		Label repoURL = new Label(composite, SWT.NONE);
-		repoURL.setText("Repo URL");
+		repoURL.setText("*Repo URL");
 		repoURLText = new Text(composite, SWT.BORDER);
 		repoURLText.setLayoutData(new GridData(230,15));
 		
+		final Label lblOtherCredentials = new Label(composite, SWT.NONE);
+		lblOtherCredentials.setText("Other Credentials");
+		final Button otherCredentialButton = new Button(composite, SWT.CHECK);
+		otherCredentialButton.setLayoutData(new GridData(15,13));
+		
         Label userNameLabel = new Label(composite, SWT.LEFT);
-        userNameLabel.setText("Username");
+        userNameLabel.setText("*Username");
         userName = new Text(composite, SWT.BORDER);
+        userName.setText(ADMIN_USER);
         userName.setLayoutData(new GridData(160,15));
 
         Label passwordLabel = new Label(composite, SWT.LEFT);
-        passwordLabel.setText(PASSWORD);
+        passwordLabel.setText("*"+PASSWORD);
         password = new Text(composite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
+        password.setText(ADMIN_PWD);
         password.setLayoutData(new GridData(160,15));
         
-		Label lblHeadRevision = new Label(composite, SWT.NONE);
-		lblHeadRevision.setText("Head Revision");
-		final Button headRevisionButton = new Button(composite, SWT.CHECK);
-		headRevisionButton.setLayoutData(new GridData(15,13));
+		final Label lblHeadRevision = new Label(composite, SWT.NONE);
+		lblHeadRevision.setText("*Revision");
+		lblHeadRevision.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+		
+		headRevisionButton = new Button(composite, SWT.CHECK);
+		headRevisionButton.setText("HeadRevision");
+		headRevisionButton.setLayoutData(new GridData(75,13));
 		
 		final Label revisionLabel = new Label(composite, SWT.NONE);
-		revisionLabel.setText("Revision");
-		final Text revisionText = new Text(composite, SWT.BORDER);
+		revisionText = new Text(composite, SWT.BORDER);
 		revisionText.setLayoutData(new GridData(160,13));
 		
+		final Label lblTestCheckout = new Label(composite, SWT.NONE);
+		lblTestCheckout.setText("Test Checkout");
+		final Button testCheckOutButton = new Button(composite, SWT.CHECK);
+		testCheckOutButton.setLayoutData(new GridData(15,13));
 		
+		// To hide for default selection scm type Git
+		
+		lblHeadRevision.setVisible(false);
+		headRevisionButton.setVisible(false);
+		revisionLabel.setVisible(false);
+		revisionText.setVisible(false);
+		lblTestCheckout.setVisible(false);
+		testCheckOutButton.setVisible(false);
+		lblOtherCredentials.setVisible(false);
+		otherCredentialButton.setVisible(false);
+		userName.setEnabled(false);
+		password.setEnabled(false);
+		
+		// To handle based on SCM type selection
+		gitRadio.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        // Handle the selection event
+		    	boolean selection = gitRadio.getSelection();
+		    	if (selection) {
+		    		lblHeadRevision.setVisible(false);
+		    		headRevisionButton.setVisible(false);
+		    		revisionLabel.setVisible(false);
+		    		revisionText.setVisible(false);
+		    		lblTestCheckout.setVisible(false);
+		    		testCheckOutButton.setVisible(false);
+		    		lblOtherCredentials.setVisible(false);
+		    		otherCredentialButton.setVisible(false);
+		    	} else {
+		    		lblHeadRevision.setVisible(true);
+		    		headRevisionButton.setVisible(true);
+		    		revisionLabel.setVisible(true);
+		    		revisionText.setVisible(true);
+		    		lblTestCheckout.setVisible(true);
+		    		testCheckOutButton.setVisible(true);
+		    		lblOtherCredentials.setVisible(true);
+		    		otherCredentialButton.setVisible(true);
+		    	}
+		    }
+		});
+		
+		//To enable/disable the revision option
 		headRevisionButton.addSelectionListener(new SelectionAdapter() {
 		    @Override
 		    public void widgetSelected(SelectionEvent e) {
@@ -106,9 +174,23 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    }
 		}); 
 		
-		Label lblTestCheckout = new Label(composite, SWT.NONE);
-		lblTestCheckout.setText("Test Checkout");
-		Button btnCheckButton = new Button(composite, SWT.CHECK);
-		btnCheckButton.setLayoutData(new GridData(15,13));
+		otherCredentialButton.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        // Handle the selection event
+				boolean selection = otherCredentialButton.getSelection();
+				userName.setEnabled(selection);
+				password.setEnabled(selection);
+				if (selection) {
+					userName.setText(STR_EMPTY);
+					password.setText(STR_EMPTY);
+				} else {
+					userName.setText(ADMIN_USER);
+					password.setText(ADMIN_PWD);
+				}
+		    }
+		}); 
+		
 	}
+	
 }
