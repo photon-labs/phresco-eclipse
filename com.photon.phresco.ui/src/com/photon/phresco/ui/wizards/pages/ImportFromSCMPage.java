@@ -59,7 +59,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 	public void createControl(Composite parent) {
 		
 		if(!PhrescoUtil.isLoggedIn()) {
-			PhrescoDialog.errorDialog(getShell(), Warning, Messages.PHRESCO_LOGIN_WARNING);
+			PhrescoDialog.errorDialog(getShell(), "Warning", Messages.PHRESCO_LOGIN_WARNING);
 			return;
 		}
 		
