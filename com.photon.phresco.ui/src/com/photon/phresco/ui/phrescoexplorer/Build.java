@@ -6,13 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.util.Base64;
 import org.codehaus.plexus.util.cli.CommandLineException;
@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,29 +43,38 @@ import com.photon.phresco.commons.util.ActionType;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.Childs.Child;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.ui.resource.Messages;
 
 public class Build extends AbstractHandler implements PhrescoConstants {
-	private Shell buildDialog;
-	private Button saveButton;
+	
+	private Button buildButton;
 	private Button cancelButton;
-	private Shell createBuildDialog;
-	private Shell generateDialog;
 	private	Button generateBuildButton;
 	private Button deleteButton;
 	private	Button generateBuildsaveButton;
 	private Button generageBuildcancelButton;
+	private Button checkBoxButton;	
+	
+	private Shell buildDialog;	
+	private Shell createBuildDialog;
+	private Shell generateDialog;
 	private Shell generateBuildDialog;
-	private MockHttpServletRequest request;
+	
+	private Text nameText;
+	private Text numberText;
+	private Text passwordText;
+	private Combo listLogs;
+	
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> map = new HashedMap();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-
 
 		generateDialog = createGenearateBuildDialog(buildDialog);
 		generateDialog.open();
@@ -93,7 +101,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			public void handleEvent(Event event) {
 				createBuildDialog = createBuildDialog(buildDialog);
 				createBuildDialog.open();
-				saveButton.addListener(SWT.Selection, saveListener);
+				buildButton.addListener(SWT.Selection, saveListener);
 			}
 		};
 
@@ -208,12 +216,11 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 
 
 	private Shell createGenearateBuildDialog(Shell dialog) {
-
 		generateBuildDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 		GridLayout layout = new GridLayout(2, false);
 		layout.verticalSpacing = 6;
 
-		generateBuildDialog.setText("Build");
+		generateBuildDialog.setText(Messages.BUILD);
 		generateBuildDialog.setLocation(385, 130);
 		generateBuildDialog.setSize(300, 300);
 		generateBuildDialog.setLayout(layout);
@@ -227,13 +234,13 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		deleteButton.setText("Delete Button");
 
 		generateBuildsaveButton = new Button(generateBuildDialog, SWT.PUSH);
-		generateBuildsaveButton.setText("OK");
+		generateBuildsaveButton.setText(Messages.OK);
 		generateBuildsaveButton.setLayoutData(new GridData(75,20));
 		generateBuildsaveButton.setLocation(500,505);
 
 
 		generageBuildcancelButton = new Button(generateBuildDialog, SWT.PUSH);
-		generageBuildcancelButton .setText(CANCEL);
+		generageBuildcancelButton .setText(Messages.CANCEL);
 		generageBuildcancelButton .setLayoutData(new GridData(75,20));
 
 		return generateBuildDialog;
@@ -258,74 +265,73 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			List<Parameter> parameters = configuration.getParameters().getParameter();
 			for (Parameter parameter : parameters) {
 				String type = parameter.getType();
-
-				if (type.equalsIgnoreCase(STRING)|| type.equalsIgnoreCase(NUMBER)) {
-					Label envLabel = new Label(buildDialog, SWT.NONE);
-					envLabel.setText(parameter.getKey());
-					envLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
-
-					Text nameText = new Text(buildDialog, SWT.BORDER);
-					nameText.setToolTipText(ENVIRONMENT_NAME);
-					nameText.setMessage(NAME);
+				if (type.equalsIgnoreCase(STRING)) {
+					Label buildNameLabel = new Label(buildDialog, SWT.NONE);
+					buildNameLabel.setText(parameter.getKey());
+					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+					
+					nameText = new Text(buildDialog, SWT.BORDER);
+					nameText.setToolTipText(parameter.getKey());
+					nameText.setMessage(parameter.getKey());
 					nameText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), nameText);
 
+				} else if (type.equalsIgnoreCase(NUMBER)) {
+					Label buildNumberLabel = new Label(buildDialog, SWT.NONE);
+					buildNumberLabel.setText(parameter.getKey());
+					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+					
+					numberText = new Text(buildDialog, SWT.BORDER);
+					numberText.setToolTipText(parameter.getKey());
+					numberText.setMessage(parameter.getKey());
+					numberText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), numberText);
+					
 				} else if (type.equalsIgnoreCase(BOOLEAN)) {
-
 					Label defaults = new Label(buildDialog, SWT.LEFT);
 					defaults.setText(parameter.getKey());
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					Button defaultCheckBoxButton = new Button(buildDialog, SWT.CHECK);
-					defaultCheckBoxButton.setLayoutData(new GridData(75, 20));
-
-				} else if (type.equalsIgnoreCase(PASSWORD)) {
+					checkBoxButton = new Button(buildDialog, SWT.CHECK);
+					checkBoxButton.setText(parameter.getType());
+					checkBoxButton.setLayoutData(new GridData(75, 20));
+					map.put(parameter.getKey(), checkBoxButton);
+				}
+				else if (type.equalsIgnoreCase(PASSWORD)) {
 					Label defaults = new Label(buildDialog, SWT.LEFT);
 					defaults.setText(parameter.getKey());
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					Button defaultCheckBoxButton = new Button(buildDialog, SWT.PASSWORD);
-					defaultCheckBoxButton.setLayoutData(new GridData(75, 20));
-
-				} else if (type.equalsIgnoreCase("List")) {
+					passwordText = new Text(buildDialog, SWT.PASSWORD | SWT.BORDER);
+					passwordText.setToolTipText(PASSWORD);
+					passwordText.setMessage(parameter.getKey());
+					passwordText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), passwordText);
+				}
+				 else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(buildDialog, SWT.LEFT);
 					Logs.setText(parameter.getKey());
 					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					Combo combo = new Combo(buildDialog, SWT.DROP_DOWN);
-					combo.setText(parameter.getKey());
+					listLogs = new Combo(buildDialog, SWT.DROP_DOWN);
+					listLogs.setText(parameter.getKey());
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
-						combo.add(value.getValue());
+						listLogs.add(value.getValue());
 					}
-				} else if (type.equalsIgnoreCase("Browser")) {
-					Label fileBrowser = new Label(buildDialog, SWT.LEFT);
-					fileBrowser.setText(parameter.getKey());
-					fileBrowser.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					fileBrowser.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-					Button browser = new Button(buildDialog, SWT.BORDER);
-					browser.setLayoutData(new GridData(90, 20));
-
-				} else if (type.equalsIgnoreCase("environmentName")) {
-					Label environmentName = new Label(buildDialog, SWT.LEFT);
-					environmentName.setText(parameter.getKey());
-					environmentName.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					environmentName.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-					Button browser = new Button(buildDialog, SWT.BORDER);
-					browser.setLayoutData(new GridData(90, 20));
-				}
+					map.put(parameter.getKey(), listLogs);
+				}  
 			}
 
-			saveButton = new Button(buildDialog, SWT.PUSH);
-			saveButton.setText(SAVE);
-			saveButton.setLayoutData(new GridData(75,20));
-			saveButton.setLocation(500,505);
-
+			buildButton = new Button(buildDialog, SWT.PUSH);
+			buildButton.setText("Build");
+			buildButton.setLayoutData(new GridData(75,20));
+			buildButton.setLocation(500,505);
 
 			cancelButton = new Button(buildDialog, SWT.PUSH);
 			cancelButton .setText(CANCEL);
@@ -334,89 +340,41 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
-
 		return buildDialog;
-
 	}
 
-	private void saveCongfiguration() {
-		request = new MockHttpServletRequest();
-		request.setParameter("buildName", "Sample");
-		request.setParameter("buildNumber", "1");
-		request.setParameter("showSettings", "false");
-		request.setParameter("environmentName", "Production");
-		request.setParameter("skipTest", "true");
-		request.setParameter("logs", "showErrors");
-		try {
-			persistValuesToXml(request, "package");
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-	}
-
-	protected void persistValuesToXml(MockHttpServletRequest request, String goal) throws PhrescoException {
+	private void saveCongfiguration()  {
 		try {
 			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
-
-			List<Parameter> parameters =processor.getConfiguration("package").getParameters().getParameter();
+			List<Parameter> parameters = processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
 				for (Parameter parameter : parameters) {
-					StringBuilder csParamVal = new StringBuilder();
-					if (Boolean.parseBoolean(parameter.getMultiple())) {
-						if (getReqParameterValues(parameter.getKey()) == null) {
-							parameter.setValue("");
-						} else {
-							String[] parameterValues = getReqParameterValuess(parameter.getKey());
-							for (String parameterValue : parameterValues) {
-								csParamVal.append(parameterValue);
-								csParamVal.append(",");
-							}
-							String csvVal = csParamVal.toString();
-							parameter.setValue(csvVal.toString().substring(0, csvVal.lastIndexOf(",")));
-						}
-					} else if (BOOLEAN.equalsIgnoreCase(parameter.getType())) {
-						if (getReqParameter(parameter.getKey()) != null) {
-							parameter.setValue(getReqParameter(parameter.getKey()));
-						} else {
-							parameter.setValue(Boolean.FALSE.toString());
-						}
-					} else if (parameter.getType().equalsIgnoreCase("map")) {
-						List<Child> childs = parameter.getChilds().getChild();
-						String[] keys = getReqParameterValuess(childs.get(0).getKey());
-						String[] values = getReqParameterValuess(childs.get(1).getKey());
-						Properties properties = new Properties();
-						for (int i = 0; i < keys.length; i++) {
-							properties.put(keys[i], values[i]);
-						}
-						StringWriter writer = new StringWriter();
-						properties.store(writer, "");
-						String value = writer.getBuffer().toString();
-						parameter.setValue(value);
-					}  else if(parameter.getType().equalsIgnoreCase("Password")) {
-						byte[] encodedPwd = Base64.encodeBase64(getReqParameter(parameter.getKey()).getBytes());
+					if (parameter.getType().equalsIgnoreCase(STRING)) {
+						Text nameText = (Text) map.get(parameter.getKey());
+						parameter.setValue(nameText.getText());
+					} else if (parameter.getType().equalsIgnoreCase(NUMBER)) {
+						Text numberText = (Text) map.get(parameter.getKey());
+						parameter.setValue(numberText.getText());
+					} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
+						Button checkBoxButton = (Button) map.get(parameter.getKey());
+						boolean selection = checkBoxButton.getSelection();
+						parameter.setValue(String.valueOf(selection));
+					} else if (parameter.getType().equalsIgnoreCase(PASSWORD)) {
+						Text passwordText = (Text) map.get(parameter.getKey());
+						String password = passwordText.getText();
+						byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
 						String encodedString = new String(encodedPwd);
 						parameter.setValue(encodedString);
-					} else {
-						parameter.setValue(StringUtils.isNotEmpty(getReqParameter(parameter.getKey())) ? (String)getReqParameter(parameter.getKey()) : "");
+					} else if (parameter.getType().equalsIgnoreCase(LIST)) {
+						Combo list =  (Combo) map.get(parameter.getKey());
+						parameter.setValue(list.getText()); 
 					}
 				}
 			}
-			processor.save();	
-		} catch (IOException e) {
-			throw new PhrescoException(e);
+			processor.save();
+		} catch (PhrescoException e) {
+			e.printStackTrace();
 		}
-	}
-
-	protected String getReqParameterValues(String key) {
-		return request.getParameter(key);
-	}
-
-	protected String getReqParameter(String key) {
-		return request.getParameter(key);
-	}
-
-	protected String[] getReqParameterValuess(String Key) {
-		return request.getParameterValues(Key);
 	}
 
 

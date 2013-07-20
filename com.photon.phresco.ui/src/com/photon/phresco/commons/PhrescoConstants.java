@@ -144,23 +144,29 @@ public interface PhrescoConstants {
 	String ENVIRONMENT_CONFIG_FILE = "phresco-env-config.xml";
 	String APPLICATION_HANDLER_INFO_FILE= "phresco-application-handler-info.xml";
 	
-	String ENVIROMENT       = "Environment";
-	String ENVIRONMENT_NAME = "Environment Name";
-	String DELETE           = "Delete";
-	String NAME		        = "Name"; 
-	String DESCRITPTION     = "Description";
-	String CONFIGURE        = "Configure";
-	String CLONE		    = "Clone";
-	String CANCEL 		    = "Cancel";
-	String SAVE				= "Save";
-	String STRING		    = "String";
-	String BOOLEAN		    = "Boolean";
-	String NUMBER 		    = "Number";
-	String DEFAULT			= "Default";
-	String CONFIGURATION 	= "Configuration";
-	String FRAMEWORK		= "framework";
-	String STR_SPACE        = " ";
-	String MAVEN_COMMAND	= "mvn";
+	// Build Constants
+	
+	String PACKAGE_INFO_FILE = "phresco-package-info.xml";
+	String PACKAGE_GOAL		 = "package";
+	String ENVIROMENT        = "Environment";
+	String ENVIRONMENT_NAME  = "Environment Name";
+	String DELETE            = "Delete";
+	String NAME		         = "Name"; 
+	String DESCRITPTION      = "Description";
+	String CONFIGURE         = "Configure";
+	String CLONE		     = "Clone";
+	String CANCEL 		     = "Cancel";
+	String SAVE				 = "Save";
+	String STRING		     = "String";
+	String BOOLEAN		     = "Boolean";
+	String NUMBER 		     = "Number";
+	String LIST				 = "List";
+	String MAP				 = "Map";
+	String DEFAULT			 = "Default";
+	String CONFIGURATION 	 = "Configuration";
+	String FRAMEWORK		 = "framework";
+	String STR_SPACE         = " ";
+	String MAVEN_COMMAND	 = "mvn";
 
 	String FAILED = "FAILED";
 	String OK = "OK";	

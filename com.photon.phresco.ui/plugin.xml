@@ -292,12 +292,26 @@
 				tooltip="%project.codevalidate.tooltip">
 			</command>
 	
-			<command
-			  commandId="Build"
-			  label="%project.build.id"
-			  style="push"
-			  tooltip="%project.build.tooltip">
-			</command>
+			<menu 
+				commandId="Build"
+				icon="icons/phresco.gif"
+				id="%project.phresco.buildmenu.id"
+				label="%project.phresco.buildmenu.label"
+				tooltip="%project.phresco.buildmenu.tooltip">
+				<command
+				  commandId="Build"
+				  label="%project.generatebuild.id"
+				  style="push"
+				  tooltip="%project.generatebuild.tooltip">
+				</command>
+				
+				<command
+				  commandId="Build"
+				  label="%project.viewbuild.id"
+				  style="push"
+				  tooltip="%project.viewbuild.tooltip">
+				</command>
+			</menu>
 	
 			<command
 			   commandId="Phresco"

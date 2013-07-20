@@ -54,6 +54,11 @@ public class Messages extends NLS {
 	public static String FAILED;
 	public static String PROJ_IMPORT_FAILED;
 	
+	//Build related Keys
+	public static String  BUILD;
+	public static String  OK;
+	public static String  CANCEL;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
