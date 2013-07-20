@@ -66,7 +66,7 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		final String customerId = action.getCustomerId();
 		final ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
 		if(serviceManager == null) {
-			PhrescoDialog.ErrorDialog(getShell(), "Error", "Please Login before making Request");
+			PhrescoDialog.errorDialog(getShell(), "Error", "Please Login before making Request");
 			return;
 		}
 
