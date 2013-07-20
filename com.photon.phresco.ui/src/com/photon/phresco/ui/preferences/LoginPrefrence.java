@@ -21,6 +21,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.ui.PhrescoPlugin;
+import com.photon.phresco.ui.resource.Messages;
 
 /**
  * This class represents a preference page that
@@ -70,13 +71,13 @@ public class LoginPrefrence
         composite.setLayout(layout);
 
         Label userNameLabel = new Label(composite, SWT.LEFT);
-        userNameLabel.setText(USER_ID);
+        userNameLabel.setText(Messages.LOGIN_ID);
         userName = new Text(composite, SWT.BORDER);
         userNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
         userName.setLayoutData(new GridData(140,13));
 
         Label passwordLabel = new Label(composite, SWT.LEFT);
-        passwordLabel.setText(PASSWORD);
+        passwordLabel.setText(Messages.LOGIN_PWD);
         password = new Text(composite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
         passwordLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
@@ -106,7 +107,6 @@ public class LoginPrefrence
         
         BusyIndicator.showWhile(null, new Runnable() {
             public void run() {
-            	System.out.println(" RUN METHOD CALLED ");
             	isLoggedIn = PhrescoUtil.doLogin(loginUserName, loginPassword);
             }
         });
@@ -119,12 +119,7 @@ public class LoginPrefrence
             setMessage(LOGIN_SUCCESSFUL);
         } else {
             result = false;
-/*            TitleAreaDialog dialog = new TitleAreaDialog(getShell());
-            dialog.create();
-            dialog.setTitle(CONNECTION_TITLE);
-            dialog.setMessage(LOGIN_FAILED);
-            dialog.open();*/
-            PhrescoDialog.errorDialog(getShell(),"Error", LOGIN_FAILED);
+            PhrescoDialog.errorDialog(getShell(),"Error", Messages.LOGIN_FAILED_MSG);
         }
 
         return result;

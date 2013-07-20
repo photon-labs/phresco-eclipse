@@ -28,7 +28,12 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "com.photon.phresco.ui.resource.messages"; //$NON-NLS-1$
-
+	
+	// Login page related keys
+	public static String LOGIN_ID;
+	public static String LOGIN_PWD;
+	public static String LOGIN_FAILED_MSG;
+	
 	// Import From SCM related Keys
 	public static String PROVIDE_SCM_DETAILS;
 	public static String IMPORT_FROM_SCM;
@@ -45,6 +50,9 @@ public class Messages extends NLS {
 	public static String REVISION;
 	public static String HEAD_REVISION;
 	public static String TEST_CHECKOUT;
+	public static String PROJ_ALREADY_IMPORTED;
+	public static String FAILED;
+	public static String PROJ_IMPORT_FAILED;
 	
 	static {
 		// initialize resource bundle
