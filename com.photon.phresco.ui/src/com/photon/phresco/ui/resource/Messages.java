@@ -58,6 +58,7 @@ public class Messages extends NLS {
 	public static String  BUILD;
 	public static String  OK;
 	public static String  CANCEL;
+	public static String ERROR;
 	
 	static {
 		// initialize resource bundle

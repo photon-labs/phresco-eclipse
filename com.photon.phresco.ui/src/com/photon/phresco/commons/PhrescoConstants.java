@@ -50,6 +50,8 @@ public interface PhrescoConstants {
 	String ADMIN_USER = "admin";
 	String ADMIN_PWD = "manage";
 	
+	String ARCHIVE_FORMAT = ".zip";
+	
 	//FOR SCMManagerUtil
 	
 	String SVN = "svn";

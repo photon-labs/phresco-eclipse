@@ -19,7 +19,7 @@ public class BaseAction implements PhrescoConstants {
 	}
 	
 	public String getCustomerId() {
-		ServiceManager serviceManager = PhrescoUtil.getServiceManager(getUserId());
+	/*	ServiceManager serviceManager = PhrescoUtil.getServiceManager(getUserId());
 		if(serviceManager != null) {
 			try {
 				Customer customer = serviceManager.getCustomers().get(0);
@@ -27,7 +27,7 @@ public class BaseAction implements PhrescoConstants {
 			} catch (PhrescoException e) {
 				e.printStackTrace();
 			}
-		}
-		return "";
+		}*/
+		return "photon";
 	}
 }

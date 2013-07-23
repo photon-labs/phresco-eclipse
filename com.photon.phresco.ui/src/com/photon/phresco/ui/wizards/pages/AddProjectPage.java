@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationType;
+import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.PhrescoUtil;
@@ -64,6 +65,8 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 	public Button layerButtons;
 
 	public Button webServiceBtn;
+	
+	public Combo customerIds;
 
 	private boolean projectNameValidation = false;
 	
@@ -117,6 +120,23 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		basicComposite.setLayout(new GridLayout(2,false));
 		basicComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+		Label customerLabel = new Label(basicComposite, SWT.NONE);
+		customerLabel.setText("Customers");
+		
+		customerIds = new Combo(basicComposite, SWT.BOLD | SWT.RIGHT | SWT.READ_ONLY);
+		try {
+			List<Customer> customers = serviceManager.getCustomers();
+			List<String> customerIdList = new ArrayList<String>();
+			for (Customer customer : customers) {
+				customerIds.setData(customer.getName(), customer.getId());
+				customerIdList.add(customer.getName());
+			}
+			String[] custIdArray = customerIdList.toArray(new String[customerIdList.size()]);
+			customerIds.setItems(custIdArray);
+			customerIds.select(0);
+		} catch (PhrescoException e2) {
+			e2.printStackTrace();
+		}
 		Label projectName = new Label(basicComposite, SWT.NONE);
 		projectName.setText("Project name *");
 		projectName.setFont(DesignUtil.getLabelFont());
@@ -202,9 +222,6 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		setControl(parentComposite);
 	}
 	
-	public void onEnterPage() {
-		
-	}
 	
 	public void saveData() {
 		setProjectTxt(projectTxt);
