@@ -301,10 +301,11 @@
 				label="%project.phresco.buildmenu.label"
 				tooltip="%project.phresco.buildmenu.tooltip">
 				<command
-				  commandId="Build"
-				  label="%project.generatebuild.id"
-				  style="push"
-				  tooltip="%project.generatebuild.tooltip">
+          commandId="Build"
+          icon="icons/build_icon.png"
+          label="%project.generatebuild.id"
+          style="push"
+          tooltip="%project.generatebuild.tooltip">
 				</command>
 				
 				<command
