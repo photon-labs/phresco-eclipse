@@ -169,6 +169,13 @@ public interface PhrescoConstants {
 	String FRAMEWORK		 = "framework";
 	String STR_SPACE         = " ";
 	String MAVEN_COMMAND	 = "mvn";
+	String BUILD			 = "build";
+	String BUILD_INFO        = "build.info";
+	
+	String BUILD_NO          = "No";
+	String BUILD_NAME		 = "BuildName";
+	String DOWNLOAD 		 = "Download";
+	String DEPLOY 		     = "Deploy";
 
 	String FAILED = "FAILED";
 	String OK = "OK";	

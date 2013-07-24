@@ -1,12 +1,8 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +16,6 @@ import org.codehaus.plexus.util.cli.Commandline;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
@@ -34,12 +29,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.util.ActionType;
+import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
@@ -112,10 +106,8 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		buildDialog.setSize(426, 300);
 		buildDialog.setLayout(layout);
 
-
-		File configurationPath = getConfigurationPath();
 		try {
-			MojoProcessor processor = new MojoProcessor(configurationPath);
+			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getConfigurationPath());
 			Configuration configuration = processor.getConfiguration(PACKAGE_GOAL);
 			List<Parameter> parameters = configuration.getParameters().getParameter();
 			for (Parameter parameter : parameters) {
@@ -201,19 +193,19 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 
 	public void build() {
 		try {
-			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
+			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getConfigurationPath());
 			List<Parameter> parameters =processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
 			ProjectManager manager = new ProjectManager();
-			ProjectInfo info = readProjectInfo();
+			ProjectInfo info = PhrescoUtil.getProjectInfo();
 
 			ApplicationInfo applicationInfo = info.getAppInfos().get(0);
-			String pomFileName = getPomFileName(applicationInfo);
+			String pomFileName = PhrescoUtil.getPomFileName(applicationInfo);
 
 			if(!POM_FILENAME.equals(pomFileName)) {
 				buildArgCmds.add(pomFileName);
 			}
-			String workingDirectory = getProjectHome() + File.separator + applicationInfo.getAppDirName();;
+			String workingDirectory = PhrescoUtil.getProjectHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.BUILD, buildArgCmds, workingDirectory);
 			String line;
@@ -223,9 +215,10 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			}
 			nameText.setText("");
 			numberText.setText("");
-			passwordText.setText("");
+			if (passwordText != null) {
+				passwordText.setText("");
+			}
 			checkBoxButton.setSelection(false);
-			buildButton.setVisible(false);
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -233,13 +226,6 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		}
 	}
 
-	public String getPomFileName(ApplicationInfo appInfo) {
-		File pomFile = new File(getProjectHome() + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
-		if(pomFile.exists()) {
-			return appInfo.getPomFile();
-		}
-		return POM_FILENAME;
-	}
 
 
 	public BufferedReader performAction(ProjectInfo projectInfo, ActionType build, List<String> mavenArgCommands, String workingDirectory) throws PhrescoException {
@@ -295,7 +281,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 
 	public void saveCongfiguration()  {
 		try {
-			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
+			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getConfigurationPath());
 			List<Parameter> parameters = processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
 				for (Parameter parameter : parameters) {
@@ -327,34 +313,4 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		}
 	}
 
-
-	public String getApplicationHome() throws PhrescoException {
-		StringBuilder builder = new StringBuilder(getProjectHome() + File.separator + "TestProject");
-		return builder.toString();
-	}
-
-
-	private static File getProjectHome() {
-		File projectPath = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString()	+ File.separator + PROJECTS);
-		return projectPath;
-	}
-
-	private File getConfigurationPath() {
-		File configPath = new File(getProjectHome() + File.separator + "TestProject" + File.separator + DOT_PHRESCO_FOLDER
-				+ File.separator + "phresco-package-info.xml");
-		return configPath;
-	}
-
-	private ProjectInfo readProjectInfo() throws PhrescoException {
-		try {
-			File projectFilePath = new File(getProjectHome() + File.separator + "TestProject" + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
-			FileReader reader = new FileReader(projectFilePath);
-			Gson  gson = new Gson();
-			Type type = new TypeToken<ProjectInfo>() {}.getType();
-			ProjectInfo info = gson.fromJson(reader, type);
-			return info;
-		} catch (FileNotFoundException e) {
-			throw new PhrescoException(e);
-		}
-	}
 }

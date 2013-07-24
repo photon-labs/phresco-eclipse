@@ -1,9 +1,12 @@
 package com.photon.phresco.commons.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
@@ -48,30 +56,30 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static boolean doLogin(String userName, String password) throws PhrescoWebServiceException {
 		
 		ServiceContext context = new ServiceContext();
-        context.put(SERVICE_URL, "http://localhost:3030/service/rest/api");
+		context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
 		System.out.println(" user name in phresco util : " + userName);
 		System.out.println(" password in phresco util : " + password);
-        context.put(SERVICE_USERNAME, userName);
-        context.put(SERVICE_PASSWORD, password);
-        try {
-        	ServiceManager serviceManager = new ServiceManagerImpl(context);
-        	CONTEXT_MANAGER_MAP.put(userName, serviceManager);
-        	isLoggedIn = true;
-        } catch(Exception e) {
-        	isLoggedIn = false;
-        	e.printStackTrace();
-        }
-        try {
-        	ServiceManager serviceManager = ServiceClientFactory.getServiceManager(context);
-        	User userInfo = serviceManager.getUserInfo();
-        	loggedInUserId = userInfo.getId();
-        	isLoggedIn = true;
-        } catch(Exception e) {
-        	isLoggedIn = false;
-        }
-        return isLoggedIn;
+		context.put(SERVICE_USERNAME, userName);
+		context.put(SERVICE_PASSWORD, password);
+		try {
+			ServiceManager serviceManager = new ServiceManagerImpl(context);
+			CONTEXT_MANAGER_MAP.put(userName, serviceManager);
+			isLoggedIn = true;
+		} catch(Exception e) {
+			isLoggedIn = false;
+			e.printStackTrace();
+		}
+		try {
+			ServiceManager serviceManager = ServiceClientFactory.getServiceManager(context);
+			User userInfo = serviceManager.getUserInfo();
+			loggedInUserId = userInfo.getId();
+			isLoggedIn = true;
+		} catch(Exception e) {
+			isLoggedIn = false;
+		}
+		return isLoggedIn;
 	}
-	
+
 	public static boolean isLoggedIn() {
 		return isLoggedIn;
 	}
@@ -298,4 +306,61 @@ public class PhrescoUtil implements PhrescoConstants {
 			e.printStackTrace();
 		}
 	}
+
+	public static String getProjectHome() {
+		IPath location = null;
+		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
+		if (selection instanceof IStructuredSelection) {
+			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
+			for (Object object : selectedObjects) {
+				IProject project = (IProject)object;
+				location = project.getLocation();
+			}
+		}
+		return location.toString();
+	}
+
+	public static String getProjectName() {
+		File projectHome = new File(getProjectHome());
+		String fileName = projectHome.getName();
+		return fileName;
+	}
+
+	public static File getBuildInfoPath() {
+		File buildInfoPath = new File(getProjectHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
+		return buildInfoPath;
+	}
+
+	public static String getApplicationHome() throws PhrescoException {
+		StringBuilder builder = new StringBuilder(getProjectHome());
+		return builder.toString();
+	}
+
+	public static File getConfigurationPath() {
+		File configPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
+		return configPath;
+	}
+
+	public static ProjectInfo getProjectInfo() throws PhrescoException {
+		try {
+			File projectFilePath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
+			FileReader reader = new FileReader(projectFilePath);
+			Gson  gson = new Gson();
+			Type type = new TypeToken<ProjectInfo>() {}.getType();
+			ProjectInfo info = gson.fromJson(reader, type);
+			return info;
+		} catch (FileNotFoundException e) {
+			throw new PhrescoException(e);
+		}
+	}
+
+	public static String getPomFileName(ApplicationInfo appInfo) {
+		File pomFile = new File(getProjectHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
+		if(pomFile.exists()) {
+			return appInfo.getPomFile();
+		}
+		return POM_FILENAME;
+	}
+
+
 }

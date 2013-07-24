@@ -36,6 +36,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.BuildInfo;
+import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 
 public class View extends AbstractHandler implements PhrescoConstants {
@@ -115,10 +116,10 @@ public class View extends AbstractHandler implements PhrescoConstants {
 		TableColumn download = new TableColumn(table, SWT.CENTER);
 		TableColumn delete = new TableColumn(table, SWT.CENTER);
 
-		no.setText("No");
-		name.setText("BuildName");
-		download.setText("Download");
-		delete.setText("Delete");
+		no.setText(BUILD_NO);
+		name.setText(BUILD_NAME);
+		download.setText(DOWNLOAD);
+		delete.setText(DEPLOY);
 
 		no.setWidth(40);
 		name.setWidth(183);
@@ -127,7 +128,7 @@ public class View extends AbstractHandler implements PhrescoConstants {
 
 		table.setHeaderVisible(true);
 
-		List<BuildInfo> buildInfos = getBuildInfos(getBuildInfoPath());
+		List<BuildInfo> buildInfos = getBuildInfos(PhrescoUtil.getBuildInfoPath());
 		if (CollectionUtils.isNotEmpty(buildInfos)) {
 			for (BuildInfo buildInfo : buildInfos) {
 				TableItem items = new TableItem(table, SWT.FILL);
@@ -180,13 +181,6 @@ public class View extends AbstractHandler implements PhrescoConstants {
 		}
 		return viewDialog;
 	}
-
-
-	public File getBuildInfoPath() {
-		File buildInfoPath = new File("D:/work/projects/phresco/Master/Eclipse-Plugin-Development/runtime-EclipseApplication/Projects/TestProject/do_not_checkin/build/build.info");
-		return buildInfoPath;
-	}
-
 
 	public List<BuildInfo> getBuildInfos(File buildInfoFile) throws PhrescoException {
 		return readBuildInfo(buildInfoFile);
