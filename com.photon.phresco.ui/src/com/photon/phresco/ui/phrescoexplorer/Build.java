@@ -66,7 +66,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	private static Map<String, Object> map = new HashedMap();
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
@@ -75,9 +75,15 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 
 		Listener generatePopupListener = new Listener() {
 			@Override
-			public void handleEvent(Event event) {
+			public void handleEvent(Event events) {
 				saveCongfiguration();
 				build();
+				View view = new View();
+				try {
+					view.execute(event);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
 			}
 		};
 
@@ -110,7 +116,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		File configurationPath = getConfigurationPath();
 		try {
 			MojoProcessor processor = new MojoProcessor(configurationPath);
-			Configuration configuration = processor.getConfiguration("package");
+			Configuration configuration = processor.getConfiguration(PACKAGE_GOAL);
 			List<Parameter> parameters = configuration.getParameters().getParameter();
 			for (Parameter parameter : parameters) {
 				String type = parameter.getType();
@@ -193,11 +199,10 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		return buildDialog;
 	}
 
-
 	public void build() {
 		try {
 			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
-			List<Parameter> parameters =processor.getConfiguration("package").getParameters().getParameter();
+			List<Parameter> parameters =processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
 			ProjectManager manager = new ProjectManager();
 			ProjectInfo info = readProjectInfo();
@@ -216,6 +221,11 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			while ((line = performAction.readLine())!= null) {
 				System.out.println(line);
 			}
+			nameText.setText("");
+			numberText.setText("");
+			passwordText.setText("");
+			checkBoxButton.setSelection(false);
+			buildButton.setVisible(false);
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
