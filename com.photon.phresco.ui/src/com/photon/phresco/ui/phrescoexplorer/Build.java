@@ -40,34 +40,28 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.util.ActionType;
+import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
-import com.photon.phresco.ui.resource.Messages;
 
 public class Build extends AbstractHandler implements PhrescoConstants {
-	
+
 	private Button buildButton;
 	private Button cancelButton;
-	private	Button generateBuildButton;
-	private Button deleteButton;
-	private	Button generateBuildsaveButton;
-	private Button generageBuildcancelButton;
 	private Button checkBoxButton;	
-	
+
 	private Shell buildDialog;	
-	private Shell createBuildDialog;
 	private Shell generateDialog;
-	private Shell generateBuildDialog;
-	
+
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
 	private Combo listLogs;
-	
+
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> map = new HashedMap();
 
@@ -76,32 +70,14 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
-		generateDialog = createGenearateBuildDialog(buildDialog);
+		generateDialog = createBuildDialog(buildDialog);
 		generateDialog.open();
-
-
-		final Listener cancelListener = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				createBuildDialog.setVisible(false);
-			}
-		};
-
-		final Listener saveListener = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				saveCongfiguration();
-				build();
-				cancelButton.addListener(SWT.Selection, cancelListener);
-			}
-		};
 
 		Listener generatePopupListener = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				createBuildDialog = createBuildDialog(buildDialog);
-				createBuildDialog.open();
-				buildButton.addListener(SWT.Selection, saveListener);
+				saveCongfiguration();
+				build();
 			}
 		};
 
@@ -112,47 +88,140 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			}
 		};
 
-		generateBuildButton.addListener(SWT.Selection, generatePopupListener);
-		generageBuildcancelButton.addListener(SWT.Selection, generatePopupCancelListener);
-
+		generateDialog.open();
+		buildButton.addListener(SWT.Selection, generatePopupListener);
+		cancelButton.addListener(SWT.Selection, generatePopupCancelListener);
 
 		return null;
 	}
 
-	private void build() {
+
+	Shell createBuildDialog(Shell dialog) {
+		buildDialog = new Shell(dialog, SWT.DIALOG_TRIM);
+		GridLayout layout = new GridLayout(2, false);
+		layout.verticalSpacing = 6;
+
+		buildDialog.setText("Build");
+		buildDialog.setLocation(385, 130);
+		buildDialog.setSize(426, 300);
+		buildDialog.setLayout(layout);
+
+
+		File configurationPath = getConfigurationPath();
 		try {
-			System.out.println("Inside the Build");
+			MojoProcessor processor = new MojoProcessor(configurationPath);
+			Configuration configuration = processor.getConfiguration("package");
+			List<Parameter> parameters = configuration.getParameters().getParameter();
+			for (Parameter parameter : parameters) {
+				String type = parameter.getType();
+				if (type.equalsIgnoreCase(STRING)) {
+					Label buildNameLabel = new Label(buildDialog, SWT.NONE);
+					buildNameLabel.setText(parameter.getKey());
+					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+
+					nameText = new Text(buildDialog, SWT.BORDER);
+					nameText.setToolTipText(parameter.getKey());
+					nameText.setMessage(parameter.getKey());
+					nameText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), nameText);
+
+				} else if (type.equalsIgnoreCase(NUMBER)) {
+					Label buildNumberLabel = new Label(buildDialog, SWT.NONE);
+					buildNumberLabel.setText(parameter.getKey());
+					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+
+					numberText = new Text(buildDialog, SWT.BORDER);
+					numberText.setToolTipText(parameter.getKey());
+					numberText.setMessage(parameter.getKey());
+					numberText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), numberText);
+
+				} else if (type.equalsIgnoreCase(BOOLEAN)) {
+					Label defaults = new Label(buildDialog, SWT.LEFT);
+					defaults.setText(parameter.getKey());
+					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+					checkBoxButton = new Button(buildDialog, SWT.CHECK);
+					checkBoxButton.setLayoutData(new GridData(75, 20));
+					map.put(parameter.getKey(), checkBoxButton);
+				}
+				else if (type.equalsIgnoreCase(PASSWORD)) {
+					Label defaults = new Label(buildDialog, SWT.LEFT);
+					defaults.setText(parameter.getKey());
+					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+					passwordText = new Text(buildDialog, SWT.PASSWORD | SWT.BORDER);
+					passwordText.setToolTipText(PASSWORD);
+					passwordText.setMessage(parameter.getKey());
+					passwordText.setLayoutData(new GridData(100, 13));
+					map.put(parameter.getKey(), passwordText);
+				}
+				else if (type.equalsIgnoreCase(LIST)) {
+					Label Logs = new Label(buildDialog, SWT.LEFT);
+					Logs.setText(parameter.getKey());
+					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
+
+					listLogs = new Combo(buildDialog, SWT.DROP_DOWN);
+					listLogs.setText(parameter.getKey());
+					List<Value> values = parameter.getPossibleValues().getValue();
+					for (Value value : values) {
+						listLogs.add(value.getValue());
+					}
+					map.put(parameter.getKey(), listLogs);
+				}  
+			}
+
+			GridData buildsButton = new GridData(SWT.LEFT, SWT.BOTTOM, true, true, 1, 1);
+			buildButton = new Button(buildDialog, SWT.PUSH);
+			buildButton.setText("Build");
+			buildButton.setLayoutData(buildsButton);
+			buildButton.setSize(56, 10);
+
+			GridData cancelsButton = new GridData(SWT.RIGHT, SWT.BOTTOM, true, true, 1, 1);
+			cancelButton = new Button(buildDialog, SWT.PUSH);
+			cancelButton.setText(CANCEL);
+			cancelButton.setLayoutData(cancelsButton);
+
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+		return buildDialog;
+	}
+
+
+	public void build() {
+		try {
 			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
-
 			List<Parameter> parameters =processor.getConfiguration("package").getParameters().getParameter();
-
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
-
+			ProjectManager manager = new ProjectManager();
 			ProjectInfo info = readProjectInfo();
+
 			ApplicationInfo applicationInfo = info.getAppInfos().get(0);
 			String pomFileName = getPomFileName(applicationInfo);
 
 			if(!POM_FILENAME.equals(pomFileName)) {
 				buildArgCmds.add(pomFileName);
 			}
-
-			String workingDirectory = getProjectHome() + File.separator + "TestProject";
-//			getApplicationProcessor().preBuild(getApplicationInfo());
+			String workingDirectory = getProjectHome() + File.separator + applicationInfo.getAppDirName();;
+			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.BUILD, buildArgCmds, workingDirectory);
 			String line;
-			
-	
+
 			while ((line = performAction.readLine())!= null) {
-					System.out.println(line);
+				System.out.println(line);
 			}
-			
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 
 	public String getPomFileName(ApplicationInfo appInfo) {
 		File pomFile = new File(getProjectHome() + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
@@ -181,19 +250,19 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		}
 		return builder;
 	}
-	
+
 	private BufferedReader executeMavenCommand(ProjectInfo projectInfo, ActionType action, StringBuilder command, String workingDirectory) throws PhrescoException {
 		Commandline cl = new Commandline(command.toString());
-        if (StringUtils.isNotEmpty(workingDirectory)) {
-            cl.setWorkingDirectory(workingDirectory);
-        } 
-        try {
-            Process process = cl.execute();
-            return new BufferedReader(new InputStreamReader(process.getInputStream()));
-        } catch (CommandLineException e) {
-            throw new PhrescoException(e);
-        }
-    }
+		if (StringUtils.isNotEmpty(workingDirectory)) {
+			cl.setWorkingDirectory(workingDirectory);
+		} 
+		try {
+			Process process = cl.execute();
+			return new BufferedReader(new InputStreamReader(process.getInputStream()));
+		} catch (CommandLineException e) {
+			throw new PhrescoException(e);
+		}
+	}
 
 
 	protected List<String> getMavenArgCommands(List<Parameter> parameters) {
@@ -214,136 +283,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		return buildArgCmds;
 	}
 
-
-	private Shell createGenearateBuildDialog(Shell dialog) {
-		generateBuildDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		GridLayout layout = new GridLayout(2, false);
-		layout.verticalSpacing = 6;
-
-		generateBuildDialog.setText(Messages.BUILD);
-		generateBuildDialog.setLocation(385, 130);
-		generateBuildDialog.setSize(300, 300);
-		generateBuildDialog.setLayout(layout);
-
-		generateBuildButton = new Button(generateBuildDialog, SWT.BORDER | SWT.PUSH);
-		generateBuildButton.setLayoutData(new GridData(75, 20));
-		generateBuildButton.setText("GenerateBuild");
-
-		deleteButton = new Button(generateBuildDialog, SWT.BORDER | SWT.PUSH);
-		deleteButton.setLayoutData(new GridData(75, 20));
-		deleteButton.setText("Delete Button");
-
-		generateBuildsaveButton = new Button(generateBuildDialog, SWT.PUSH);
-		generateBuildsaveButton.setText(Messages.OK);
-		generateBuildsaveButton.setLayoutData(new GridData(75,20));
-		generateBuildsaveButton.setLocation(500,505);
-
-
-		generageBuildcancelButton = new Button(generateBuildDialog, SWT.PUSH);
-		generageBuildcancelButton .setText(Messages.CANCEL);
-		generageBuildcancelButton .setLayoutData(new GridData(75,20));
-
-		return generateBuildDialog;
-
-	}
-
-
-	private Shell createBuildDialog(Shell dialog) {
-		buildDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		GridLayout layout = new GridLayout(2, false);
-		layout.verticalSpacing = 6;
-
-		buildDialog.setText("Build");
-		buildDialog.setLocation(385, 130);
-		buildDialog.setSize(300, 300);
-		buildDialog.setLayout(layout);
-
-		File configurationPath = getConfigurationPath();
-		try {
-			MojoProcessor processor = new MojoProcessor(configurationPath);
-			Configuration configuration = processor.getConfiguration("package");
-			List<Parameter> parameters = configuration.getParameters().getParameter();
-			for (Parameter parameter : parameters) {
-				String type = parameter.getType();
-				if (type.equalsIgnoreCase(STRING)) {
-					Label buildNameLabel = new Label(buildDialog, SWT.NONE);
-					buildNameLabel.setText(parameter.getKey());
-					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
-					
-					nameText = new Text(buildDialog, SWT.BORDER);
-					nameText.setToolTipText(parameter.getKey());
-					nameText.setMessage(parameter.getKey());
-					nameText.setLayoutData(new GridData(100, 13));
-					map.put(parameter.getKey(), nameText);
-
-				} else if (type.equalsIgnoreCase(NUMBER)) {
-					Label buildNumberLabel = new Label(buildDialog, SWT.NONE);
-					buildNumberLabel.setText(parameter.getKey());
-					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
-					
-					numberText = new Text(buildDialog, SWT.BORDER);
-					numberText.setToolTipText(parameter.getKey());
-					numberText.setMessage(parameter.getKey());
-					numberText.setLayoutData(new GridData(100, 13));
-					map.put(parameter.getKey(), numberText);
-					
-				} else if (type.equalsIgnoreCase(BOOLEAN)) {
-					Label defaults = new Label(buildDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-					checkBoxButton = new Button(buildDialog, SWT.CHECK);
-					checkBoxButton.setText(parameter.getType());
-					checkBoxButton.setLayoutData(new GridData(75, 20));
-					map.put(parameter.getKey(), checkBoxButton);
-				}
-				else if (type.equalsIgnoreCase(PASSWORD)) {
-					Label defaults = new Label(buildDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-					passwordText = new Text(buildDialog, SWT.PASSWORD | SWT.BORDER);
-					passwordText.setToolTipText(PASSWORD);
-					passwordText.setMessage(parameter.getKey());
-					passwordText.setLayoutData(new GridData(100, 13));
-					map.put(parameter.getKey(), passwordText);
-				}
-				 else if (type.equalsIgnoreCase(LIST)) {
-					Label Logs = new Label(buildDialog, SWT.LEFT);
-					Logs.setText(parameter.getKey());
-					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
-
-					listLogs = new Combo(buildDialog, SWT.DROP_DOWN);
-					listLogs.setText(parameter.getKey());
-					List<Value> values = parameter.getPossibleValues().getValue();
-					for (Value value : values) {
-						listLogs.add(value.getValue());
-					}
-					map.put(parameter.getKey(), listLogs);
-				}  
-			}
-
-			buildButton = new Button(buildDialog, SWT.PUSH);
-			buildButton.setText("Build");
-			buildButton.setLayoutData(new GridData(75,20));
-			buildButton.setLocation(500,505);
-
-			cancelButton = new Button(buildDialog, SWT.PUSH);
-			cancelButton .setText(CANCEL);
-			cancelButton .setLayoutData(new GridData(75,20));
-
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-		return buildDialog;
-	}
-
-	private void saveCongfiguration()  {
+	public void saveCongfiguration()  {
 		try {
 			MojoProcessor processor = new MojoProcessor(getConfigurationPath());
 			List<Parameter> parameters = processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
@@ -378,7 +318,13 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	}
 
 
-	private File getProjectHome() {
+	public String getApplicationHome() throws PhrescoException {
+		StringBuilder builder = new StringBuilder(getProjectHome() + File.separator + "TestProject");
+		return builder.toString();
+	}
+
+
+	private static File getProjectHome() {
 		File projectPath = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString()	+ File.separator + PROJECTS);
 		return projectPath;
 	}
