@@ -277,24 +277,26 @@
 			</command>
 	
 			<command
-			  commandId="Config"
-			  id="%project.configuration.id"
-			  label="%project.configuration.label"
-			  style="push"
-			  tooltip="%project.configuration.tooltip">
+         commandId="Config"
+         icon="icons/configure_icon.png"
+         id="%project.configuration.id"
+         label="%project.configuration.label"
+         style="push"
+         tooltip="%project.configuration.tooltip">
 			</command>
 	
 			<command
-				commandId="Phresco"
-				id="%project.codevalidate.id "
-				label="%project.codevalidate.label"
-				style="push"
-				tooltip="%project.codevalidate.tooltip">
+         commandId="Phresco"
+         icon="icons/code_validation.png"
+         id="%project.codevalidate.id "
+         label="%project.codevalidate.label"
+         style="push"
+         tooltip="%project.codevalidate.tooltip">
 			</command>
 	
 			<menu 
 				commandId="Build"
-				icon="icons/phresco.gif"
+				icon="icons/build_icon.png"
 				id="%project.phresco.buildmenu.id"
 				label="%project.phresco.buildmenu.label"
 				tooltip="%project.phresco.buildmenu.tooltip">
@@ -314,10 +316,11 @@
 			</menu>
 	
 			<command
-			   commandId="Phresco"
-			   label="%project.deploy.label"
-			   style="push"
-			   tooltip="%project.deploy.tooltip">
+         commandId="Phresco"
+         icon="icons/deploy_iconn.png"
+         label="%project.deploy.label"
+         style="push"
+         tooltip="%project.deploy.tooltip">
 			</command>
 	
 			 <separator
@@ -327,25 +330,27 @@
 		 
 			 <menu 
 				commandId="Quality"
-				icon="icons/phresco.gif"
+				icon="icons/quality_icon.png"
 				id="%project.phresco.qualitymenu.id"
 				label="%project.phresco.qualitymenu.label"
 				tooltip="%project.phresco.qualitymenu.tooltip">
 			   
 				<command
-				   commandId="Quality"
-					id="%project.unittest.id"
-				  label="%project.unittest.label"
-				  style="push"
-				  tooltip="%project.unittest.tooltip">
+          commandId="Quality"
+          icon="icons/unit_func.png"
+          id="%project.unittest.id"
+          label="%project.unittest.label"
+          style="push"
+          tooltip="%project.unittest.tooltip">
 				</command>
 		
 				<command
-					commandId="Quality"
-					id="%project.functionaltest.id"
-				  label="%project.functionaltest.label"
-				  style="push"
-				  tooltip="%project.functionaltest.tooltip">
+          commandId="Quality"
+          icon="icons/func_test.png"
+          id="%project.functionaltest.id"
+          label="%project.functionaltest.label"
+          style="push"
+          tooltip="%project.functionaltest.tooltip">
 				</command>
 			</menu>
 		</menu>
