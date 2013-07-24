@@ -354,6 +354,15 @@
           tooltip="%project.functionaltest.tooltip">
 				</command>
 			</menu>
+		    <visibleWhen
+		          checkEnabled="false">
+		       <with
+		             variable="activeMenuSelection">
+		          <count
+		                value="1">
+		          </count>
+		       </with>
+		    </visibleWhen>
 		</menu>
 	</menuContribution>
 	 <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
