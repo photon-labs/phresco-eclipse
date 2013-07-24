@@ -129,9 +129,6 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 				if(CollectionUtils.isNotEmpty(appLayerComponents)) {
 					for (AppLayerComponent appLayerComponent : appLayerComponents) {
 						String appCode = appLayerComponent.appCodeText.getText();
-						if(StringUtils.isEmpty(appCode)) {
-							
-						}
 						ApplicationInfo appInfo = new ApplicationInfo();
 						String techId = appLayerComponent.getTechIdMap().get(appLayerComponent.techNameCombo.getText());
 						String version = appLayerComponent.techVersionCombo.getText();

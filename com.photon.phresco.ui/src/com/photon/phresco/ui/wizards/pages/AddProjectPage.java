@@ -3,6 +3,7 @@ package com.photon.phresco.ui.wizards.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -146,10 +147,20 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		projectTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		projectTxt.setFocus();
 		
+		Label code = new Label(basicComposite, SWT.NONE);
+		code.setText("Code");
+		code.setFont(DesignUtil.getLabelFont());
+		
+		codeTxt = new Text(basicComposite, SWT.BORDER);
+		codeTxt.setMessage("Project Code");
+		codeTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		codeTxt.setEditable(false);
+		
 		projectTxt.addKeyListener(new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) { 
-				if(projectTxt.getText().trim().length()>0) {
+				codeTxt.setText(projectTxt.getText());
+				if(projectTxt.getText().trim().length() > 0) {
 					projectNameValidation = true;
 				} else {
 					projectNameValidation = false;
@@ -161,13 +172,6 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 			public void keyPressed(KeyEvent e) {
 			}
 		});
-
-		Label code = new Label(basicComposite, SWT.NONE);
-		code.setText("Code");
-		code.setFont(DesignUtil.getLabelFont());
-		
-		codeTxt = new Text(basicComposite, SWT.BORDER);
-		codeTxt.setMessage("Project Code");
 
 		Label description = new Label(basicComposite, SWT.NONE);
 		description.setText("Description");
@@ -207,11 +211,13 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 				public void widgetSelected(SelectionEvent e) {
 					if(button.getSelection()) {
 						selectedLayersList.add(button);
-						layerValidation = true;
 					} else {
 						selectedLayersList.remove(button);
-						layerValidation = false;
 					}
+					layerValidation = false;
+					if(CollectionUtils.isNotEmpty(selectedLayersList)) {
+						layerValidation = true;
+					} 
 					checkStatus();
 				}
 			});

@@ -23,7 +23,7 @@ import com.photon.phresco.commons.model.TechnologyInfo;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.LayerUtil;
 
-public class AppLayerComponent extends Composite {
+public class AppLayerComponent {
 	
 	public Text appCodeText;
 	public Combo techNameCombo;
@@ -37,7 +37,6 @@ public class AppLayerComponent extends Composite {
 	private Map<String, String> techIdMap = new HashMap<String, String>();
 
 	public AppLayerComponent(Composite composite, int style) {
-		super(composite, style);
 		this.composite = composite;
 	}
 	
@@ -46,9 +45,8 @@ public class AppLayerComponent extends Composite {
 		Label appCodeLabel = new Label(composite, SWT.BOLD);
 		appCodeLabel.setText("AppCode");
 		appCodeLabel.setFont(DesignUtil.getLabelFont());
-		appCodeLabel.pack();
 
-		appCodeText = new Text(composite, SWT.NONE);
+		appCodeText = new Text(composite, SWT.BORDER);
 		appCodeText.setMessage("Enter AppCode");
 		
 		String appTypeId = (String) button.getData(button.getText());
