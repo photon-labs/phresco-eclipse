@@ -43,7 +43,7 @@ public class AppLayerComponent {
 	public Composite getComponent(Button button) {
 		
 		Label appCodeLabel = new Label(composite, SWT.BOLD);
-		appCodeLabel.setText("AppCode");
+		appCodeLabel.setText("AppCode *");
 		appCodeLabel.setFont(DesignUtil.getLabelFont());
 
 		appCodeText = new Text(composite, SWT.BORDER);

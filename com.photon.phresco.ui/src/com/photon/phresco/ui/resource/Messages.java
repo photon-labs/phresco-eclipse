@@ -60,6 +60,10 @@ public class Messages extends NLS {
 	public static String  CANCEL;
 	public static String ERROR;
 	
+	//Create page related keys
+	public static String WARNING;
+	public static String WARN_APPCODE_EMPTY;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

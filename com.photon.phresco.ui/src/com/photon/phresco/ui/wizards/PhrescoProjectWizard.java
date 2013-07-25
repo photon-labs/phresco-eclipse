@@ -129,6 +129,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 				if(CollectionUtils.isNotEmpty(appLayerComponents)) {
 					for (AppLayerComponent appLayerComponent : appLayerComponents) {
 						String appCode = appLayerComponent.appCodeText.getText();
+						if(StringUtils.isEmpty(appCode)) {
+							PhrescoDialog.errorDialog(getShell(), Messages.WARNING, Messages.WARN_APPCODE_EMPTY);
+							return false;
+						}
 						ApplicationInfo appInfo = new ApplicationInfo();
 						String techId = appLayerComponent.getTechIdMap().get(appLayerComponent.techNameCombo.getText());
 						String version = appLayerComponent.techVersionCombo.getText();
@@ -148,6 +152,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 					for (WebLayerComponent webLayerComponent : webLayerComponents) {
 						ApplicationInfo appInfo = new ApplicationInfo();
 						String appCode = webLayerComponent.appCodeText.getText();
+						if(StringUtils.isEmpty(appCode)) {
+							PhrescoDialog.errorDialog(getShell(), Messages.WARNING, Messages.WARN_APPCODE_EMPTY);
+							return false;
+						}
 						String techGroupName = webLayerComponent.techGroupNameCombo.getText();
 						String techId = webLayerComponent.getTechIdMap().get(techGroupName + webLayerComponent.techNameCombo.getText());
 						String version = webLayerComponent.techVersionCombo.getText();
@@ -167,6 +175,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 					for (MobLayerComponent mobLayerComponent : mobLayerComponents) {
 						ApplicationInfo appInfo = new ApplicationInfo();
 						String appCode = mobLayerComponent.appCodeText.getText();
+						if(StringUtils.isEmpty(appCode)) {
+							PhrescoDialog.errorDialog(getShell(), Messages.WARNING, Messages.WARN_APPCODE_EMPTY);
+							return false;
+						}
 						String techGroupName = mobLayerComponent.techGroupNameCombo.getText();
 						String techId = mobLayerComponent.getTechIdMap().get(techGroupName + mobLayerComponent.techNameCombo.getText());
 						String version = mobLayerComponent.techVersionCombo.getText();
