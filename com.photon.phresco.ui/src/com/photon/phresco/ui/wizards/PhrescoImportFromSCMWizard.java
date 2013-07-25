@@ -60,11 +60,15 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 			if (validate(scmPage)) {
 				try {
 					
+					//get location of workspace (java.io.File)
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();  
-					  
-					//get location of workspace (java.io.File)  
 					File workspaceDirectory = workspace.getRoot().getLocation().toFile();
-					SCMManagerUtil.importProject(scmPage.gitRadio.getText(), scmPage.repoURLText.getText(), 
+					String scmType = GIT;
+					if (scmPage.svnRadio.getSelection()) {
+						scmType = SVN;
+					}
+					
+					SCMManagerUtil.importProject(scmType, scmPage.repoURLText.getText(), 
 							scmPage.userName.getText(), scmPage.password.getText(), STR_EMPTY, scmPage.revisionText.getText(), workspaceDirectory.getPath());
 				} catch (Exception e) {
 					e.printStackTrace();

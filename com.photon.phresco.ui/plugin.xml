@@ -261,6 +261,12 @@
             name="Quality">
         </command>
 
+         <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.ReportPage"
+            id="PDFReport"
+            name="PDF Report">
+        </command>
+                
    </extension>
    
    <extension
@@ -360,15 +366,15 @@
           tooltip="%project.functionaltest.tooltip">
 				</command>
 			</menu>
-		    <visibleWhen
-		          checkEnabled="false">
-		       <with
-		             variable="activeMenuSelection">
-		          <count
-		                value="1">
-		          </count>
-		       </with>
-		    </visibleWhen>
+
+			<command
+				commandId="PDFReport"
+				id="PDFReport"
+				label="%project.pdfreport.label"
+				style="push"
+				tooltip="%project.pdfreport.tooltip">
+			</command>
+						
 		</menu>
 	</menuContribution>
 	 <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">

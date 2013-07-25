@@ -47,6 +47,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
     public Text userName;
     public Text password;
     public Button gitRadio;
+    public Button svnRadio;
     public Button headRevisionButton;
     public Text revisionText;
     
@@ -80,7 +81,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		gitRadio.setText(Messages.TYPE_GIT);
 		gitRadio.setLayoutData(new GridData(50,13));
 		
-		Button svnRadio = new Button(composite, SWT.RADIO);
+		svnRadio = new Button(composite, SWT.RADIO);
 		svnRadio.setText(Messages.TYPE_SVN);
 		svnRadio.setLayoutData(new GridData(50,13));
 		
