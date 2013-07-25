@@ -7,12 +7,9 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -42,6 +39,8 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 	public Label techVersionLabel;
 	public Combo techVersionCombo;
 	
+	private int pageWidth = 0;
+	
 	public TechnologyPage(String pageName) {
 		super(pageName);
 		setTitle("{Phresco}");
@@ -50,10 +49,9 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite parentComposite = new Composite(parent, SWT.NULL);
-		GridLayout layout = new GridLayout(1, true);
+		Composite parentComposite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(1, false);
         parentComposite.setLayout(layout);
-		parentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		parentComposite.pack();
 		parentComposite.redraw();
 		setControl(parentComposite);
@@ -66,7 +64,6 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 	}
 	
 	public void renderLayer(List<Button> selectedLayers) {
-		
 		final Composite parentComposite = (Composite) getControl();
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.Resize | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -114,13 +111,16 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 						super.widgetSelected(e);
 					}
 				});
+				if(pageWidth < appLayerGroup.getSize().x) {
+					pageWidth = appLayerGroup.getSize().x;
+				}
 				appLayerGroup.pack();
 				appLayerGroup.redraw();
 			}
 			if("web-layer".equals(layerButton.getData(layerButton.getText()))) {
 				final Group webLayerGroup = new Group(composite, SWT.NONE);
 				webLayerGroup.setText(layerButton.getText());
-				GridLayout layout = new GridLayout(4, false);
+				GridLayout layout = new GridLayout(9, false);
 		        webLayerGroup.setLayout(layout);
 				webLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				webLayerGroup.setFont(DesignUtil.getHeaderFont());
@@ -147,12 +147,15 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 						super.widgetDefaultSelected(e);
 					}
 				});
+				if(pageWidth < webLayerGroup.getSize().x) {
+					pageWidth = webLayerGroup.getSize().x;
+				}
 				webLayerGroup.redraw();
 			}
 			if("mob-layer".equals(layerButton.getData(layerButton.getText()))) {
 				final Group mobLayerGroup = new Group(composite, SWT.NONE);
 				mobLayerGroup.setText(layerButton.getText());
-				mobLayerGroup.setLayout(new GridLayout(2, true));
+				mobLayerGroup.setLayout(new GridLayout(9, false));
 				mobLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				mobLayerGroup.setFont(DesignUtil.getHeaderFont());
 				
@@ -168,25 +171,29 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 						MobLayerComponent mobLayerComponent = new MobLayerComponent(mobLayerGroup, SWT.NONE);
 						mobLayerComponents.add(mobLayerComponent);
 						mobLayerComponent.getComponent(layerButton);
+						
+						Button mobDeleteButton = new Button(mobLayerGroup, SWT.PUSH);
+						mobDeleteButton.setText("-");
+						
 						parentComposite.pack();
 						parentComposite.redraw();
 						super.widgetDefaultSelected(e);
 					}
 				});
+				if(pageWidth < mobLayerGroup.getSize().x) {
+					pageWidth = mobLayerGroup.getSize().x;
+				}
 				mobLayerGroup.redraw();
 			}
 		}
-		Point size = parentComposite.getSize();
-		int y = size.x;
-		final int vertical_scroll_size = y -10;
 		scrolledComposite.setContent(composite);
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
-		/*Rectangle r = scrolledComposite.getClientArea();
-		scrolledComposite.setMinSize(scrolledComposite.computeSize(r.width, vertical_scroll_size));*/
 		reSize(composite, scrolledComposite);
 		scrolledComposite.pack();
 		scrolledComposite.redraw();
+		getContainer().getShell().setSize(pageWidth + 80, 500);
+		
 		parentComposite.pack();
 		parentComposite.redraw();
 		setControl(parentComposite);
