@@ -135,7 +135,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 							return false;
 						}
 						ApplicationInfo appInfo = new ApplicationInfo();
-						String techId = appLayerComponent.getTechIdMap().get(appLayerComponent.techNameCombo.getText());
+						String techName = appLayerComponent.techNameCombo.getText();
+						String techId = appLayerComponent.getTechIdMap().get(techName);
 						String version = appLayerComponent.techVersionCombo.getText();
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
@@ -143,6 +144,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(appLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
+						techInfo.setName(techName);
 						techInfo.setVersion(version);
 						appInfo.setTechInfo(techInfo);
 						appInfos.add(appInfo);
@@ -158,7 +160,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 							return false;
 						}
 						String techGroupName = webLayerComponent.techGroupNameCombo.getText();
-						String techId = webLayerComponent.getTechIdMap().get(techGroupName + webLayerComponent.techNameCombo.getText());
+						String techName = webLayerComponent.techNameCombo.getText();
+						String techId = webLayerComponent.getTechIdMap().get(techGroupName + techName);
 						String version = webLayerComponent.techVersionCombo.getText();
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
@@ -166,6 +169,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(webLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
+						techInfo.setName(techName);
 						techInfo.setVersion(version);
 						appInfo.setTechInfo(techInfo);
 						appInfos.add(appInfo);
@@ -183,7 +187,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						String techGroupName = mobLayerComponent.techGroupNameCombo.getText();
 						Map<String, String> techGroupIdMap = mobLayerComponent.getTechGroupIdMap();
 						String techGroupId = techGroupIdMap.get(techGroupName);
-						String techId = mobLayerComponent.getTechIdMap().get(techGroupName + mobLayerComponent.techNameCombo.getText());
+						String techName = mobLayerComponent.techNameCombo.getText();
+						String techId = mobLayerComponent.getTechIdMap().get(techGroupName + techName);
 						String version = mobLayerComponent.techVersionCombo.getText();
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
@@ -191,6 +196,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(mobLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
+						techInfo.setName(techName);
 						techInfo.setTechGroupId(techGroupId);
 						techInfo.setVersion(version);
 						appInfo.setTechInfo(techInfo);

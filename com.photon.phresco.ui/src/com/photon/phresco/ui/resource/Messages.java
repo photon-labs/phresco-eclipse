@@ -64,6 +64,18 @@ public class Messages extends NLS {
 	public static String WARNING;
 	public static String WARN_APPCODE_EMPTY;
 	
+	//Design related keys
+	public static String NAME;
+	public static String CODE;
+	public static String DESCRIPTION;
+	public static String APP_DIRECTORY;
+	public static String VERSION;
+	public static String TECHNOLOGY;
+	public static String HYPHEN;
+	public static String SERVER;
+	public static String SERVERS;
+	public static String VERSIONS;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
