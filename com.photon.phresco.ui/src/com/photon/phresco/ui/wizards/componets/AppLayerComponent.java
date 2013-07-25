@@ -56,12 +56,14 @@ public class AppLayerComponent {
 		List<TechnologyGroup> techGroups = applicationType.getTechGroups();
 		List<String> techInfoList = new ArrayList<String>();
 		for (TechnologyGroup technologyGroup : techGroups) {
-			techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
-			for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
-				techInfoList.add(techInfo.getName());
-				techIdMap.put(techInfo.getName(), techInfo.getId());
-				setTechIdMap(techIdMap);
-				techVersionMap.put(techInfo.getName(), techInfo.getTechVersions());
+			if("java".equals(technologyGroup.getId())) {
+				techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
+				for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
+					techInfoList.add(techInfo.getName());
+					techIdMap.put(techInfo.getName(), techInfo.getId());
+					setTechIdMap(techIdMap);
+					techVersionMap.put(techInfo.getName(), techInfo.getTechVersions());
+				}
 			}
 		}
 

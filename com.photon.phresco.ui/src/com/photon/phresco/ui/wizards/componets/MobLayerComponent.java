@@ -58,14 +58,16 @@ public class MobLayerComponent {
 		List<TechnologyGroup> techGroups = applicationType.getTechGroups();
 		List<String> techGroupNameList = new ArrayList<String>();
 		for (TechnologyGroup technologyGroup : techGroups) {
-			techGroupNameList.add(technologyGroup.getName());
-			techGroupIdMap.put(technologyGroup.getName(), technologyGroup.getId());
-			setTechGroupIdMap(techGroupIdMap);
-			techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
-			for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
-				techIdMap.put(technologyGroup.getName() + techInfo.getName(), techInfo.getId());
-				setTechIdMap(techIdMap);
-				techVersionMap.put(technologyGroup.getName() + techInfo.getName(), techInfo.getTechVersions());
+			if("android".equals(technologyGroup.getId())) {
+				techGroupNameList.add(technologyGroup.getName());
+				techGroupIdMap.put(technologyGroup.getName(), technologyGroup.getId());
+				setTechGroupIdMap(techGroupIdMap);
+				techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
+				for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
+					techIdMap.put(technologyGroup.getName() + techInfo.getName(), techInfo.getId());
+					setTechIdMap(techIdMap);
+					techVersionMap.put(technologyGroup.getName() + techInfo.getName(), techInfo.getTechVersions());
+				}
 			}
 		}
 
