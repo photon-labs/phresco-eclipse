@@ -1,0 +1,55 @@
+<project name="com.photon.phresco.ui" default="create-plugin-jar" basedir=".">
+	
+	<property name="build.compiler" value="extJavac"/>
+    <property environment="env"/>
+    <property file="build.properties"/>
+    <import file="classpath.xml"/>
+
+    <target name="create-plugin-jar">
+        <antcall target="bundle"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="target"/>
+    </target>
+
+    <target name="prepare">
+        <mkdir dir="target"/>
+        <mkdir dir="target/classes"/> 
+		<mkdir dir="target/lib"/>
+     </target>
+
+	 <target name="compile" depends="prepare">
+        <javac
+                srcdir="src"                
+                destdir="target/classes"
+                compiler="modern"
+                debug="on"
+                deprecation="off"
+                nowarn="on"
+        >
+        <classpath refid="plugin.classpath"/>
+        </javac>
+		
+		<jar destfile="target/lib/com.photon.phresco.plugin.jar">
+            <fileset dir="target/classes"/> 
+		</jar>
+		
+	    <copy todir="target/lib" failonerror="true" overwrite="false">
+            <fileset dir="./lib" includes="*.jar" />
+        </copy>
+		
+	</target>
+
+    <target name="bundle" depends="compile">
+        <zip destfile="target/com.photon.phresco.ui_1.0.0.jar">
+            <fileset dir="target/classes"/> 
+			<zipfileset prefix="META-INF" dir="META-INF" includes="*.*"/>
+			<zipfileset prefix="icons" dir="icons" includes="*.*"/>
+			<zipfileset prefix="OSGI-INF" dir="OSGI-INF" includes="**/*.*"/>
+			<fileset dir="." includes="plugin.xml"/>
+			<fileset dir="." includes="build.properties"/>
+			<zipfileset prefix="lib" dir="target/lib" includes="**/*.*"/>
+        </zip>
+    </target>        
+</project>
