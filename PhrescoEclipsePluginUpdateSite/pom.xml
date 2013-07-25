@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.photon.phresco</groupId>
+  <artifactId>PhrescoEclipsePluginUpdateSite</artifactId>
+  <version>1.0.0</version>
+  <packaging>eclipse-update-site</packaging>
+  
+  <build>
+		<plugins>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>0.10.0</version>
+                <extensions>true</extensions>
+            </plugin>		
+			<plugin>
+			  <groupId>org.eclipse.tycho</groupId>
+			  <artifactId>tycho-packaging-plugin</artifactId>
+			  <version>0.18.0</version>
+			  <configuration>
+				<archiveSite>true</archiveSite>
+			  </configuration>
+			</plugin>		
+			<plugin>
+				<groupId>com.github.goldin</groupId>
+				<artifactId>copy-maven-plugin</artifactId>
+				<version>0.2.5</version>
+				<executions>
+					<execution>
+						<id>create-archive</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<targetPath>${project.build.outputDirectory}/../site/web</targetPath>
+									<directory>${project.basedir}/web</directory>
+								</resource>
+								<resource>
+									<targetPath>${project.build.outputDirectory}/../site/WEB-INF</targetPath>
+									<directory>${project.basedir}/WEB-INF</directory>
+								</resource>
+								<resource>
+									<targetPath>${project.build.outputDirectory}/../site/</targetPath>
+									<directory>${project.basedir}/html</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

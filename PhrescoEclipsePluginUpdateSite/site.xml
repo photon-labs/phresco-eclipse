@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.photon.phresco.features_1.0.0.jar" id="com.photon.phresco.feature" >
+      <category name="Phresco Eclipse Plugin Site"/>
+   </feature>
+   <category-def name="Phresco Eclipse Plugin Site" label="Phresco Eclipse Plugin Site">
+      <description>
+         Phresco Eclipse Plugin Site
+      </description>
+   </category-def>
+</site>

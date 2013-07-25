@@ -1,0 +1,42 @@
+<project name="plugin" default="war" basedir=".">
+
+    <property environment="env"/>
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="bundle-zip">
+        <zip destfile="build/com.photon.phresco.features_1.0.0.jar" 
+            basedir="./com.photon.phresco.feature"
+            includes="feature.xml" />
+    </target>
+	
+	<target name="copy-files" depends="bundle-zip">
+		 <mkdir dir="build/plugins"/>
+		 <mkdir dir="build/features"/>
+		 
+		 <copy todir="build/plugins" failonerror="true" overwrite="false">
+            <fileset dir="./com.photon.phresco.ui/target" includes="com.photon.phresco.ui_1.0.0.jar" />
+        </copy>
+
+		 <copy todir="build/features" failonerror="true" overwrite="false">
+            <fileset dir="./build" includes="*.jar" />
+        </copy>
+		
+		<mkdir dir="build/.sitebuild"/>
+        <copy file="./PhrescoEclipsePluginUpdateSite/sitebuild.xml" todir="build/.sitebuild"/>
+		
+	</target>
+	<target name="war" depends="copy-files">
+        <zip destfile="build/phresco-plugin.war">
+			<zipfileset prefix="web" dir="./PhrescoEclipsePluginUpdateSite/web" includes="*.*"/>
+			<zipfileset prefix="WEB-INF" dir="./PhrescoEclipsePluginUpdateSite/WEB-INF" includes="*.*"/>
+			<fileset dir="./PhrescoEclipsePluginUpdateSite" includes="site.xml"/>
+			<fileset dir="./PhrescoEclipsePluginUpdateSite/html" includes="*.*"/>
+			<zipfileset prefix="plugins" dir="./build/plugins" includes="*.*"/>
+			<zipfileset prefix="features" dir="./build/features" includes="*.*"/>
+			<zipfileset prefix=".sitebuild" dir="./build/.sitebuild" includes="*.*"/>
+        </zip>
+	</target>
+</project>

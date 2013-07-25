@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.photon.phresco</groupId>
+    <artifactId>phresco-eclipse</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <groupId>com.photon.phresco</groupId>
+  <artifactId>com.photon.phresco.feature</artifactId>
+  <version>1.0.0</version>
+  <packaging>eclipse-feature</packaging>
+
+	<build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>0.10.0</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>0.11.1</version>
+                <configuration>
+                    <resolver>p2</resolver>
+                    <pomDependencies>consider</pomDependencies>
+                    <ignoreTychoRepositories>true</ignoreTychoRepositories>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.tycho</groupId>
+                <artifactId>maven-osgi-packaging-plugin</artifactId>
+                <version>0.11.1</version>
+                <configuration>
+                    <deployableFeature>true</deployableFeature>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+	
+</project>
