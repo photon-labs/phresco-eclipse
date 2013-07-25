@@ -36,11 +36,12 @@ public class MobLayerComponent {
 	
 	private String appTypeId;
 	private Map<String, String> techIdMap = new HashMap<String, String>();
+	private Map<String, String> techGroupIdMap = new HashMap<String, String>();
 
-	public MobLayerComponent(Composite composite, int style) {
-		this.composite = composite;
+	public Map<String, String> getTechGroupIdMap() {
+		return techGroupIdMap;
 	}
-	
+
 	public Composite getComponent(Button button) {
 		
 		Label appCodeLabel = new Label(composite, SWT.BOLD);
@@ -58,6 +59,8 @@ public class MobLayerComponent {
 		List<String> techGroupNameList = new ArrayList<String>();
 		for (TechnologyGroup technologyGroup : techGroups) {
 			techGroupNameList.add(technologyGroup.getName());
+			techGroupIdMap.put(technologyGroup.getName(), technologyGroup.getId());
+			setTechGroupIdMap(techGroupIdMap);
 			techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
 			for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
 				techIdMap.put(technologyGroup.getName() + techInfo.getName(), techInfo.getId());
@@ -171,5 +174,13 @@ public class MobLayerComponent {
 
 	public void setTechIdMap(Map<String, String> techIdMap) {
 		this.techIdMap = techIdMap;
+	}
+	
+	public void setTechGroupIdMap(Map<String, String> techGroupIdMap) {
+		this.techGroupIdMap = techGroupIdMap;
+	}
+
+	public MobLayerComponent(Composite composite, int style) {
+		this.composite = composite;
 	}
 }

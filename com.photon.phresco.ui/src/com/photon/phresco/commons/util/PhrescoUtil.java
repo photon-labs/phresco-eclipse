@@ -138,7 +138,7 @@ public class PhrescoUtil implements PhrescoConstants {
 				for (ApplicationInfo applicationInfo : appInfos) {
 					String appDirName = applicationInfo.getAppDirName();
 					path = file.getPath() + File.separator + appDirName;
-					if("tech-android-native".equals(applicationInfo.getTechInfo().getId())) {
+					if("android".equals(applicationInfo.getTechInfo().getTechGroupId())) {
 						String mainProjectName =appDirName + ".main"; 
 						applicationInfo.setAppDirName(mainProjectName);
 						String sourcePath = path + "/source";
@@ -169,8 +169,12 @@ public class PhrescoUtil implements PhrescoConstants {
 			//Link the created Project to Eclipse
 			IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(appInfo.getAppDirName());
 			description.setLocation(new Path(path));
+			BuildCommand buildCommand = new BuildCommand();
+			buildCommand.setName("org.eclipse.jdt.core.javabuilder");
 			String[] natures = {PhrescoNature.NATURE_ID, "org.maven.ide.eclipse.maven2Nature"};
 			description.setNatureIds(natures);
+			BuildCommand [] buildSpecific = {buildCommand};
+			description.setBuildSpec(buildSpecific);
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
 			project.create(description, monitor);
 			project.open(monitor);

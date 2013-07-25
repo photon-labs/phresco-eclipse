@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +67,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
 		ImageDescriptor myImage = ImageDescriptor.createFromURL(FileLocator.find(PhrescoPlugin.getDefault().getBundle(),
-				new Path("icons/sample.gif"),null));
+				new Path("icons/phresco.gif"),null));
 		super.setDefaultPageImageDescriptor(myImage);
 		super.setNeedsProgressMonitor(true);
 		super.setWindowTitle("Phresco");
@@ -180,6 +181,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 							return false;
 						}
 						String techGroupName = mobLayerComponent.techGroupNameCombo.getText();
+						Map<String, String> techGroupIdMap = mobLayerComponent.getTechGroupIdMap();
+						String techGroupId = techGroupIdMap.get(techGroupName);
 						String techId = mobLayerComponent.getTechIdMap().get(techGroupName + mobLayerComponent.techNameCombo.getText());
 						String version = mobLayerComponent.techVersionCombo.getText();
 						appInfo.setAppDirName(appCode);
@@ -188,6 +191,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(mobLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
+						techInfo.setTechGroupId(techGroupId);
 						techInfo.setVersion(version);
 						appInfo.setTechInfo(techInfo);
 						appInfos.add(appInfo);
