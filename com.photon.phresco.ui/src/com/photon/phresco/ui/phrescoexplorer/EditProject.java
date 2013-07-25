@@ -11,6 +11,8 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -54,13 +56,13 @@ public class EditProject extends AbstractHandler {
 		buildDialog.setLocation(385, 130);
 		buildDialog.setSize(526, 350);
 		buildDialog.setLayout(layout);
-		buildDialog.setLayoutData(new GridData(GridData.FILL_BOTH));
+		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Group serverGroup = new Group(buildDialog, SWT.NONE);
 		serverGroup.setText(Messages.SERVERS);
 		GridLayout serverLlayout = new GridLayout(5, false);
 		serverGroup.setLayout(serverLlayout);
-		serverGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		try {
 			BaseAction baseAction = new BaseAction();
@@ -68,6 +70,10 @@ public class EditProject extends AbstractHandler {
 			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 			ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
+			if(serviceManager == null) {
+				PhrescoDialog.errorDialog(buildDialog, Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
+				return null;
+			}
 			String customerId = PhrescoUtil.getCustomerId();
 			String techId = PhrescoUtil.getTechId();
 			serviceManager = PhrescoUtil.getServiceManager(userId);
@@ -87,7 +93,7 @@ public class EditProject extends AbstractHandler {
 	 * @param techId
 	 * @throws PhrescoException
 	 */
-	private void getServers(Group serverGroup,
+	private void getServers(final Group serverGroup,
 			ServiceManager serviceManager, String customerId, String techId) throws PhrescoException {
 		List<DownloadInfo> servers = serviceManager.getServers(customerId, techId);
 		List<String> serverNames = new ArrayList<String>();
@@ -115,10 +121,23 @@ public class EditProject extends AbstractHandler {
 			Label versionLanel = new Label(serverGroup, SWT.NONE);
 			versionLanel.setText(Messages.VERSIONS);
 			String[] serverVersionsArray = serverVersions.toArray(new String[serverVersions.size()]);
-			serverVersionCombo = new Combo(serverGroup, SWT.BORDER | SWT.READ_ONLY);
+			serverVersionCombo = new Combo(serverGroup, SWT.BORDER | SWT.READ_ONLY | SWT.RESIZE);
 			serverVersionCombo.setItems(serverVersionsArray);
 			serverVersionCombo.select(0);
 		}
+		
+		serverNameCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<String> versions = serverVersionMap.get(serverNameCombo.getText());
+				String[] versionsArray = versions.toArray(new String[versions.size()]);
+				serverVersionCombo.removeAll();
+				serverVersionCombo.setItems(versionsArray);
+				serverVersionCombo.select(0);
+				serverGroup.redraw();
+				super.widgetSelected(e);
+			}
+		});
 	}
 
 	/**
@@ -132,7 +151,7 @@ public class EditProject extends AbstractHandler {
 		Composite composite = new Composite(buildDialog, SWT.BORDER);
 		GridLayout gridlayout = new GridLayout(6, false);
 		composite.setLayout(gridlayout);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label nameLable = new Label(composite, SWT.NONE);
 		nameLable.setText(Messages.NAME);
