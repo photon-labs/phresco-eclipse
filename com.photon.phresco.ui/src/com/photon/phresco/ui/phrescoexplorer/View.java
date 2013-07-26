@@ -179,6 +179,16 @@ public class View extends AbstractHandler implements PhrescoConstants {
 			gd_cancelButton.heightHint = 23;
 			cancelButton.setLayoutData(gd_cancelButton);
 		}
+	
+		
+		buildButton = new Button(viewDialog, SWT.PUSH);
+		buildButton.setLocation(379, 230);
+		buildButton.setText("Build");
+		buildButton.setSize(86, 23);
+		
+		cancelButton= new Button(viewDialog, SWT.NONE);
+		cancelButton.setBounds(471, 230, 82, 23);
+		cancelButton.setText("Cancel");
 		return viewDialog;
 	}
 
