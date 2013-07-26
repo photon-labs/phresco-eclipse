@@ -31,7 +31,7 @@
 					<configuration>
 					  <target>
 						<ant antfile="${basedir}/build.xml">
-						  <target name="war"/>
+						  <target name="deploy-phresco-plugin"/>
 						</ant>
 					  </target>
 					</configuration>

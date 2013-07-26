@@ -1,9 +1,9 @@
 <project name="classpath" basedir=".">
 
-    <property file="build.properties"/>
+    <property file="../build.properties"/>
 
     <path id="phresco.lib.classpath">
-        <pathelement location="lib/com.photon.phresco.ui-1.0.0-jar-with-dependencies.jar"/>
+        <pathelement location="lib/com.photon.phresco.ui-${plugin.version}-jar-with-dependencies.jar"/>
     </path>
 
     <path id="eclipse.classpath">		

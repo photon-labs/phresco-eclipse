@@ -1,42 +1,49 @@
-<project name="plugin" default="war" basedir=".">
+<project name="plugin" default="deploy-phresco-plugin" basedir=".">
 
     <property environment="env"/>
-
+	<property file="build.properties"/>
+	
     <target name="clean">
-        <delete dir="build"/>
+		<ant antfile="./com.photon.phresco.ui/build.xml" target="clean" inheritall="false"/>
+        <delete dir="target"/>
     </target>
 
     <target name="bundle-zip">
-        <zip destfile="build/com.photon.phresco.features_1.0.0.jar" 
+        <zip destfile="target/com.photon.phresco.features_${plugin.version}.jar" 
             basedir="./com.photon.phresco.feature"
             includes="feature.xml" />
     </target>
 	
 	<target name="copy-files" depends="bundle-zip">
-		 <mkdir dir="build/plugins"/>
-		 <mkdir dir="build/features"/>
+		 <mkdir dir="target/plugins"/>
+		 <mkdir dir="target/features"/>
 		 
-		 <copy todir="build/plugins" failonerror="true" overwrite="false">
-            <fileset dir="./com.photon.phresco.ui/target" includes="com.photon.phresco.ui_1.0.0.jar" />
+		 <copy todir="target/plugins" failonerror="true" overwrite="false">
+            <fileset dir="./com.photon.phresco.ui/target" includes="com.photon.phresco.ui_${plugin.version}.jar" />
         </copy>
 
-		 <copy todir="build/features" failonerror="true" overwrite="false">
-            <fileset dir="./build" includes="*.jar" />
+		 <copy todir="target/features" failonerror="true" overwrite="false">
+            <fileset dir="./target" includes="*.jar" />
         </copy>
 		
-		<mkdir dir="build/.sitebuild"/>
-        <copy file="./PhrescoEclipsePluginUpdateSite/sitebuild.xml" todir="build/.sitebuild"/>
+		<mkdir dir="target/.sitetarget"/>
+        <copy file="./PhrescoEclipsePluginUpdateSite/sitebuild.xml" todir="target/.sitetarget"/>
 		
 	</target>
 	<target name="war" depends="copy-files">
-        <zip destfile="build/phresco-plugin.war">
+        <zip destfile="target/phresco-plugin.war">
 			<zipfileset prefix="web" dir="./PhrescoEclipsePluginUpdateSite/web" includes="*.*"/>
 			<zipfileset prefix="WEB-INF" dir="./PhrescoEclipsePluginUpdateSite/WEB-INF" includes="*.*"/>
 			<fileset dir="./PhrescoEclipsePluginUpdateSite" includes="site.xml"/>
 			<fileset dir="./PhrescoEclipsePluginUpdateSite/html" includes="*.*"/>
-			<zipfileset prefix="plugins" dir="./build/plugins" includes="*.*"/>
-			<zipfileset prefix="features" dir="./build/features" includes="*.*"/>
-			<zipfileset prefix=".sitebuild" dir="./build/.sitebuild" includes="*.*"/>
+			<zipfileset prefix="plugins" dir="./target/plugins" includes="*.*"/>
+			<zipfileset prefix="features" dir="./target/features" includes="*.*"/>
+			<zipfileset prefix=".sitetarget" dir="./target/.sitetarget" includes="*.*"/>
         </zip>
+	</target>
+	
+	<target name="deploy-phresco-plugin" depends="war">
+		<echo message="####### DEPLOYING WAR INTO SERVER #######"/>
+		<copy file="target/phresco-plugin.war" todir="${deploy.dir}"/>
 	</target>
 </project>
