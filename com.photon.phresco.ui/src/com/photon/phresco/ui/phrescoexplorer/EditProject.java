@@ -58,12 +58,6 @@ public class EditProject extends AbstractHandler {
 		buildDialog.setLayout(layout);
 		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		Group serverGroup = new Group(buildDialog, SWT.NONE);
-		serverGroup.setText(Messages.SERVERS);
-		GridLayout serverLlayout = new GridLayout(5, false);
-		serverGroup.setLayout(serverLlayout);
-		serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
 		try {
 			BaseAction baseAction = new BaseAction();
 			String userId = baseAction.getUserId();
@@ -78,7 +72,14 @@ public class EditProject extends AbstractHandler {
 			String techId = PhrescoUtil.getTechId();
 			serviceManager = PhrescoUtil.getServiceManager(userId);
 			createAppInfoPage(buildDialog, projectInfo, appInfo);
+			
+			Group serverGroup = new Group(buildDialog, SWT.NONE);
+			serverGroup.setText(Messages.SERVERS);
+			GridLayout serverLlayout = new GridLayout(5, false);
+			serverGroup.setLayout(serverLlayout);
+			serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			getServers(serverGroup, serviceManager, customerId, techId);
+			
 		} catch (PhrescoException e) {
 			PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e.getLocalizedMessage());
 		}

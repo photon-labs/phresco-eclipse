@@ -35,7 +35,6 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.User;
 import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.exception.PhrescoWebServiceException;
 import com.photon.phresco.service.client.api.ServiceContext;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.service.client.factory.ServiceClientFactory;
@@ -53,7 +52,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	static String loggedInUserId;
 	public static final Map<String, ServiceManager> CONTEXT_MANAGER_MAP = new HashMap<String, ServiceManager>();
 	
-	public static boolean doLogin(String userName, String password) throws PhrescoWebServiceException {
+	public static boolean doLogin(String userName, String password) throws PhrescoException {
 		
 		ServiceContext context = new ServiceContext();
 		context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
@@ -76,6 +75,7 @@ public class PhrescoUtil implements PhrescoConstants {
 			isLoggedIn = true;
 		} catch(Exception e) {
 			isLoggedIn = false;
+			throw new PhrescoException(e);
 		}
 		return isLoggedIn;
 	}
