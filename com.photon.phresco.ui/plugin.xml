@@ -278,6 +278,15 @@
 		   id="%project.phresco.menu.id"
 		   label="%project.phresco.menu.label"
 		   tooltip="%project.phresco.menu.tooltip">
+		    <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <count
+                        value="1">
+                  </count>
+               </with>
+            </visibleWhen>
 		   
 			<command
 			   commandId="Phresco"
@@ -288,21 +297,21 @@
 			</command>
 	
 			<command
-         commandId="Config"
-         icon="icons/configure_icon.png"
-         id="%project.configuration.id"
-         label="%project.configuration.label"
-         style="push"
-         tooltip="%project.configuration.tooltip">
+		         commandId="Config"
+		         icon="icons/configure_icon.png"
+		         id="%project.configuration.id"
+		         label="%project.configuration.label"
+		         style="push"
+		         tooltip="%project.configuration.tooltip">
 			</command>
 	
 			<command
-         commandId="Phresco"
-         icon="icons/code_validation.png"
-         id="%project.codevalidate.id "
-         label="%project.codevalidate.label"
-         style="push"
-         tooltip="%project.codevalidate.tooltip">
+		         commandId="Phresco"
+		         icon="icons/code_validation.png"
+		         id="%project.codevalidate.id "
+		         label="%project.codevalidate.label"
+		         style="push"
+		         tooltip="%project.codevalidate.tooltip">
 			</command>
 	
 			<menu 
@@ -317,13 +326,6 @@
 		          label="%project.generatebuild.id"
 		          style="push"
 		          tooltip="%project.generatebuild.tooltip">
-				</command>
-				
-				<command
-				  commandId="View"
-				  label="%project.viewbuild.id"
-				  style="push"
-				  tooltip="%project.viewbuild.tooltip">
 				</command>
 				
 			</menu>
@@ -349,21 +351,21 @@
 				tooltip="%project.phresco.qualitymenu.tooltip">
 			   
 				<command
-          commandId="Quality"
-          icon="icons/unit_func.png"
-          id="%project.unittest.id"
-          label="%project.unittest.label"
-          style="push"
-          tooltip="%project.unittest.tooltip">
+			          commandId="Quality"
+			          icon="icons/unit_func.png"
+			          id="%project.unittest.id"
+			          label="%project.unittest.label"
+			          style="push"
+			          tooltip="%project.unittest.tooltip">
 				</command>
 		
 				<command
-          commandId="Quality"
-          icon="icons/func_test.png"
-          id="%project.functionaltest.id"
-          label="%project.functionaltest.label"
-          style="push"
-          tooltip="%project.functionaltest.tooltip">
+			          commandId="Quality"
+			          icon="icons/func_test.png"
+			          id="%project.functionaltest.id"
+			          label="%project.functionaltest.label"
+			          style="push"
+			          tooltip="%project.functionaltest.tooltip">
 				</command>
 			</menu>
 

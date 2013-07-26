@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
@@ -55,7 +56,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static boolean doLogin(String userName, String password) throws PhrescoException {
 		
 		ServiceContext context = new ServiceContext();
-		context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
+		context.put(SERVICE_URL, "http://localhost:3030/service/rest/api");
 		System.out.println(" user name in phresco util : " + userName);
 		System.out.println(" password in phresco util : " + password);
 		context.put(SERVICE_USERNAME, userName);
@@ -308,16 +309,16 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static String getProjectHome() {
-		IPath location = null;
+		org.eclipse.jdt.internal.core.JavaProject projects = null;
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
 		if (selection instanceof IStructuredSelection) {
 			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
 			for (Object object : selectedObjects) {
-				IProject project = (IProject)object;
-				location = project.getLocation();
+				projects = (JavaProject) object;
 			}
 		}
-		return location.toString();
+		File path = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separator + PROJECTS + File.separator + projects.getPath().toOSString());
+		return path.getPath();
 	}
 
 	public static String getProjectName() {
@@ -337,13 +338,13 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static File getPackageInfoConfigurationPath() {
-		File configPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
-		return configPath;
+		File packageconfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
+		return packageconfigPath;
 	}
 	
 	public static File getDeployInfoConfigurationPath() {
-		File configPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
-		return configPath;
+		File deployConfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
+		return deployConfigPath;
 	}
 
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
