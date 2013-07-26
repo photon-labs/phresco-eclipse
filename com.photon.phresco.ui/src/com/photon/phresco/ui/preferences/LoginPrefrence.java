@@ -20,6 +20,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.ui.PhrescoPlugin;
 import com.photon.phresco.ui.resource.Messages;
 
@@ -107,7 +108,11 @@ public class LoginPrefrence
         
         BusyIndicator.showWhile(null, new Runnable() {
             public void run() {
-            	isLoggedIn = PhrescoUtil.doLogin(loginUserName, loginPassword);
+            	try {
+					isLoggedIn = PhrescoUtil.doLogin(loginUserName, loginPassword);
+				} catch (PhrescoException e) {
+					PhrescoDialog.exceptionDialog(getShell(), e);
+				}
             }
         });
 
@@ -117,11 +122,7 @@ public class LoginPrefrence
             PhrescoPlugin.getDefault().savePluginPreferences();
             result = true;
             setMessage(LOGIN_SUCCESSFUL);
-        } else {
-            result = false;
-            PhrescoDialog.errorDialog(getShell(),"Error", Messages.LOGIN_FAILED_MSG);
-        }
-
+        } 
         return result;
     }
 
