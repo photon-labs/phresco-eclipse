@@ -21,6 +21,8 @@
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.equinox.common_3.6.200.v20130402-1505.jar"/>
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.core.runtime_3.9.0.v20130326-1255.jar"/>
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.jgit_3.0.0.201306101825-r.jar"/>
+		<pathelement location="${eclipse.home}/plugins/org.eclipse.equinox.registry_3.5.300.v20130327-1442.jar"/>
+		<pathelement location="${eclipse.home}/plugins/org.eclipse.core.jobs_3.5.300.v20130429-1813.jar"/>
    </path>
  
     <path id="plugin.classpath">
