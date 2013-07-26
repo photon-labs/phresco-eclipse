@@ -19,8 +19,8 @@
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.m2e.core_1.4.0.20130601-0317.jar"/>
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.m2e.core.ui_1.4.0.20130601-0317.jar"/>
 		<pathelement location="${eclipse.home}/plugins/org.eclipse.equinox.common_3.6.200.v20130402-1505.jar"/>
-		<pathelement location="D:/jar/For Eclipse/org.eclipse.core.runtime-3.1.0.jar"/>
-		<pathelement location="D:/jar/For Eclipse/org.eclipse.jgit-3.0.0.201306101825-r.jar"/>
+		<pathelement location="${eclipse.home}/plugins/org.eclipse.core.runtime_3.9.0.v20130326-1255.jar"/>
+		<pathelement location="${eclipse.home}/plugins/org.eclipse.jgit_3.0.0.201306101825-r.jar"/>
    </path>
  
     <path id="plugin.classpath">
