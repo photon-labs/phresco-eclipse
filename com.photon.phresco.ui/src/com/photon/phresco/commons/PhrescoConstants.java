@@ -176,6 +176,12 @@ public interface PhrescoConstants {
 	String BUILD_NAME		 = "BuildName";
 	String DOWNLOAD 		 = "Download";
 	String DEPLOY 		     = "Deploy";
+	String DYNAMIC_PARAMETER = "DynamicParameter";
+	
+	// Deploy constants
+	
+	String 	DEPLOY_INFO_FILE = "phresco-deploy-info.xml";
+	
 
 	String FAILED = "FAILED";
 	String OK = "OK";	

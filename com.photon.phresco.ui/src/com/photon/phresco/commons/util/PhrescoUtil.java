@@ -336,8 +336,13 @@ public class PhrescoUtil implements PhrescoConstants {
 		return builder.toString();
 	}
 
-	public static File getConfigurationPath() {
+	public static File getPackageInfoConfigurationPath() {
 		File configPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
+		return configPath;
+	}
+	
+	public static File getDeployInfoConfigurationPath() {
+		File configPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
 		return configPath;
 	}
 
@@ -353,6 +358,10 @@ public class PhrescoUtil implements PhrescoConstants {
 			throw new PhrescoException(e);
 		}
 	}
+	
+	public static ApplicationInfo getApplicationInfo() throws PhrescoException {
+		return getProjectInfo().getAppInfos().get(0);
+	}
 
 	public static String getPomFileName(ApplicationInfo appInfo) {
 		File pomFile = new File(getProjectHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
@@ -360,6 +369,15 @@ public class PhrescoUtil implements PhrescoConstants {
 			return appInfo.getPomFile();
 		}
 		return POM_FILENAME;
+	}
+	
+	public static String getCustomerId() throws PhrescoException {
+		return getProjectInfo().getCustomerIds().get(0);
+	}
+	
+	public static String getUserId() {
+		BaseAction  action = new BaseAction();
+		return action.getUserId();
 	}
 
 	public static ApplicationInfo getApplicationInfo() throws PhrescoException {
