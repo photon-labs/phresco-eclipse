@@ -75,6 +75,10 @@ public class Messages extends NLS {
 	public static String SERVER;
 	public static String SERVERS;
 	public static String VERSIONS;
+	public static String DATABASE;
+	public static String DATABASES;
+	public static String WEBSERVICES;
+	public static String UPDATE;
 	
 	static {
 		// initialize resource bundle

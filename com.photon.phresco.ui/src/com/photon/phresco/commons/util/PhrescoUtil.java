@@ -43,6 +43,7 @@ import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 import com.photon.phresco.ui.PhrescoNature;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
+import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -56,7 +57,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static boolean doLogin(String userName, String password) throws PhrescoException {
 		
 		ServiceContext context = new ServiceContext();
-		context.put(SERVICE_URL, "http://localhost:3030/service/rest/api");
+		context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
 		System.out.println(" user name in phresco util : " + userName);
 		System.out.println(" password in phresco util : " + password);
 		context.put(SERVICE_USERNAME, userName);
@@ -309,15 +310,16 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static String getProjectHome() {
-		org.eclipse.jdt.internal.core.JavaProject projects = null;
+		IPath location = null ;
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
 		if (selection instanceof IStructuredSelection) {
 			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
 			for (Object object : selectedObjects) {
-				projects = (JavaProject) object;
+				IProject iProject = (IProject) object;
+				location = iProject.getLocation();
 			}
 		}
-		File path = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separator + PROJECTS + File.separator + projects.getPath().toOSString());
+		File path = new File(location.toOSString());
 		return path.getPath();
 	}
 
@@ -383,5 +385,26 @@ public class PhrescoUtil implements PhrescoConstants {
 
 	public static String getTechId() throws PhrescoException {
 		return getApplicationInfo().getTechInfo().getId();
+	}
+	public static String findPlatform() {
+		String osName = System.getProperty("os.name");
+		String osBit = System.getProperty("os.arch");
+		if (osName.contains(Constants.WINDOWS)) {
+			osName = Constants.WINDOWS;
+		} else if (osName.contains("Linux")) {
+			osName = "Linux";
+		} else if (osName.contains("Mac")) {
+			osName = "Mac";
+		} else if (osName.contains("Server")) {
+			osName = "Server";
+		} else if (osName.contains("Windows 7")) {
+			osName = "Windows 7".replace(" ", "");
+		}
+		if (osBit.contains("64")) {
+			osBit = "64";
+		} else {
+			osBit = "86";
+		}
+		return osName.concat(osBit);
 	}
 }
