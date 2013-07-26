@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
@@ -41,6 +40,7 @@ import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.service.client.factory.ServiceClientFactory;
 import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 import com.photon.phresco.ui.PhrescoNature;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
@@ -387,23 +387,23 @@ public class PhrescoUtil implements PhrescoConstants {
 		return getApplicationInfo().getTechInfo().getId();
 	}
 	public static String findPlatform() {
-		String osName = System.getProperty("os.name");
-		String osBit = System.getProperty("os.arch");
+		String osName = System.getProperty(OS_NAME);
+		String osBit = System.getProperty(OS_ARCH);
 		if (osName.contains(Constants.WINDOWS)) {
 			osName = Constants.WINDOWS;
-		} else if (osName.contains("Linux")) {
-			osName = "Linux";
-		} else if (osName.contains("Mac")) {
-			osName = "Mac";
-		} else if (osName.contains("Server")) {
-			osName = "Server";
-		} else if (osName.contains("Windows 7")) {
-			osName = "Windows 7".replace(" ", "");
+		} else if (osName.contains(LINUX)) {
+			osName = LINUX;
+		} else if (osName.contains(MAC)) {
+			osName = MAC;
+		} else if (osName.contains(SERVER)) {
+			osName = SERVER;
+		} else if (osName.contains(WINDOWS_7)) {
+			osName = WINDOWS_7.replace(" ", "");
 		}
-		if (osBit.contains("64")) {
-			osBit = "64";
+		if (osBit.contains(BIT_64)) {
+			osBit = BIT_64;
 		} else {
-			osBit = "86";
+			osBit = BIT_86;
 		}
 		return osName.concat(osBit);
 	}

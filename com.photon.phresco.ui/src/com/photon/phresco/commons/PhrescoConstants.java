@@ -185,4 +185,14 @@ public interface PhrescoConstants {
 
 	String FAILED = "FAILED";
 	String OK = "OK";	
+	
+	//platform Constants
+	String OS_NAME = "os.name";
+	String OS_ARCH = "os.arch";
+	String LINUX = "Linux";
+	String MAC = "Mac";
+	String SERVER = "Server";
+	String WINDOWS_7 = "Windows 7";
+	String BIT_64 = "64";
+	String BIT_86 = "86";
 }
