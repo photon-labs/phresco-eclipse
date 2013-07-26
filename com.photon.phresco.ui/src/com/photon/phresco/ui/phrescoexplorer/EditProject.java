@@ -91,67 +91,71 @@ public class EditProject extends AbstractHandler {
 			final String platform = PhrescoUtil.findPlatform();
 			createAppInfoPage(composite, projectInfo, appInfo);
 			
-			final Group serverGroup = new Group(composite, SWT.NONE);
-			serverGroup.setText(Messages.SERVERS);
-			GridLayout serverLayout = new GridLayout(5, false);
-			serverGroup.setLayout(serverLayout);
-			serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			getServers(serverGroup, serviceManager, customerId, techId, platform);
-			
-			Button serverAddButton = new Button(serverGroup, SWT.PUSH);
-			serverAddButton.setText("+");
-			serverAddButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					try {
-						getServers(serverGroup, serviceManager, customerId, techId, platform);
-						
-						Button serverDeleteButton = new Button(serverGroup, SWT.PUSH);
-						serverDeleteButton.setText("-");
-						
-					} catch (PhrescoException e1) {
-						PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());
+			final List<DownloadInfo> servers = serviceManager.getDownloads(customerId, techId, Category.SERVER.name(), platform);
+			if(CollectionUtils.isNotEmpty(servers)) {
+				final Group serverGroup = new Group(composite, SWT.NONE);
+				serverGroup.setText(Messages.SERVERS);
+				GridLayout serverLayout = new GridLayout(5, false);
+				serverGroup.setLayout(serverLayout);
+				serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				getServers(serverGroup, servers, customerId, techId, platform);
+				
+				Button serverAddButton = new Button(serverGroup, SWT.PUSH);
+				serverAddButton.setText("+");
+				serverAddButton.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						try {
+							getServers(serverGroup, servers, customerId, techId, platform);
+							
+							Button serverDeleteButton = new Button(serverGroup, SWT.PUSH);
+							serverDeleteButton.setText("-");
+							
+						} catch (PhrescoException e1) {
+							PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());
+						}
+						serverGroup.redraw();
+						serverGroup.pack();
+						composite.redraw();
+						composite.pack();
+						reSize(composite, scrolledComposite);
+						super.widgetSelected(e);
 					}
-					serverGroup.redraw();
-					serverGroup.pack();
-					composite.redraw();
-					composite.pack();
-					reSize(composite, scrolledComposite);
-					super.widgetSelected(e);
-				}
-			});
-			
-			final Group dbGroup = new Group(composite, SWT.NONE);
-			dbGroup.setText(Messages.DATABASES);
-			GridLayout dbLlayout = new GridLayout(5, false);
-			dbGroup.setLayout(dbLlayout);
-			dbGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			
-			getDataBases(dbGroup, serviceManager, customerId, techId, platform);
-			
-			Button dbAddButton = new Button(dbGroup, SWT.PUSH);
-			dbAddButton.setText("+");
-			
-			dbAddButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					try {
-						getServers(dbGroup, serviceManager, customerId, techId, platform);
-						
-						Button dbDeleteButton = new Button(dbGroup, SWT.PUSH);
-						dbDeleteButton.setText("-");
-						
-					} catch (PhrescoException e1) {
-						PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());
+				});
+			}
+			final List<DownloadInfo> dataBases = serviceManager.getDownloads(customerId, techId, Category.DATABASE.name(), platform);
+			if(CollectionUtils.isNotEmpty(dataBases)) {
+				final Group dbGroup = new Group(composite, SWT.NONE);
+				dbGroup.setText(Messages.DATABASES);
+				GridLayout dbLlayout = new GridLayout(5, false);
+				dbGroup.setLayout(dbLlayout);
+				dbGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				
+				getDataBases(dbGroup, dataBases, customerId, techId, platform);
+				
+				Button dbAddButton = new Button(dbGroup, SWT.PUSH);
+				dbAddButton.setText("+");
+				
+				dbAddButton.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						try {
+							getDataBases(dbGroup, dataBases, customerId, techId, platform);
+							
+							Button dbDeleteButton = new Button(dbGroup, SWT.PUSH);
+							dbDeleteButton.setText("-");
+							
+						} catch (PhrescoException e1) {
+							PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());
+						}
+						dbGroup.redraw();
+						composite.redraw();
+						composite.pack();
+						reSize(composite, scrolledComposite);
+						super.widgetSelected(e);
 					}
-					dbGroup.redraw();
-					composite.redraw();
-					composite.pack();
-					reSize(composite, scrolledComposite);
-					super.widgetSelected(e);
-				}
-			});
-			
+				});
+			}
 			getWebServices(serviceManager, composite);
 			
 			Composite updateComposite = new Composite(buildDialog, SWT.NONE);
@@ -253,11 +257,7 @@ public class EditProject extends AbstractHandler {
 	 * @throws PhrescoException
 	 */
 	private void getServers(final Group serverGroup,
-			ServiceManager serviceManager, String customerId, String techId, String platform) throws PhrescoException {
-		List<DownloadInfo> servers = serviceManager.getDownloads(customerId, techId, Category.SERVER.name(), platform);
-		if(CollectionUtils.isEmpty(servers)) {
-			return;
-		}
+			List<DownloadInfo> servers, String customerId, String techId, String platform) throws PhrescoException {
 		List<String> serverNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : servers) {
 			serverNames.add(downloadInfo.getName());
@@ -312,11 +312,7 @@ public class EditProject extends AbstractHandler {
 	 * @throws PhrescoException
 	 */
 	private void getDataBases(final Group dbGroup,
-			ServiceManager serviceManager, String customerId, String techId, String platform) throws PhrescoException {
-		List<DownloadInfo> dataBases = serviceManager.getDownloads(customerId, techId, Category.DATABASE.name(), platform);
-		if(CollectionUtils.isEmpty(dataBases)) {
-			return;
-		}
+			List<DownloadInfo> dataBases, String customerId, String techId, String platform) throws PhrescoException {
 		List<String> dbNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : dataBases) {
 			dbNames.add(downloadInfo.getName());
