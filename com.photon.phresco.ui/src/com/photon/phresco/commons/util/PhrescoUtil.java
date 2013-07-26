@@ -380,14 +380,6 @@ public class PhrescoUtil implements PhrescoConstants {
 		return action.getUserId();
 	}
 
-	public static ApplicationInfo getApplicationInfo() throws PhrescoException {
-		return getProjectInfo().getAppInfos().get(0);
-	}
-	
-	public static String getCustomerId() throws PhrescoException {
-		return getProjectInfo().getCustomerIds().get(0);
-	}
-	
 	public static String getTechId() throws PhrescoException {
 		return getApplicationInfo().getTechInfo().getId();
 	}
