@@ -28,7 +28,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "com.photon.phresco.ui.resource.messages"; //$NON-NLS-1$
-	
+	/*
 	// Login page related keys
 	public static String LOGIN_ID;
 	public static String LOGIN_PWD;
@@ -78,7 +78,49 @@ public class Messages extends NLS {
 	public static String DATABASE;
 	public static String DATABASES;
 	public static String WEBSERVICES;
-	public static String UPDATE;
+	public static String UPDATE;*/
+	
+	// Needs to be localization
+	
+	public static String PROVIDE_SCM_DETAILS="Provide SCM Details";
+	public static String IMPORT_FROM_SCM="Import from SCM";
+	public static String PROVIDE_MANDATORY_VALUES="Provide Mandatory Values";
+	public static String PHRESCO_LOGIN_WARNING="Please Login before making Request";
+	public static String SCM_TYPE="Type";
+	public static String TYPE_GIT="Git";
+	public static String TYPE_SVN="Svn";
+	public static String REPO_RUL="*Repo URL";
+	public static String OTHER_CREDENTIALS="Other Credentials";
+	public static String USER_NAME="*Username";
+	public static String USER_PWD="*Password";
+	public static String REVISION="*Revision";
+	public static String HEAD_REVISION="HeadRevision";
+	public static String TEST_CHECKOUT="Test Checkout";
+	public static String LOGIN_ID="User Id";
+	public static String LOGIN_PWD="Password";
+	public static String LOGIN_FAILED_MSG="Login Failed \n\n\nInvalid credentials";
+	public static String PROJ_ALREADY_IMPORTED="Project already imported";
+	public static String PROJ_IMPORT_FAILED="Failed to import project";
+	public static String BUILD="Build";
+	public static String OK="Ok";
+	public static String CANCEL="Cancel";
+	public static String ERROR="Error";
+	public static String WARNING="Warning";
+	public static String WARN_APPCODE_EMPTY="Appcode should not be empty";
+	public static String NAME="*Name";
+	public static String CODE="*Code";
+	public static String DESCRIPTION="Description";
+	public static String APP_DIRECTORY="*App Directory";
+	public static String VERSION="Version";
+	public static String TECHNOLOGY="Technology";
+	public static String HYPHEN="-";
+	public static String SERVER="Server";
+	public static String SERVERS="Servers";
+	public static String VERSIONS="Versions";
+	public static String DATABASE="Database";
+	public static String DATABASES="Databases";
+	public static String WEBSERVICES="Web Services";
+	public static String UPDATE="Update";	
 	
 	static {
 		// initialize resource bundle
