@@ -248,7 +248,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			if(!POM_FILENAME.equals(pomFileName)) {
 				buildArgCmds.add(pomFileName);
 			}
-			String workingDirectory = PhrescoUtil.getProjectHome().toString();
+			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.BUILD, buildArgCmds, workingDirectory);
 			String line;

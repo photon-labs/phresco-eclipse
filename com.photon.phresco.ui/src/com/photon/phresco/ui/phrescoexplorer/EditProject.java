@@ -1,15 +1,19 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -25,21 +29,26 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.ArtifactGroupInfo;
 import com.photon.phresco.commons.model.ArtifactInfo;
 import com.photon.phresco.commons.model.Category;
 import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.WebService;
+import com.photon.phresco.commons.util.ApplicationManagerUtil;
 import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.ui.wizards.componets.DatabaseComponent;
+import com.photon.phresco.ui.wizards.componets.ServerComponent;
 
 /**
  * @author suresh_ma
@@ -47,13 +56,16 @@ import com.photon.phresco.ui.resource.Messages;
  */
 public class EditProject extends AbstractHandler {
 	
-	public Combo serverNameCombo;
-	public org.eclipse.swt.widgets.List serverVersionListBox;
-	public org.eclipse.swt.widgets.List dbVersionListBox;
-	public Combo dbNameCombo;
+	private Text nameText;
+	private Text codeText;
+	private Text descText;
+	private Text appDirText;
 	
-	public static Map<String, List<String>> serverVersionMap = new HashMap<String, List<String>>();
-	public static Map<String, List<String>> dbVersionMap = new HashMap<String, List<String>>();
+	private List<ServerComponent> serverComponents = new ArrayList<ServerComponent>();
+	private List<DatabaseComponent> dbComponents = new ArrayList<DatabaseComponent>();
+	
+	private Button[] webServiceButtons;
+	private Button webServiceButton;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
@@ -80,7 +92,7 @@ public class EditProject extends AbstractHandler {
 			BaseAction baseAction = new BaseAction();
 			String userId = baseAction.getUserId();
 			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
-			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+			final ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 			final ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
 			if(serviceManager == null) {
 				PhrescoDialog.errorDialog(buildDialog, Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
@@ -98,7 +110,10 @@ public class EditProject extends AbstractHandler {
 				GridLayout serverLayout = new GridLayout(5, false);
 				serverGroup.setLayout(serverLayout);
 				serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				getServers(serverGroup, servers, customerId, techId, platform);
+				
+				ServerComponent serverComponent = new ServerComponent();
+				serverComponent.getServers(serverGroup, servers, customerId, techId, platform);
+				serverComponents.add(serverComponent);
 				
 				Button serverAddButton = new Button(serverGroup, SWT.PUSH);
 				serverAddButton.setText("+");
@@ -106,8 +121,9 @@ public class EditProject extends AbstractHandler {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						try {
-							getServers(serverGroup, servers, customerId, techId, platform);
-							
+							ServerComponent serverComponent = new ServerComponent();
+							serverComponent.getServers(serverGroup, servers, customerId, techId, platform);
+							serverComponents.add(serverComponent);
 							Button serverDeleteButton = new Button(serverGroup, SWT.PUSH);
 							serverDeleteButton.setText("-");
 							
@@ -131,7 +147,9 @@ public class EditProject extends AbstractHandler {
 				dbGroup.setLayout(dbLlayout);
 				dbGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
-				getDataBases(dbGroup, dataBases, customerId, techId, platform);
+				DatabaseComponent dbComponent = new DatabaseComponent();
+				dbComponent.getDataBases(dbGroup, dataBases, customerId, techId, platform);
+				dbComponents.add(dbComponent);
 				
 				Button dbAddButton = new Button(dbGroup, SWT.PUSH);
 				dbAddButton.setText("+");
@@ -140,7 +158,9 @@ public class EditProject extends AbstractHandler {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						try {
-							getDataBases(dbGroup, dataBases, customerId, techId, platform);
+							DatabaseComponent dbComponent = new DatabaseComponent();
+							dbComponent.getDataBases(dbGroup, dataBases, customerId, techId, platform);
+							dbComponents.add(dbComponent);
 							
 							Button dbDeleteButton = new Button(dbGroup, SWT.PUSH);
 							dbDeleteButton.setText("-");
@@ -165,6 +185,52 @@ public class EditProject extends AbstractHandler {
 			
 			Button updateButton = new Button(updateComposite, SWT.PUSH);
 			updateButton.setText(Messages.UPDATE);
+			
+			Listener updateListener = new Listener() {
+				@Override
+				public void handleEvent(Event events) {
+					boolean validate = validate(shell);
+					if(!validate) {
+						return;
+					}
+					//To set the basic information into applicationInfo
+					ApplicationManagerUtil managerUtil = new ApplicationManagerUtil();
+					appInfo.setAppDirName(appDirText.getText());
+					appInfo.setCode(codeText.getText());
+					appInfo.setName(nameText.getText());
+					if(StringUtils.isNotEmpty(descText.getText())) {
+						appInfo.setDescription(descText.getText());
+					}
+					String oldAppDirName = PhrescoUtil.getProjectName();
+					
+					//Top set the selected server
+					List<ArtifactGroupInfo> artifactGroupInfos = new ArrayList<ArtifactGroupInfo>();
+					setSelectedServers(appInfo, artifactGroupInfos);
+					setSelectedDatabase(appInfo, artifactGroupInfos);
+					
+					List<String> webServiceIds = new ArrayList<String>();
+					List<Button> buttons = Arrays.asList(webServiceButtons);
+					int i = 0;
+					for (Button button : buttons) {
+						if(button.getSelection()) {
+							String webServiceId = (String) button.getData(button.getText());
+							webServiceIds.add(webServiceId);
+						}
+						i = i+ 1;
+					}
+					if(CollectionUtils.isNotEmpty(webServiceIds)) {
+						appInfo.setSelectedWebservices(webServiceIds);
+					}
+					
+					try {
+						managerUtil.updateApplication(oldAppDirName, appInfo);
+					} catch (PhrescoException e) {
+						PhrescoDialog.exceptionDialog(shell, e);
+					}
+				}
+			};
+			
+			updateButton.addListener(SWT.Selection, updateListener);
 			
 			Button cancelButton = new Button(updateComposite, SWT.PUSH);
 			cancelButton.setText(Messages.CANCEL);
@@ -203,21 +269,21 @@ public class EditProject extends AbstractHandler {
 		Label nameLable = new Label(composite, SWT.NONE);
 		nameLable.setText(Messages.NAME);
 
-		Text nameText = new Text(composite, SWT.BORDER);
+		nameText = new Text(composite, SWT.BORDER);
 		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		nameText.setText(projectInfo.getName());
+		nameText.setText(appInfo.getName());
 
 		Label codeLable = new Label(composite, SWT.NONE);
 		codeLable.setText(Messages.CODE);
 
-		Text codeText = new Text(composite, SWT.BORDER);
+		codeText = new Text(composite, SWT.BORDER);
 		codeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		codeText.setText(appInfo.getCode());
 
 		Label descLable = new Label(composite, SWT.NONE);
 		descLable.setText(Messages.DESCRIPTION);
 
-		Text descText = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		descText = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData descGridData = new GridData();
 		descGridData.widthHint = 100;
 		descGridData.heightHint = 40;
@@ -229,7 +295,7 @@ public class EditProject extends AbstractHandler {
 		Label appDirLabel = new Label(composite, SWT.NONE);
 		appDirLabel.setText(Messages.APP_DIRECTORY);
 
-		Text appDirText = new Text(composite, SWT.BORDER);
+		appDirText = new Text(composite, SWT.BORDER);
 		appDirText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		appDirText.setText(appInfo.getAppDirName());
 
@@ -248,131 +314,25 @@ public class EditProject extends AbstractHandler {
 		techText.setText(appInfo.getTechInfo().getName() + Messages.HYPHEN + appInfo.getTechInfo().getVersion());
 	}
 
-	/**
-	 * @param serverGroup
-	 * @param serviceManager
-	 * @param customerId
-	 * @param techId
-	 * @param platform
-	 * @throws PhrescoException
-	 */
-	private void getServers(final Group serverGroup,
-			List<DownloadInfo> servers, String customerId, String techId, String platform) throws PhrescoException {
-		List<String> serverNames = new ArrayList<String>();
-		for (DownloadInfo downloadInfo : servers) {
-			serverNames.add(downloadInfo.getName());
-			List<ArtifactInfo> versions = downloadInfo.getArtifactGroup().getVersions();
-			List<String> versionList = new ArrayList<String>();
-			for (ArtifactInfo artifactInfo : versions) {
-				versionList.add(artifactInfo.getVersion());
-			}
-			serverVersionMap.put(downloadInfo.getName(), versionList);
-		}
-		if(CollectionUtils.isNotEmpty(serverNames)) {
-			Label serverLabel = new Label(serverGroup, SWT.NONE);
-			serverLabel.setText(Messages.SERVER);
-			
-			String[] serverNamesArray = serverNames.toArray(new String[serverNames.size()]);
-			serverNameCombo = new Combo(serverGroup, SWT.BORDER | SWT.READ_ONLY);
-			serverNameCombo.setItems(serverNamesArray);
-			serverNameCombo.select(0);
-		}
-		
-		List<String> serverVersions = serverVersionMap.get(serverNames.get(0));
-		if(CollectionUtils.isNotEmpty(serverVersions)) {
-			Label versionLanel = new Label(serverGroup, SWT.NONE);
-			versionLanel.setText(Messages.VERSIONS);
-			String[] serverVersionsArray = serverVersions.toArray(new String[serverVersions.size()]);
-			serverVersionListBox = new org.eclipse.swt.widgets.List(serverGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
-			serverVersionListBox.setItems(serverVersionsArray);
-			serverVersionListBox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			serverVersionListBox.select(0);
-		}
-		
-		serverNameCombo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				List<String> versions = serverVersionMap.get(serverNameCombo.getText());
-				String[] versionsArray = versions.toArray(new String[versions.size()]);
-				serverVersionListBox.removeAll();
-				serverVersionListBox.setItems(versionsArray);
-				serverVersionListBox.select(0);
-				serverGroup.redraw();
-				super.widgetSelected(e);
-			}
-		});
-	}
-	
-	/**
-	 * @param dbGroup
-	 * @param serviceManager
-	 * @param customerId
-	 * @param techId
-	 * @param platform
-	 * @throws PhrescoException
-	 */
-	private void getDataBases(final Group dbGroup,
-			List<DownloadInfo> dataBases, String customerId, String techId, String platform) throws PhrescoException {
-		List<String> dbNames = new ArrayList<String>();
-		for (DownloadInfo downloadInfo : dataBases) {
-			dbNames.add(downloadInfo.getName());
-			List<ArtifactInfo> versions = downloadInfo.getArtifactGroup().getVersions();
-			List<String> versionList = new ArrayList<String>();
-			for (ArtifactInfo artifactInfo : versions) {
-				versionList.add(artifactInfo.getVersion());
-			}
-			dbVersionMap.put(downloadInfo.getName(), versionList);
-		}
-		if(CollectionUtils.isNotEmpty(dbNames)) {
-			Label serverLabel = new Label(dbGroup, SWT.NONE);
-			serverLabel.setText(Messages.DATABASE);
-			
-			String[] serverNamesArray = dbNames.toArray(new String[dbNames.size()]);
-			dbNameCombo = new Combo(dbGroup, SWT.BORDER | SWT.READ_ONLY);
-			dbNameCombo.setItems(serverNamesArray);
-			dbNameCombo.select(0);
-		}
-		
-		List<String> dbVersions = dbVersionMap.get(dbNames.get(0));
-		if(CollectionUtils.isNotEmpty(dbVersions)) {
-			Label versionLanel = new Label(dbGroup, SWT.NONE);
-			versionLanel.setText(Messages.VERSIONS);
-			String[] serverVersionsArray = dbVersions.toArray(new String[dbVersions.size()]);
-			dbVersionListBox = new org.eclipse.swt.widgets.List(dbGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
-			dbVersionListBox.setItems(serverVersionsArray);
-			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-			gridData.heightHint = 40;
-			dbVersionListBox.setLayoutData(gridData);
-			dbVersionListBox.select(0);
-		}
-		
-		dbNameCombo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				List<String> versions = dbVersionMap.get(dbNameCombo.getText());
-				String[] versionsArray = versions.toArray(new String[versions.size()]);
-				dbVersionListBox.removeAll();
-				dbVersionListBox.setItems(versionsArray);
-				dbVersionListBox.select(0);
-				dbGroup.redraw();
-				super.widgetSelected(e);
-			}
-		});
-	}
 	
 	private void getWebServices(ServiceManager serviceManager, Composite composite) {
-		Group webserviceGroup = new Group(composite, SWT.NONE);
-		webserviceGroup.setText(Messages.WEBSERVICES);
-		GridLayout webServiceLayout = new GridLayout(5, false);
-		webserviceGroup.setLayout(webServiceLayout);
-		webserviceGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
 		try {
 			List<WebService> webServices = serviceManager.getWebServices();
+			if(CollectionUtils.isEmpty(webServices)) {
+				return;
+			}
+			Group webserviceGroup = new Group(composite, SWT.NONE);
+			webserviceGroup.setText(Messages.WEBSERVICES);
+			GridLayout webServiceLayout = new GridLayout(5, false);
+			webserviceGroup.setLayout(webServiceLayout);
+			webserviceGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			webServiceButtons = new Button[webServices.size()];
+			int i =0;
 			for (WebService webService : webServices) {
-				Button webServiceButton = new Button(webserviceGroup, SWT.CHECK);
-				webServiceButton.setText(webService.getName());
-				webServiceButton.setData(webService.getName(), webService.getId());
+				webServiceButtons[i] = new Button(webserviceGroup, SWT.CHECK);
+				webServiceButtons[i].setText(webService.getName());
+				webServiceButtons[i].setData(webService.getName(), webService.getId());
+				i = i + 1;
 			}
 		} catch (PhrescoException e) {
 			PhrescoDialog.errorDialog(composite.getShell(), Messages.ERROR, e.getLocalizedMessage());
@@ -391,5 +351,77 @@ public class EditProject extends AbstractHandler {
 			    }
 			}
 		});
+	}
+	
+	private boolean validate(Shell shell) {
+		if(StringUtils.isEmpty(nameText.getText())) {
+			PhrescoDialog.errorDialog(shell, Messages.ERROR, "Name should no be empty");
+			return false;
+		} if(StringUtils.isEmpty(codeText.getText())) {
+			PhrescoDialog.errorDialog(shell, Messages.ERROR, "Code should no be empty");
+			return false;
+		} if(StringUtils.isEmpty(appDirText.getText())) {
+			PhrescoDialog.errorDialog(shell, Messages.ERROR, "App Directory should no be empty");
+			return false;
+		} 
+		return true;
+	}
+	
+	/**
+	 * @param appInfo
+	 * @param artifactGroupInfos
+	 */
+	private void setSelectedServers(final ApplicationInfo appInfo,
+			List<ArtifactGroupInfo> artifactGroupInfos) {
+		if(CollectionUtils.isNotEmpty(serverComponents)) {
+			for (ServerComponent serverComponent : serverComponents) {
+				String serverName = serverComponent.serverNameCombo.getText();
+				String[] selectedVersions = serverComponent.serverVersionListBox.getSelection();
+				String serverId = ServerComponent.serverIdMap.get(serverName);
+				ArtifactGroupInfo artifactGroupInfo = new ArtifactGroupInfo();
+				artifactGroupInfo.setArtifactGroupId(serverId);
+				
+				List<String> artifactInfoIds = new ArrayList<String>();
+				List<ArtifactInfo> artifactInfos = ServerComponent.serverVersionMap.get(serverName);
+				for (ArtifactInfo artifactInfo : artifactInfos) {
+					List<String> selectedVersionsList = Arrays.asList(selectedVersions);
+					if(selectedVersionsList.contains(artifactInfo.getVersion())) {
+						artifactInfoIds.add(artifactInfo.getId());
+					}
+				}
+				artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
+				artifactGroupInfos.add(artifactGroupInfo);
+				appInfo.setSelectedServers(artifactGroupInfos);
+			}
+		}
+	}
+	
+	/**
+	 * @param appInfo
+	 * @param artifactGroupInfos
+	 */
+	private void setSelectedDatabase(final ApplicationInfo appInfo,
+			List<ArtifactGroupInfo> artifactGroupInfos) {
+		if(CollectionUtils.isNotEmpty(dbComponents)) {
+			for (DatabaseComponent dbComponent : dbComponents) {
+				String dataBaseName = dbComponent.dbNameCombo.getText();
+				String[] selectedVersions = dbComponent.dbVersionListBox.getSelection();
+				String serverId = DatabaseComponent.dbIdMap.get(dataBaseName);
+				ArtifactGroupInfo artifactGroupInfo = new ArtifactGroupInfo();
+				artifactGroupInfo.setArtifactGroupId(serverId);
+				
+				List<String> artifactInfoIds = new ArrayList<String>();
+				List<ArtifactInfo> artifactInfos = DatabaseComponent.dbVersionMap.get(dataBaseName);
+				for (ArtifactInfo artifactInfo : artifactInfos) {
+					List<String> selectedVersionsList = Arrays.asList(selectedVersions);
+					if(selectedVersionsList.contains(artifactInfo.getVersion())) {
+						artifactInfoIds.add(artifactInfo.getId());
+					}
+				}
+				artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
+				artifactGroupInfos.add(artifactGroupInfo);
+				appInfo.setSelectedDatabases(artifactGroupInfos);
+			}
+		}
 	}
 }

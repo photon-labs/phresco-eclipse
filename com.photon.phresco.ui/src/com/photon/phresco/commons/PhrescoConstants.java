@@ -195,4 +195,6 @@ public interface PhrescoConstants {
 	String WINDOWS_7 = "Windows 7";
 	String BIT_64 = "64";
 	String BIT_86 = "86";
+	
+	String PHRESCO_SQL_PATH = "phresco.sql.path";
 }

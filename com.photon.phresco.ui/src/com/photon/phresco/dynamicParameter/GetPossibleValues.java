@@ -42,7 +42,7 @@ public class GetPossibleValues {
 					if ("DynamicParameter".equalsIgnoreCase(parameter.getType()) && parameter.getDynamicParameter() != null) { 
 						//Dynamic parameter
 						Map<String, Object> constructMapForDynVals = constructMapForDynVals(appInfo, watcherMap, parameterKey);
-						constructMapForDynVals.put("eclipseHome", PhrescoUtil.getProjectHome());
+						constructMapForDynVals.put("eclipseHome", PhrescoUtil.getApplicationHome());
 						constructMapForDynVals.put("mojo", mojo);
 						constructMapForDynVals.put("goal", goal);
 						constructMapForDynVals.put("serviceManager", serviceManager);

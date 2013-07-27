@@ -40,11 +40,12 @@ import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.service.client.factory.ServiceClientFactory;
 import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 import com.photon.phresco.ui.PhrescoNature;
-import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
+import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.util.PomProcessor;
 import com.sun.jersey.api.client.ClientResponse;
 
 
@@ -309,7 +310,7 @@ public class PhrescoUtil implements PhrescoConstants {
 		}
 	}
 
-	public static String getProjectHome() {
+	public static String getApplicationHome() {
 		IPath location = null ;
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -322,36 +323,35 @@ public class PhrescoUtil implements PhrescoConstants {
 		File path = new File(location.toOSString());
 		return path.getPath();
 	}
+	
+	public static String getProjectHome() {
+		return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+	}
 
 	public static String getProjectName() {
-		File projectHome = new File(getProjectHome());
+		File projectHome = new File(getApplicationHome());
 		String fileName = projectHome.getName();
 		return fileName;
 	}
 
 	public static File getBuildInfoPath() {
-		File buildInfoPath = new File(getProjectHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
+		File buildInfoPath = new File(getApplicationHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
 		return buildInfoPath;
 	}
 
-	public static String getApplicationHome() throws PhrescoException {
-		StringBuilder builder = new StringBuilder(getProjectHome());
-		return builder.toString();
-	}
-
 	public static File getPackageInfoConfigurationPath() {
-		File packageconfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
+		File packageconfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
 		return packageconfigPath;
 	}
 	
 	public static File getDeployInfoConfigurationPath() {
-		File deployConfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
+		File deployConfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
 		return deployConfigPath;
 	}
 
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
 		try {
-			File projectFilePath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
+			File projectFilePath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
 			FileReader reader = new FileReader(projectFilePath);
 			Gson  gson = new Gson();
 			Type type = new TypeToken<ProjectInfo>() {}.getType();
@@ -367,7 +367,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static String getPomFileName(ApplicationInfo appInfo) {
-		File pomFile = new File(getProjectHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
+		File pomFile = new File(getApplicationHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
 		if(pomFile.exists()) {
 			return appInfo.getPomFile();
 		}
@@ -406,5 +406,19 @@ public class PhrescoUtil implements PhrescoConstants {
 			osBit = BIT_86;
 		}
 		return osName.concat(osBit);
+	}
+	
+	public static PomProcessor getPomProcessor(String appDirName) throws PhrescoException {
+		String applicationHome = getProjectHome() + File.separator + appDirName;
+		try {
+			return new PomProcessor(new File(applicationHome));
+		} catch (PhrescoPomException e) {
+			throw new PhrescoException(e);
+		}
+	}
+	
+	public static String getSqlFilePath(String appDirName) throws PhrescoException, PhrescoPomException {
+		String sqlPath = getPomProcessor(appDirName).getProperty(PHRESCO_SQL_PATH);
+		return getApplicationHome() + File.separatorChar + sqlPath;
 	}
 }
