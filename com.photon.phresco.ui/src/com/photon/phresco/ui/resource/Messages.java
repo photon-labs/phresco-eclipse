@@ -121,12 +121,12 @@ public class Messages extends NLS {
 	public static String DATABASES="Databases";
 	public static String WEBSERVICES="Web Services";
 	public static String UPDATE="Update";	
-	
+/*	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
 
 	private Messages() {
-	}
+	}*/
 }
