@@ -34,7 +34,7 @@
 		
 		<jar destfile="target/lib/com.photon.phresco.plugin.jar">
             <manifest>
-                <attribute name="MyParameter" value="123"/>
+                <attribute name="serviceURL" value="${service.url}"/>
             </manifest>
             <fileset dir="target/classes"/> 
 		</jar>

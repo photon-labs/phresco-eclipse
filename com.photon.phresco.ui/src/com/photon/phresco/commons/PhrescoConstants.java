@@ -27,6 +27,8 @@ package com.photon.phresco.commons;
  
 public interface PhrescoConstants {
 	
+	String DEFAULT_SERVICE_URL = "http://172.16.8.250:7070/service-testing/rest/api";
+	
 	char CHAR_ASTERISK = '*';
 	
 	String STR_EMPTY = "";

@@ -1,5 +1,8 @@
 package com.photon.phresco.ui.preferences;
 
+import java.io.File;
+import java.net.URISyntaxException;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -46,6 +49,7 @@ public class LoginPrefrence
     private Text password;
     private IPreferenceStore prefStore;
     private boolean isLoggedIn;
+    private String jarName = "/com.photon.phresco.plugin.jar";
     
 	public LoginPrefrence() {
 		super();
@@ -101,6 +105,18 @@ public class LoginPrefrence
     }
 
     public boolean performOk() {
+    	String jarPath="";
+		try {
+			File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			String jarDir = f.getParentFile().getPath();
+			jarPath = jarDir+jarName;
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
+    	final String serviceURL = PhrescoUtil.getServiceURL(jarPath);
+    	
         boolean result = false;
         prefStore = getPreferenceStore();
         final String loginUserName = userName.getText();
@@ -109,7 +125,7 @@ public class LoginPrefrence
         BusyIndicator.showWhile(null, new Runnable() {
             public void run() {
             	try {
-					isLoggedIn = PhrescoUtil.doLogin(loginUserName, loginPassword);
+					isLoggedIn = PhrescoUtil.doLogin(loginUserName, loginPassword, serviceURL);
 				} catch (PhrescoException e) {
 					PhrescoDialog.exceptionDialog(getShell(), e);
 				}

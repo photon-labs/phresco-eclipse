@@ -10,6 +10,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.internal.events.BuildCommand;
 import org.eclipse.core.resources.IProject;
@@ -55,14 +58,19 @@ public class PhrescoUtil implements PhrescoConstants {
 	static String loggedInUserId;
 	public static final Map<String, ServiceManager> CONTEXT_MANAGER_MAP = new HashMap<String, ServiceManager>();
 	
-	public static boolean doLogin(String userName, String password) throws PhrescoException {
+	public static boolean doLogin(String userName, String password, String serviceURL) throws PhrescoException {
 		
 		ServiceContext context = new ServiceContext();
-		context.put(SERVICE_URL, "http://172.16.8.250:7070/service-testing/rest/api");
-		System.out.println(" user name in phresco util : " + userName);
-		System.out.println(" password in phresco util : " + password);
+		
+		if (serviceURL != null) {
+			context.put(SERVICE_URL, serviceURL);
+		} else {
+			context.put(SERVICE_URL, DEFAULT_SERVICE_URL);
+		}
+		
 		context.put(SERVICE_USERNAME, userName);
 		context.put(SERVICE_PASSWORD, password);
+		
 		try {
 			ServiceManager serviceManager = new ServiceManagerImpl(context);
 			CONTEXT_MANAGER_MAP.put(userName, serviceManager);
@@ -83,6 +91,26 @@ public class PhrescoUtil implements PhrescoConstants {
 		return isLoggedIn;
 	}
 
+	public static String getServiceURL(String jarPath) {
+
+		try {
+			////pass your jar file name which included manifest file
+			JarFile jf = new JarFile(jarPath);
+			////getting manifest file from jar file
+			Manifest m = jf.getManifest();
+			////getting all attribute from manifest file
+			Attributes attr = m.getMainAttributes();
+			////taking values from manifest file.
+			////existing field
+			String serviceURL = attr.getValue("serviceURL"); // Service URL	serviceURL
+			return serviceURL;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public static boolean isLoggedIn() {
 		return isLoggedIn;
 	}
