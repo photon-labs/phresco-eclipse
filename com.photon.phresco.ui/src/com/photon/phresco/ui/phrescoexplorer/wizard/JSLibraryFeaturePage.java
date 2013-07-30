@@ -38,13 +38,14 @@ import com.photon.phresco.commons.model.ArtifactGroup;
  */
 
 public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
-	public static final String PAGE_NAME = "JS Library";
+	public static final String PAGE_NAME = "JS Libraries";
 	private Table jsLibTable;
 	private List<ArtifactGroup> features = null;
 	private boolean isFirstPage;
+	private boolean isRendered;
 	
 	public JSLibraryFeaturePage(List<ArtifactGroup> features, boolean isFirstPage) {
-		super(PAGE_NAME, "JS Library", null);
+		super(PAGE_NAME, PAGE_NAME, null);
 		this.features = features;
 		this.isFirstPage = isFirstPage;
 	}
@@ -61,21 +62,29 @@ public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 		
 		if (isFirstPage) {
 			renderPage();
+			isRendered = true;
 		}
 		
 	}
 	
 	public void getSelectedItems() {
-		TableItem[] selection = jsLibTable.getSelection();
-		for (int i = 0; i < selection.length; i++) {
-			TableItem tableItem = selection[i];
-			String id = (String) tableItem.getData();
-			System.out.println(" ID IN JS LIB : " + id);
+		if (jsLibTable != null) {
+			TableItem[] selection = jsLibTable.getSelection();
+			for (int i = 0; i < selection.length; i++) {
+				TableItem tableItem = selection[i];
+				String id = (String) tableItem.getData();
+				System.out.println(" ID IN JS LIB : " + id);
+			}
 		}
 	}
 
 	@Override
 	public void renderPage() {
+		
+		if (isRendered) {
+			return;
+		}
+		
 		final Composite parentComposite = (Composite) getControl();
 		
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.V_SCROLL);

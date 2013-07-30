@@ -68,7 +68,7 @@ class FeatureWizard extends Wizard {
 			String techId = PhrescoUtil.getTechId();
 			List<ArtifactGroup> jsLibs = serviceManager.getFeatures(custId, techId, "JAVASCRIPT");
 			List<ArtifactGroup> modules = serviceManager.getFeatures(custId, techId, "FEATURE");
-			List<ArtifactGroup> components = serviceManager.getFeatures(custId, techId, "LIBRARIES");
+			List<ArtifactGroup> components = serviceManager.getFeatures(custId, techId, "COMPONENT");
 			
 			if (jsLibs != null && jsLibs.size() != 0) {
 				addPage(new JSLibraryFeaturePage(jsLibs, isFirstPage));
@@ -98,6 +98,7 @@ class FeatureWizard extends Wizard {
 		for (int i = 0; i < pages.length; i++) {
 			IWizardPage wizardPage = pages[i];
 			
+			System.out.println(" wizardPage :"  + wizardPage);
 			if (wizardPage instanceof JSLibraryFeaturePage) {
 				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
 				jsLibPage.getSelectedItems();

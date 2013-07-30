@@ -81,7 +81,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage {
         for (ArtifactGroup artifactGroup : features) {
         	TableItem item = new TableItem(jsLibTable, SWT.NONE);
         	
-        	item.setData(artifactGroup.getGroupId());
+        	item.setData(artifactGroup);
         	
         	item.setText(0, artifactGroup.getDisplayName());
         	String description = artifactGroup.getDescription();
