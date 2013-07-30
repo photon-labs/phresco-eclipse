@@ -19,6 +19,8 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.List;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -31,6 +33,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+
+import com.photon.phresco.commons.model.ArtifactGroup;
+import com.photon.phresco.commons.model.ArtifactInfo;
 
 /**
  * Abstract class to handle feature page
@@ -48,7 +53,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage {
 	}
 	
 	
-	public Table getFeatureTable(final Composite composite, String featureName) {
+	public Table getFeatureTable(final Composite composite, String featureName, List<ArtifactGroup> features) {
 		
 		Group jsLibGroups = new Group(composite, SWT.SHADOW_ETCHED_IN);
 		jsLibGroups.setText(featureName);
@@ -73,13 +78,23 @@ public abstract class AbstractFeatureWizardPage extends WizardPage {
         versionColumn.setText("Version");
         versionColumn.setWidth(160);
         
-        for (int i = 0; i < 5; i++) {
-            TableItem item = new TableItem(jsLibTable, SWT.NONE);
-            item.setData("id "+i);
-            item.setText(0, "abc name"+i);
-            item.setText(1, "abc desc"+i);
-            item.setText(1, "abc version"+i);
-        }
+        for (ArtifactGroup artifactGroup : features) {
+        	TableItem item = new TableItem(jsLibTable, SWT.NONE);
+        	
+        	item.setData(artifactGroup.getGroupId());
+        	
+        	item.setText(0, artifactGroup.getDisplayName());
+        	String description = artifactGroup.getDescription();
+        	if (description == null) {
+        		description = "";
+        	}
+        	
+        	item.setText(1, description);
+        	
+        	// Versions should be in combo
+            ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
+            item.setText(2, artifactInfo.getVersion());
+		}
         
         SelectionListener listener = new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {

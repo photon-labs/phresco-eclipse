@@ -19,12 +19,18 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.List;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+
+import com.photon.phresco.commons.model.ArtifactGroup;
+import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.service.client.api.ServiceManager;
 
 /**
  * Class to create the wizard page to render featues
@@ -54,36 +60,58 @@ class FeatureWizard extends Wizard {
 	}
 
 	public void addPages() {
-		addPage(new JSLibraryFeaturePage());
-		addPage(new ModuleFeaturePage());
-		addPage(new ComponentFeaturePage());
+		
+		try {
+			boolean isFirstPage = true;
+			ServiceManager serviceManager = PhrescoUtil.getServiceManager();
+			String custId = PhrescoUtil.getCustomerId();
+			String techId = PhrescoUtil.getTechId();
+			List<ArtifactGroup> jsLibs = serviceManager.getFeatures(custId, techId, "JAVASCRIPT");
+			List<ArtifactGroup> modules = serviceManager.getFeatures(custId, techId, "FEATURE");
+			List<ArtifactGroup> components = serviceManager.getFeatures(custId, techId, "LIBRARIES");
+			
+			if (jsLibs != null && jsLibs.size() != 0) {
+				addPage(new JSLibraryFeaturePage(jsLibs, isFirstPage));
+				isFirstPage = false;
+			}
+			
+			if (modules != null && modules.size() != 0) {
+				ModuleFeaturePage moduleFeaturePage = new ModuleFeaturePage(modules, isFirstPage);
+				addPage(moduleFeaturePage);
+				isFirstPage = false;
+			}
+			
+			if (components != null && components.size() != 0) {
+				ComponentFeaturePage componentFeaturePage = new ComponentFeaturePage(components, isFirstPage);
+				addPage(componentFeaturePage);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean performFinish() {
-		JSLibraryFeaturePage dirPage = getDirectoryPage();
-		if (dirPage.useDefaultDirectory()) {
-			System.out.println("Using default directory");
-		} else {
-			ModuleFeaturePage choosePage = getChoosePage();
-//			System.out.println("Using directory: " + choosePage.getDirectory());
-		}
 		
-		IWizardPage wizardPage = getContainer().getCurrentPage();
-		System.out.println(" wizardPage :" + wizardPage);
-		if (wizardPage instanceof JSLibraryFeaturePage) {
-			JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
-			jsLibPage.getSelectedJSLib();
+		IWizardPage[] pages = getPages();
+		
+		for (int i = 0; i < pages.length; i++) {
+			IWizardPage wizardPage = pages[i];
+			
+			if (wizardPage instanceof JSLibraryFeaturePage) {
+				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
+				jsLibPage.getSelectedItems();
+			} else if (wizardPage instanceof ModuleFeaturePage) {
+				ModuleFeaturePage modulePage = (ModuleFeaturePage) wizardPage;
+				modulePage.getSelectedItems();
+			} else if (wizardPage instanceof ComponentFeaturePage) {
+				ComponentFeaturePage componentPage = (ComponentFeaturePage) wizardPage;
+				componentPage.getSelectedItems();
+			}
+			
 		}
 		
 		return true;
-	}
-
-	private ModuleFeaturePage getChoosePage() {
-		return (ModuleFeaturePage) getPage(ModuleFeaturePage.PAGE_NAME);
-	}
-
-	private JSLibraryFeaturePage getDirectoryPage() {
-		return (JSLibraryFeaturePage) getPage(JSLibraryFeaturePage.PAGE_NAME);
 	}
 
 	public boolean performCancel() {
@@ -106,7 +134,7 @@ class FeatureWizard extends Wizard {
 			ModuleFeaturePage modulePage = (ModuleFeaturePage) page;
 			modulePage.renderPage();
 		}
-		
+			
 		return super.getNextPage(page);
 	}
 }

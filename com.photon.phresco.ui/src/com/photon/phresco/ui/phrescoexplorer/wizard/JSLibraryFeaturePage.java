@@ -19,6 +19,8 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
@@ -26,6 +28,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+
+import com.photon.phresco.commons.model.ArtifactGroup;
 
 /**
  * Page to render js libraries
@@ -35,10 +39,14 @@ import org.eclipse.swt.widgets.TableItem;
 
 public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 	public static final String PAGE_NAME = "JS Library";
-	Table jsLibTable;
+	private Table jsLibTable;
+	private List<ArtifactGroup> features = null;
+	private boolean isFirstPage;
 	
-	public JSLibraryFeaturePage() {
+	public JSLibraryFeaturePage(List<ArtifactGroup> features, boolean isFirstPage) {
 		super(PAGE_NAME, "JS Library", null);
+		this.features = features;
+		this.isFirstPage = isFirstPage;
 	}
 
 	public void createControl(Composite parent) {
@@ -51,20 +59,18 @@ public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 		topLevel.setLayout(layout);
 		setControl(topLevel);
 		
-	}
-
-	public boolean useDefaultDirectory() {
-		return false; 
+		if (isFirstPage) {
+			renderPage();
+		}
+		
 	}
 	
-	public void getSelectedJSLib() {
+	public void getSelectedItems() {
 		TableItem[] selection = jsLibTable.getSelection();
-		System.out.println(" selection : " + selection);
-		
 		for (int i = 0; i < selection.length; i++) {
 			TableItem tableItem = selection[i];
 			String id = (String) tableItem.getData();
-			System.out.println(" selected id : " + id);
+			System.out.println(" ID IN JS LIB : " + id);
 		}
 	}
 
@@ -79,7 +85,7 @@ public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 		scrolledComposite.setLocation(5, 5);
 		scrolledComposite.setBounds(5, 5, 500, 200);
 		
-		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME);
+		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME, features);
 	}
 	
 }

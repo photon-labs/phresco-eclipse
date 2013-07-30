@@ -19,12 +19,17 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+
+import com.photon.phresco.commons.model.ArtifactGroup;
 
 /**
  * Page to render components
@@ -34,10 +39,15 @@ import org.eclipse.swt.widgets.Table;
 
 public class ComponentFeaturePage  extends AbstractFeatureWizardPage {
 	public static final String PAGE_NAME = "Component";
-	Table jsLibTable;
+	
+	private Table jsLibTable;
+	private List<ArtifactGroup> features = null;
+	private boolean isFirstPage;
 
-	public ComponentFeaturePage() {
+	public ComponentFeaturePage(List<ArtifactGroup> features, boolean isFirstPage) {
 		super(PAGE_NAME, "Component", null);
+		this.features = features;
+		this.isFirstPage = isFirstPage;
 	}
 
 	public void createControl(Composite parent) {
@@ -50,6 +60,9 @@ public class ComponentFeaturePage  extends AbstractFeatureWizardPage {
 		topLevel.setLayout(layout);
 		setControl(topLevel);
 		
+		if (isFirstPage) {
+			renderPage();
+		}
 	}
 	
 	@Override
@@ -63,6 +76,17 @@ public class ComponentFeaturePage  extends AbstractFeatureWizardPage {
 		scrolledComposite.setLocation(5, 5);
 		scrolledComposite.setBounds(5, 5, 500, 200);
 		
-		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME);
+		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME, features);
+	}
+	
+	public void getSelectedItems() {
+		TableItem[] selection = jsLibTable.getSelection();
+		System.out.println(" selection : " + selection);
+		
+		for (int i = 0; i < selection.length; i++) {
+			TableItem tableItem = selection[i];
+			String id = (String) tableItem.getData();
+			System.out.println(" selected id : " + id);
+		}
 	}
 }
