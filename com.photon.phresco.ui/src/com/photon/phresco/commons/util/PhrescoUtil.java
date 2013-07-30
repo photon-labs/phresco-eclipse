@@ -357,29 +357,40 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static String getProjectName() {
-		File projectHome = new File(getApplicationHome());
+		File projectHome = new File(getProjectHome());
 		String fileName = projectHome.getName();
 		return fileName;
 	}
 
 	public static File getBuildInfoPath() {
-		File buildInfoPath = new File(getApplicationHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
+		File buildInfoPath = new File(getProjectHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
 		return buildInfoPath;
 	}
 
 	public static File getPackageInfoConfigurationPath() {
-		File packageconfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
+		File packageconfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PACKAGE_INFO_FILE);
 		return packageconfigPath;
 	}
 	
 	public static File getDeployInfoConfigurationPath() {
-		File deployConfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
+		File deployConfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + DEPLOY_INFO_FILE);
 		return deployConfigPath;
 	}
 
+	
+	public static File getValidateCodeInfoConfigurationPath() {
+		File validateCodeconfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + VALIDATECODE_INFO_FILE );
+		return validateCodeconfigPath;
+	}
+	
+	public static File getUnitTestInfoConfigurationPath() {
+		File unitTestconfigPath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + UNITTEST_INFO_FILE );
+		return unitTestconfigPath;
+	}
+	
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
 		try {
-			File projectFilePath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
+			File projectFilePath = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
 			FileReader reader = new FileReader(projectFilePath);
 			Gson  gson = new Gson();
 			Type type = new TypeToken<ProjectInfo>() {}.getType();
@@ -393,9 +404,15 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static ApplicationInfo getApplicationInfo() throws PhrescoException {
 		return getProjectInfo().getAppInfos().get(0);
 	}
+	
+	public static File getConfigurationFile() throws PhrescoException {
+		File envconfigFile = new File(getProjectHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + ENVIRONMENT_CONFIG_FILE);
+		return envconfigFile;
+	}
+	
 
 	public static String getPomFileName(ApplicationInfo appInfo) {
-		File pomFile = new File(getApplicationHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
+		File pomFile = new File(getProjectHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
 		if(pomFile.exists()) {
 			return appInfo.getPomFile();
 		}

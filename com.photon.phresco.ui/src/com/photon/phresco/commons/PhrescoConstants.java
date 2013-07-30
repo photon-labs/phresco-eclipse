@@ -184,6 +184,19 @@ public interface PhrescoConstants {
 	
 	String 	DEPLOY_INFO_FILE = "phresco-deploy-info.xml";
 	
+	// Code Validate
+	
+	String VALIDATECODE_INFO_FILE = "phresco-validate-code-info.xml";
+	String VALIDATE_CODE_GOAL     = "validate-code";
+	String VALIDATE				  = "Validate";
+	
+	
+	// Unit Test
+	
+	String UNITTEST_INFO_FILE = "phresco-unit-test-info.xml";
+	String UNIT_TEST_GOAL     = "unit-test";
+	String TEST				  = "Test";
+	
 
 	String FAILED = "FAILED";
 	String OK = "OK";	

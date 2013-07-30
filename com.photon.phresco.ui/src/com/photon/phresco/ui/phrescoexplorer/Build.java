@@ -97,7 +97,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	/**
 	 * @wbp.parser.entryPoint
 	 */
-	Shell createBuildDialog(Shell dialog) {
+	public Shell createBuildDialog(Shell dialog) {
 		buildDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
 
 		buildDialog.setText("Build");
@@ -248,7 +248,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			if(!POM_FILENAME.equals(pomFileName)) {
 				buildArgCmds.add(pomFileName);
 			}
-			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
+			String workingDirectory = PhrescoUtil.getProjectHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.BUILD, buildArgCmds, workingDirectory);
 			String line;
