@@ -29,7 +29,7 @@ public class ProjectManager implements PhrescoConstants {
 
 			Customer customer = serviceManager.getCustomer(action.getCustomerId());
 			RepoInfo repoInfo = customer.getRepoInfo();
-			StringBuilder sb = new StringBuilder(getApplicationHome())
+			StringBuilder sb = new StringBuilder(PhrescoUtil.getApplicationHome())
 			.append(File.separator)
 			.append(Constants.DOT_PHRESCO_FOLDER)
 			.append(File.separator)
@@ -60,16 +60,6 @@ public class ProjectManager implements PhrescoConstants {
 		artifactGroup.setVersions(artifactInfos);
 		plugins.add(artifactGroup);
 		return plugins;
-	}
-
-	private File getProjectHome() {
-		File projectPath = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString()	+ File.separator + PROJECTS);
-		return projectPath;
-	}
-
-	public String getApplicationHome() throws PhrescoException {
-		StringBuilder builder = new StringBuilder(getProjectHome() + File.separator + "TestProject");
-		return builder.toString();
 	}
 
 }
