@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -29,9 +30,11 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.ole.win32.OleClientSite;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -47,6 +50,7 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Utility;
 
 public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants {
@@ -60,7 +64,7 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 		downloadDialog.setLayout(layout);
 		downloadDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Composite composite = new Composite(downloadDialog, SWT.NONE);
+		final Composite composite = new Composite(downloadDialog, SWT.NONE);
 		GridLayout compLayout = new GridLayout(2, false);
 		composite.setLayout(compLayout);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -70,8 +74,10 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 
 			List<Map<String,String>> existingPDFs = getExistingPDFs(fromPage, appInfo);
 
-			System.out.println("available report====> " + existingPDFs);
-
+			if(CollectionUtils.isEmpty(existingPDFs)) {
+				PhrescoDialog.errorDialog(downloadDialog, Messages.ERROR, "Pdf report Not Available");
+				return null;
+			}
 			Table table = new Table(downloadDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 			table.setLayoutData(new GridData(GridData.FILL_BOTH));
 			table.setHeaderVisible(true);
@@ -104,7 +110,7 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 						String reportFileName = (String) downloadButton.getData(time);
 						if(StringUtils.isNotEmpty(reportFileName)) {
 							try {
-								download(fromPage, reportFileName);
+								download(fromPage, reportFileName, downloadDialog);
 							} catch (PhrescoException e1) {
 								PhrescoDialog.exceptionDialog(downloadDialog, e1);
 							}
@@ -173,9 +179,8 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 		return pdfList;
 	}
 	
-	private void download(String fromPage, String reportFileName) throws PhrescoException {
+	private void download(String fromPage, String reportFileName, Shell shell) throws PhrescoException {
 		String pdfLOC = "";
-		FileInputStream fileInputStream = null;
 		String applicationHome = PhrescoUtil.getApplicationHome();
 		String archivePath = applicationHome + File.separator + DO_NOT_CHECKIN_DIR + File.separator + ARCHIVES
 				+ File.separator;
@@ -185,21 +190,18 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 			pdfLOC = archivePath + fromPage + File.separator + reportFileName;
 		}
 		File pdfFile = new File(pdfLOC);
-		System.out.println("file===> " + pdfFile);
 		if (pdfFile.isFile()) {
+			FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
+			fileDialog.setText("Save");
+			fileDialog.setFileName(pdfFile.getName());
+			fileDialog.setFilterPath("C:/");
+			String[] filterExt = { "*.pdf"};
+			fileDialog.setFilterExtensions(filterExt);
+			String selected = fileDialog.open();
 			try {
-				Process p = Runtime
-						   .getRuntime()
-						   .exec("rundll32 url.dll,FileProtocolHandler "+pdfFile);
-						p.waitFor();
-			} catch (FileNotFoundException e) {
-				throw new PhrescoException(e);
+				FileUtils.copyFile(pdfFile, new File(selected), true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new PhrescoException(e);
 			}
 		}
 	}
