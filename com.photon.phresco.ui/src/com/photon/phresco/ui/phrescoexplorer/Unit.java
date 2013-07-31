@@ -100,7 +100,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			if(!POM_FILENAME.equals(pomFileName)) {
 				buildArgCmds.add(pomFileName);
 			}
-			String workingDirectory = PhrescoUtil.getProjectHome().toString();
+			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.UNIT_TEST, buildArgCmds, workingDirectory);
 			String line;
@@ -302,6 +302,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						listLogs.add(value.getValue());
 					}
 					data = new GridData(GridData.FILL_BOTH);
+					listLogs.select(0);
 					listLogs.setLayoutData(data);
 					map.put(parameter.getKey(), listLogs); 
 
