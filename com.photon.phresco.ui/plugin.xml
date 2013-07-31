@@ -123,7 +123,7 @@
       </wizard>
             <wizard
             name="%scm.phresco.project"
-            icon="icons/sample.gif"
+            icon="icons/scm_import.png"
             category="com.photon.phresco.ui.import.phrescoImportCategory"
             class="com.photon.phresco.ui.wizards.PhrescoImportFromSCMWizard"
             id="com.photon.phresco.ui.wizards.PhrescoImportSCMWizard">
@@ -188,13 +188,6 @@
             name="Login">
             
      </page>
-            
-     <page
-            category="com.photon.phresco.ui.preferences.PhrescoPreferences"
-            class="com.photon.phresco.ui.preferences.ConfigurationPage"
-            id="com.photon.phresco.ui.preferences.Configuration"
-            name="Configuration">
-      </page>
       
    </extension>
    <extension
@@ -417,31 +410,32 @@
 				</command>
 			</menu>
 
-			<menu 
-				commandId="PDFReport"
-				id="PDFReport"
-				label="%project.pdfreport.label"
-				style="push"
-				tooltip="%project.pdfreport.tooltip">
+			<menu
+		         commandId="PDFReport"
+		         icon="icons/pdf_report.png"
+		         id="PDFReport"
+		         label="%project.pdfreport.label"
+		         style="push"
+		         tooltip="%project.pdfreport.tooltip">
 				<command
-					commandId="Generate"
-					id="%project.pdfreport.generate.id"
-					label="%project.pdfreport.generate.name"
-					style="push"
-					tooltip="%project.pdfreport.generate.tooltip">
+		          commandId="Generate"
+		          icon="icons/generate_build_icon.png"
+		          id="%project.pdfreport.generate.id"
+		          label="%project.pdfreport.generate.name"
+		          style="push"
+		          tooltip="%project.pdfreport.generate.tooltip">
 				</command>
 				<command
-					commandId="Download"
-					id="%project.pdfreport.download.id"
-					label="%project.pdfreport.download.name"
-					style="push"
-					tooltip="%project.pdfreport.download.tooltip">
+		          commandId="Download"
+		          icon="icons/deploy_icon.png"
+		          id="%project.pdfreport.download.id"
+		          label="%project.pdfreport.download.name"
+		          style="push"
+		          tooltip="%project.pdfreport.download.tooltip">
 				</command>
 				
 			</menu>
 
-
-						
 		</menu>
 	</menuContribution>
 	 <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
