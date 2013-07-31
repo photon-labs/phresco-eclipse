@@ -27,7 +27,7 @@ import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.util.PhrescoDynamicLoader;
 
-public class GetPossibleValues {
+public class DynamicPossibleValues {
 	private static Map<String, PhrescoDynamicLoader> pdlMap = new HashMap<String, PhrescoDynamicLoader>();
 	private static Map<String, Object> dynamicMap = new HashMap<String, Object>(); 
 

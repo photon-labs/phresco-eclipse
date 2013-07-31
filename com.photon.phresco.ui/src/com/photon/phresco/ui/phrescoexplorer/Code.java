@@ -37,13 +37,15 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.util.ActionType;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
+import com.photon.phresco.commons.util.SonarUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
-import com.photon.phresco.dynamicParameter.GetPossibleValues;
+import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
@@ -68,28 +70,33 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
+		final Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
-		Shell createCodeDialog = createCodeDialog(dialog);
-		createCodeDialog.open();
+		try {
+			int status = SonarUtil.getSonarServerStatus();
+			if (status == 200) {
+				final Shell createCodeDialog = createCodeDialog(dialog);
+				createCodeDialog.open();
+			} else {
+				PhrescoDialog.errorDialog(shell, "Sonar Status", "Sonar is not Yet Started . Start the sonar to continue");
+				return "";
+			}
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
 
 		codeButton.addListener(SWT.Selection, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
 				saveCongfiguration();
-				checkSonarStatus();
-				ValidateCode();				
+				ValidateCode();
 			}
 		});
 		return null;
 	}
 
-	private void checkSonarStatus() {
-		
-	}
-	
 	public void ValidateCode() {
 		try {
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
@@ -234,7 +241,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			List<Parameter> parameters = configuration.getParameters().getParameter();
 
 			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
-			GetPossibleValues possibleValues = new GetPossibleValues();
+			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, VALIDATE_CODE_GOAL);
 

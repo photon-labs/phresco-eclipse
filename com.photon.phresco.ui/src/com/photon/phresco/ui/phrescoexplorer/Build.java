@@ -38,7 +38,7 @@ import com.photon.phresco.commons.util.ActionType;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.dynamicParameter.DependantParameters;
-import com.photon.phresco.dynamicParameter.GetPossibleValues;
+import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
@@ -110,7 +110,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			List<Parameter> parameters = configuration.getParameters().getParameter();
 
 			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
-			GetPossibleValues possibleValues = new GetPossibleValues();
+			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, "package");
 
