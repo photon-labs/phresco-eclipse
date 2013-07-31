@@ -364,7 +364,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			unitButton.setSize(74, 23);
 
 			cancelButton = new Button(composite, SWT.BORDER);
-			cancelButton.setText(DELETE);
+			cancelButton.setText(CANCEL);
 			cancelButton.setSize(74, 23);
 
 			unitTestDialog.pack();

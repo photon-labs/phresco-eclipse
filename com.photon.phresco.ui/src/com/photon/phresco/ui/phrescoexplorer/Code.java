@@ -79,12 +79,17 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			@Override
 			public void handleEvent(Event event) {
 				saveCongfiguration();
+				checkSonarStatus();
 				ValidateCode();				
 			}
 		});
 		return null;
 	}
 
+	private void checkSonarStatus() {
+		
+	}
+	
 	public void ValidateCode() {
 		try {
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
@@ -362,7 +367,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			codeButton.setSize(74, 23);
 
 			cancelButton = new Button(composite, SWT.BORDER);
-			cancelButton.setText(DELETE);
+			cancelButton.setText(CANCEL);
 			cancelButton.setSize(74, 23);
 
 			codeDialog.pack();

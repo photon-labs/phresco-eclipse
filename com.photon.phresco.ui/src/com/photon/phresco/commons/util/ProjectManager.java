@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import com.photon.phresco.api.ApplicationProcessor;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ArtifactGroup;
