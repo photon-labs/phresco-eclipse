@@ -62,27 +62,6 @@ public class ModuleFeaturePage extends AbstractFeatureWizardPage {
 		scrolledComposite.setAlwaysShowScrollBars(false);
 		scrolledComposite.setBounds(5, 5, 500, 350);
 		
-		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME, features);
-	}
-	
-	
-	public void getSelectedItems() {
-		System.out.println(" getSelectedCheckBoxRows : " + getSelectedCheckBoxRows());
-		Map<ArtifactGroup, String> selectedComboBoxRows = getSelectedComboBoxRows();
-		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
-		
-		Iterator entries = selectedCheckBoxRows.entrySet().iterator();
-		while (entries.hasNext()) {
-		    Map.Entry entry = (Map.Entry) entries.next();
-		    ArtifactGroup key = (ArtifactGroup)entry.getKey();
-		    
-		    String value = (String)entry.getValue();
-		    System.out.println("Key = " + key.getDisplayName() + " = " + value);
-		    
-		    if (value != null && KEY_EMPTY.equals(value)) {
-		    	String comboValue = selectedComboBoxRows.get(key);
-		    	System.out.println(" comboValue :" + comboValue);
-		    }
-		}
+		renderFeatureTable(scrolledComposite, PAGE_NAME, features);
 	}
 }
