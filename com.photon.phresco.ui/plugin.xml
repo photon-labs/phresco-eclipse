@@ -254,6 +254,13 @@
             id="editProject"
             name="Edit Project">
         </command>
+
+      <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.UpdateFeature"
+            id="feature"
+            name="Features">
+      </command>
+      
        <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.ConfigurationPage"
             id="Config"
@@ -316,14 +323,7 @@
                   </count>
                </with>
             </visibleWhen>
-		   
-			<command
-			   commandId="Phresco"
-			   id="%project.feature.id"
-			   label="%project.feature.label"
-			   style="push"
-			   tooltip="%project.feature.tooltip">
-			</command>
+
 			<command
          		commandId="editProject"
          		icon="icons/configure_icon.png"
@@ -332,7 +332,15 @@
          		style="push"
          		tooltip="%project.configuration.tooltip">
 			</command>
-	
+
+			<command
+			   commandId="feature"
+			   id="%project.feature.id"
+			   label="%project.feature.label"
+			   style="push"
+			   tooltip="%project.feature.tooltip">
+			</command>
+				
 			<command
 		         commandId="Config"
 		         icon="icons/configure_icon.png"
