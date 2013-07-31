@@ -24,11 +24,11 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationType;
 import com.photon.phresco.commons.model.Customer;
-import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.BaseAction;
 
 /**
  * App Info Page

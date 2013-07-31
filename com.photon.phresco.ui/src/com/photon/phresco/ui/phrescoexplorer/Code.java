@@ -40,7 +40,6 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
-import com.photon.phresco.commons.util.ActionType;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.SonarUtil;
@@ -52,6 +51,7 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.ui.model.ActionType;
 
 public class Code extends AbstractHandler implements PhrescoConstants {
 
