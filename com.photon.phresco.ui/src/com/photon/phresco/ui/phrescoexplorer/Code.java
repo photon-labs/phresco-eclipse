@@ -203,8 +203,12 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						String encodedString = new String(encodedPwd);
 						parameter.setValue(encodedString);
 					} else if (parameter.getType().equalsIgnoreCase(LIST)) {
-						Combo list =  (Combo) map.get(parameter.getKey());
-						parameter.setValue(list.getText()); 
+						List<String> list =  (List<String>) map.get(parameter.getKey());
+						if (CollectionUtils.isNotEmpty(list)) {
+							for (String value : list) {
+								parameter.setValue(value);
+							}
+						}
 					} else if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 						List<String> list =  (List<String>) map.get(parameter.getKey());
 						StringBuilder env = new StringBuilder();
@@ -308,14 +312,16 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 					listLogs = new Combo(codeDialog, SWT.DROP_DOWN);
+					List<String> listValues = new ArrayList<String>();
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
+						listValues.add(value.getKey());
 					}
 					data = new GridData(GridData.FILL_BOTH);
 					listLogs.select(0);
 					listLogs.setLayoutData(data);
-					map.put(parameter.getKey(), listLogs); 
+					map.put(parameter.getKey(), listValues); 
 
 				} else if (type.equalsIgnoreCase("DynamicParameter")) {
 					int yaxis = 0;
