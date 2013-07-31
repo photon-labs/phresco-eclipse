@@ -55,7 +55,6 @@ public class UpdateFeature extends AbstractHandler  {
 			PhrescoDialog.errorDialog(shell,"Error", "Please Login before making Request");
 			return null;
 		}
-
 		
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.MAX | SWT.TITLE | SWT.RESIZE);
 		GridLayout layout = new GridLayout(1, false);

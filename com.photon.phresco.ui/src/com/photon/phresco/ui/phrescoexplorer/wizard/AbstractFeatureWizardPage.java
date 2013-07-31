@@ -19,6 +19,7 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.eclipse.swt.widgets.Text;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
+import com.photon.phresco.commons.model.SelectedFeature;
 
 /**
  * Abstract class to handle feature page
@@ -204,28 +206,34 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		return selectedArtifactGroupWithComboVersion;
 	}
 	
-	public Map getSelectedItems() {
-		Map<ArtifactGroup, String> finalDataMap = new HashMap<ArtifactGroup, String>();
-		
+	public List<SelectedFeature> getSelectedItems() {
 		Map<ArtifactGroup, String> selectedComboBoxRows = getSelectedComboBoxRows();
 		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
 		
+		List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
 		Iterator entries = selectedCheckBoxRows.entrySet().iterator();
 		while (entries.hasNext()) {
+			SelectedFeature selectedFeature = new SelectedFeature();
 		    Map.Entry entry = (Map.Entry) entries.next();
 		    ArtifactGroup key = (ArtifactGroup)entry.getKey();
 		    
 		    String value = (String)entry.getValue();
+		    selectedFeature.setModuleId(key.getId());
+		    selectedFeature.setType(key.getType().name());
+		    List<ArtifactInfo> versions = key.getVersions();
+		    for (ArtifactInfo artifactInfo : versions) {
+				if(artifactInfo.getVersion().equals(value)) {
+					selectedFeature.setVersionID(artifactInfo.getId());
+				}
+			}
 		    System.out.println("Key = " + key.getDisplayName() + " = " + value);
 		    
 		    if (value != null && KEY_EMPTY.equals(value)) {
 		    	value = selectedComboBoxRows.get(key);
 		    	System.out.println(" comboValue :" + value);
 		    }
-		    
-		    finalDataMap.put(key, value);
+		    selectedFeatures.add(selectedFeature);
 		}
-		
-		return finalDataMap;
+		return selectedFeatures;
 	}
 }
