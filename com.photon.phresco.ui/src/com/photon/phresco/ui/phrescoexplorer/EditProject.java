@@ -2,18 +2,13 @@ package com.photon.phresco.ui.phrescoexplorer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.CheckboxCellEditor;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -22,14 +17,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -65,7 +58,6 @@ public class EditProject extends AbstractHandler {
 	private List<DatabaseComponent> dbComponents = new ArrayList<DatabaseComponent>();
 	
 	private Button[] webServiceButtons;
-	private Button webServiceButton;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
@@ -183,7 +175,7 @@ public class EditProject extends AbstractHandler {
 			updateComposite.setLayout(gridLayout);
 			updateComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			
-			Button updateButton = new Button(updateComposite, SWT.PUSH);
+			final Button updateButton = new Button(updateComposite, SWT.PUSH);
 			updateButton.setText(Messages.UPDATE);
 			
 			Listener updateListener = new Listener() {
@@ -203,20 +195,21 @@ public class EditProject extends AbstractHandler {
 					}
 					String oldAppDirName = PhrescoUtil.getProjectName();
 					
-					//Top set the selected server
-					List<ArtifactGroupInfo> artifactGroupInfos = new ArrayList<ArtifactGroupInfo>();
-					setSelectedServers(appInfo, artifactGroupInfos);
-					setSelectedDatabase(appInfo, artifactGroupInfos);
+					//To set the selected server
+					setSelectedServers(appInfo);
+					setSelectedDatabase(appInfo);
 					
 					List<String> webServiceIds = new ArrayList<String>();
-					List<Button> buttons = Arrays.asList(webServiceButtons);
-					int i = 0;
-					for (Button button : buttons) {
-						if(button.getSelection()) {
-							String webServiceId = (String) button.getData(button.getText());
-							webServiceIds.add(webServiceId);
+					if(webServiceButtons != null) {
+						List<Button> buttons = Arrays.asList(webServiceButtons);
+						int i = 0;
+						for (Button button : buttons) {
+							if(button.getSelection()) {
+								String webServiceId = (String) button.getData(button.getText());
+								webServiceIds.add(webServiceId);
+							}
+							i = i+ 1;
 						}
-						i = i+ 1;
 					}
 					if(CollectionUtils.isNotEmpty(webServiceIds)) {
 						appInfo.setSelectedWebservices(webServiceIds);
@@ -227,6 +220,11 @@ public class EditProject extends AbstractHandler {
 					} catch (PhrescoException e) {
 						PhrescoDialog.exceptionDialog(shell, e);
 					}
+					if(!oldAppDirName.equals(appInfo.getAppDirName())) {
+						PhrescoUtil.deleteProjectIntoWorkspace(oldAppDirName);
+						PhrescoUtil.updateProjectIntoWorkspace(appInfo.getAppDirName());
+					}
+					buildDialog.setVisible(false);
 				}
 			};
 			
@@ -371,9 +369,9 @@ public class EditProject extends AbstractHandler {
 	 * @param appInfo
 	 * @param artifactGroupInfos
 	 */
-	private void setSelectedServers(final ApplicationInfo appInfo,
-			List<ArtifactGroupInfo> artifactGroupInfos) {
+	private void setSelectedServers(final ApplicationInfo appInfo) {
 		if(CollectionUtils.isNotEmpty(serverComponents)) {
+			List<ArtifactGroupInfo> artifactGroupInfos = new ArrayList<ArtifactGroupInfo>();
 			for (ServerComponent serverComponent : serverComponents) {
 				String serverName = serverComponent.serverNameCombo.getText();
 				String[] selectedVersions = serverComponent.serverVersionListBox.getSelection();
@@ -400,9 +398,9 @@ public class EditProject extends AbstractHandler {
 	 * @param appInfo
 	 * @param artifactGroupInfos
 	 */
-	private void setSelectedDatabase(final ApplicationInfo appInfo,
-			List<ArtifactGroupInfo> artifactGroupInfos) {
+	private void setSelectedDatabase(final ApplicationInfo appInfo) {
 		if(CollectionUtils.isNotEmpty(dbComponents)) {
+			List<ArtifactGroupInfo> artifactGroupInfos = new ArrayList<ArtifactGroupInfo>();
 			for (DatabaseComponent dbComponent : dbComponents) {
 				String dataBaseName = dbComponent.dbNameCombo.getText();
 				String[] selectedVersions = dbComponent.dbVersionListBox.getSelection();

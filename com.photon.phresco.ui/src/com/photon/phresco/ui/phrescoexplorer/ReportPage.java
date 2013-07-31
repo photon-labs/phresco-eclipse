@@ -1,89 +1,153 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.lang.reflect.Type;
+import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.Technology;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.api.ActionType;
+import com.photon.phresco.framework.api.ApplicationManager;
+import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.Childs.Child;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
-import com.photon.phresco.ui.model.ActionType;
+import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
+import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.model.Model.Modules;
+import com.phresco.pom.util.PomProcessor;
 
 public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 
-	private String selectedProjectHome;
+	private Combo reportTypeCombo;
+	private Text pdfReportNameText;
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
-//		selectedProjectHome = PhrescoUtil.getSelectedProjectHome(event);
-		/*IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-	    IWorkbenchPage activePage = window.getActivePage();
-	    ISelection selection = activePage.getSelection();
-	    
-		if (selection instanceof IStructuredSelection) { 
-			Object[] selectedObjects = ((IStructuredSelection)selection).toArray(); 
-			for (Object object : selectedObjects) {
-				if (object instanceof IProject) {
-					IProject iProject = (IProject) object;
-					System.out.println(" Relative Path : " + iProject.getProjectRelativePath());
-					System.out.println(" Project Name : " + iProject.getName());
-					System.out.println(" project full path : " + iProject.getFullPath());
-					System.out.println(" project location : " + iProject.getLocation());
-					break;
+		Shell shell = HandlerUtil.getActiveShell(event);
+		final Shell reportDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE | SWT.RESIZE);
+		GridLayout layout = new GridLayout(1, false);
+		reportDialog.setLocation(reportDialog.getLocation());
+		reportDialog.setLayout(layout);
+		reportDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Composite composite = new Composite(reportDialog, SWT.NONE);
+		GridLayout compLayout = new GridLayout(2, false);
+		composite.setLayout(compLayout);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Label reportTypeLable = new Label(composite, SWT.NONE);
+		reportTypeLable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		reportTypeLable.setText("Report Type");
+		
+		reportTypeCombo = new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
+		String[] reportItems = {"Detailed", "Overall"};
+		reportTypeCombo.setItems(reportItems);
+		reportTypeCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		reportTypeCombo.select(0);
+		
+		Label pdfReportNameLabel = new Label(composite, SWT.NONE);
+		pdfReportNameLabel.setText("Pdf Report Name");
+		pdfReportNameLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		pdfReportNameText = new Text(composite, SWT.BORDER);
+		pdfReportNameText.setMessage("Pdf Report Name");
+		pdfReportNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Composite buttonComposite = new Composite(reportDialog, SWT.RIGHT);
+		GridLayout buttonLayout = new GridLayout(2, false);
+		buttonComposite.setLayout(buttonLayout);
+		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Listener generateListener = new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				try {
+					boolean reportAvailable = isReportAvailable(reportDialog);
+					System.out.println("report available===> " + reportAvailable);
+					if(!reportAvailable) {
+						return;
+					}
+					printAsPdf(reportDialog);
+					reportDialog.close();
+				} catch (PhrescoException e) {
+					PhrescoDialog.exceptionDialog(reportDialog, e);
 				}
 			}
-		}*/
-	    return null;
-
+		};
+		
+		Listener closeListener = new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				reportDialog.close();
+			}
+		};
+		Button generate = new Button(buttonComposite, SWT.PUSH | SWT.CENTER);
+		generate.setText("Generate");
+		
+		generate.addListener(SWT.Selection, generateListener);
+		
+		Button close = new Button(buttonComposite, SWT.PUSH | SWT.CENTER);
+		close.setText("Close");
+		
+		close.addListener(SWT.Selection, closeListener);
+		
+		int x = reportDialog.getSize().x - 400;
+		int y = reportDialog.getSize().y - 360;
+		
+		reportDialog.setSize(x, y);
+		Point location = new Point(x, y);
+		reportDialog.setLocation(location);
+		
+		reportDialog.open();
+	    return reportDialog;
 	}
 	
-	private String getProjectHome() {
-		return selectedProjectHome;
-	}
-	
-	private ProjectInfo readProjectInfo() throws PhrescoException {
-		try {
-			File projectFilePath = new File(getProjectHome() + File.separator + "TestProject" + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
-			FileReader reader = new FileReader(projectFilePath);
-			Gson  gson = new Gson();
-			Type type = new TypeToken<ProjectInfo>() {}.getType();
-			ProjectInfo info = gson.fromJson(reader, type);
-			return info;
-		} catch (FileNotFoundException e) {
-			throw new PhrescoException(e);
-		}
-	}
-	
-	private File getConfigurationPath() {
-		File configPath = new File(getProjectHome() + File.separator + "TestProject" + File.separator + DOT_PHRESCO_FOLDER
-				+ File.separator + "phresco-package-info.xml");
-		return configPath;
-	}
-	
-    protected List<Parameter> getMojoParameters(MojoProcessor mojo, String goal) throws PhrescoException {
+    private List<Parameter> getMojoParameters(MojoProcessor mojo, String goal) throws PhrescoException {
 		com.photon.phresco.plugins.model.Mojos.Mojo.Configuration mojoConfiguration = mojo.getConfiguration(goal);
 		if (mojoConfiguration != null) {
 		    return mojoConfiguration.getParameters().getParameter();
@@ -92,70 +156,359 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		return null;
 	}
     
-	/*public String generatePDF() {
-
+    private boolean isReportAvailable(Shell shell) throws PhrescoException {
+    	ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+    	boolean isReportAvailable = false;
+    	if(getSonarReport()) {
+    		isReportAvailable =  getSonarReport();
+    	} if(isTestReportAvailable(appInfo)) {
+    		isReportAvailable = true;
+    	} else {
+    		PhrescoDialog.errorDialog(shell, Messages.ERROR, "Atleast one Test Report should be available Or Sonar report should be available");
+    		isReportAvailable = false;
+    	}
+    	return isReportAvailable;
+    }
+    
+    private boolean getSonarReport() {
+    	boolean isSonarReportAvailable = false;
+    	StringBuilder sb = new StringBuilder(PhrescoUtil.getApplicationHome()).append(DO_NOT_CHECKIN_DIR).append(File.separatorChar).append(
+				STATIC_ANALYSIS_REPORT);
+		File indexPath = new File(sb.toString());
+		if (indexPath.exists() && indexPath.isDirectory()) {
+			File[] listFiles = indexPath.listFiles();
+			for (int i = 0; i < listFiles.length; i++) {
+				File file = listFiles[i];
+				File htmlFileCheck = new File(file, INDEX_HTML);
+				if (htmlFileCheck.exists()) {
+					isSonarReportAvailable = true;
+				}
+			}
+		}
+		return isSonarReportAvailable;
+    }
+    
+	private boolean isTestReportAvailable(ApplicationInfo appInfo) throws PhrescoException {
+		boolean xmlResultsAvailable = false;
+		File file = null;
+		StringBuilder sb = new StringBuilder(Utility.getProjectHome());
+		sb.append(appInfo.getAppDirName());
 		try {
-			
-			ProjectInfo projectInfo = readProjectInfo();
-			ApplicationInfo applicationInfo = projectInfo.getAppInfos().get(0);
+			String isIphone = PhrescoUtil.isIphoneTagExists(appInfo);
+			// unit xml check
+			if (!xmlResultsAvailable) {
+				List<String> moduleNames = new ArrayList<String>();
+				PomProcessor processor = PhrescoUtil.getPomProcessor(appInfo.getAppDirName());
+				Modules pomModules = processor.getPomModule();
+				List<String> modules = null;
+				// check multimodule or not
+				if (pomModules != null) {
+					modules = PhrescoUtil.getProjectModules(appInfo.getAppDirName());
+					for (String module : modules) {
+						if (StringUtils.isNotEmpty(module)) {
+							moduleNames.add(module);
+						}
+					}
+					for (String moduleName : moduleNames) {
+						String moduleXmlPath = sb.toString() + File.separator + moduleName
+								+ PhrescoUtil.getUnitTestReportDir(appInfo);
+						file = new File(moduleXmlPath);
+						xmlResultsAvailable = xmlFileSearch(file, xmlResultsAvailable);
+					}
+				} else {
+					if (StringUtils.isNotEmpty(isIphone)) {	
+						String unitIphoneTechReportDir = PhrescoUtil.getUnitTestReportDir(appInfo);
+						file = new File(sb.toString() + unitIphoneTechReportDir);
+					} else {
+						String unitTechReports = PhrescoUtil.getUnitTestReportOptions(appInfo);
+						if (StringUtils.isEmpty(unitTechReports)) {
+							file = new File(sb.toString() + PhrescoUtil.getUnitTestReportDir(appInfo));
+						} else {
+							List<String> unitTestTechs = Arrays.asList(unitTechReports.split(","));
+							for (String unitTestTech : unitTestTechs) {
+								unitTechReports = PhrescoUtil.getUnitTestReportDir(appInfo, unitTestTech);
+								if (StringUtils.isNotEmpty(unitTechReports)) {
+									file = new File(sb.toString() + unitTechReports);
+									xmlResultsAvailable = xmlFileSearch(file, xmlResultsAvailable);
+								}
+							}
+						}
+					}
+					xmlResultsAvailable = xmlFileSearch(file, xmlResultsAvailable);
+				}
+			}
 
-			Technology technology = PhrescoUtil.getServiceManager().getTechnology(applicationInfo.getTechInfo().getId());
-			
-			MojoProcessor mojo = new MojoProcessor(getConfigurationPath());
-			
-			List<Parameter> parameters = getMojoParameters(mojo, PHASE_PDF_REPORT);
-			String sonarUrl = (String) getReqAttribute(REQ_SONAR_URL);
-			
-	        if (CollectionUtils.isNotEmpty(parameters)) {
-	            for (Parameter parameter : parameters) {
-	            	String key = parameter.getKey();
-	            	if (REQ_REPORT_TYPE.equals(key)) {
-	            		parameter.setValue(reportDataType);
-	            	} else if (REQ_TEST_TYPE.equals(key)) {
-	            		if (StringUtils.isEmpty(fromPage)) {
-	            			setFromPage(FROMPAGE_ALL);
-	            		}
-	            		parameter.setValue(getFromPage());
-	            	} else if (REQ_SONAR_URL.equals(key)) {
+			// functional xml check
+			if (!xmlResultsAvailable) {
+				file = new File(sb.toString() + PhrescoUtil.getFunctionalTestReportDir(appInfo));
+				xmlResultsAvailable = xmlFileSearch(file, xmlResultsAvailable);
+			}
+
+			// component xml check
+			if (!xmlResultsAvailable) {
+				String componentDir = PhrescoUtil.getComponentTestReportDir(appInfo);
+				if (StringUtils.isNotEmpty(componentDir)) {
+					file = new File(sb.toString() + componentDir);
+					xmlResultsAvailable = xmlFileSearch(file, xmlResultsAvailable);
+				}
+			}
+
+			// performance xml check
+			if (StringUtils.isEmpty(isIphone)) {
+				if (!xmlResultsAvailable) {
+					QualityUtil qualityUtil = new QualityUtil();
+					MojoProcessor mojo = new MojoProcessor(new File(PhrescoUtil.getPhrescoPluginInfoFilePath(Constants.PHASE_PERFORMANCE_TEST, 
+							Constants.PHASE_PERFORMANCE_TEST, appInfo.getAppDirName())));
+					List<String> testAgainsts = new ArrayList<String>();
+					Parameter testAgainstParameter = mojo.getParameter(Constants.PHASE_PERFORMANCE_TEST, REQ_TEST_AGAINST);
+					if (testAgainstParameter != null && TYPE_LIST.equalsIgnoreCase(testAgainstParameter.getType())) {
+						List<Value> values = testAgainstParameter.getPossibleValues().getValue();
+						for (Value value : values) {
+							testAgainsts.add(value.getKey());
+						}
+					}
+					xmlResultsAvailable =qualityUtil.testResultAvail(appInfo.getAppDirName(), testAgainsts, Constants.PHASE_PERFORMANCE_TEST);
+				}
+			}
+
+			// load xml check
+			if (StringUtils.isEmpty(isIphone)) {
+				if (!xmlResultsAvailable) {
+					 xmlResultsAvailable = loadTestResultAvail(appInfo);
+				}
+			}
+		} catch (PhrescoException e) {
+			throw new PhrescoException(e);
+		} catch (PhrescoPomException e) {
+			throw new PhrescoException(e);
+		}
+		return xmlResultsAvailable;
+	}
+	
+	public boolean loadTestResultAvail(ApplicationInfo appInfo) throws PhrescoException {
+		boolean isResultFileAvailable = false;
+		try {
+			String baseDir = Utility.getProjectHome() + appInfo.getAppDirName();
+			List<String> testResultsTypes = new ArrayList<String>();
+			testResultsTypes.add("server");
+			testResultsTypes.add("webservice");
+			for (String testResultsType : testResultsTypes) {
+				StringBuilder sb = new StringBuilder(baseDir.toString());
+				String loadReportDir = PhrescoUtil.getLoadTestReportDir(appInfo);
+				if (StringUtils.isNotEmpty(loadReportDir) && StringUtils.isNotEmpty(testResultsType)) {
+					Pattern p = Pattern.compile("dir_type");
+					Matcher matcher = p.matcher(loadReportDir);
+					loadReportDir = matcher.replaceAll(testResultsType);
+					sb.append(loadReportDir);
+				}
+				File file = new File(sb.toString());
+				File[] children = file.listFiles(new XmlNameFileFilter(FILE_EXTENSION_XML));
+				if (!ArrayUtils.isEmpty(children)) {
+					isResultFileAvailable = true;
+					break;
+				}
+			}
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+
+		return isResultFileAvailable;
+	}
+	
+	public boolean performanceTestResultAvail(ApplicationInfo appInfo) throws PhrescoException {
+		boolean isResultFileAvailable = false;
+		try {
+			String baseDir = Utility.getProjectHome() + appInfo.getAppDirName();
+			List<String> testResultsTypes = new ArrayList<String>();
+			testResultsTypes.add("server");
+			testResultsTypes.add("database");
+			testResultsTypes.add("webservice");
+			for (String testResultsType : testResultsTypes) {
+				StringBuilder sb = new StringBuilder(baseDir.toString());
+				String performanceReportDir = PhrescoUtil.getPerformanceTestReportDir(appInfo);
+				if (StringUtils.isNotEmpty(performanceReportDir) && StringUtils.isNotEmpty(testResultsType)) {
+					Pattern p = Pattern.compile("dir_type");
+					Matcher matcher = p.matcher(performanceReportDir);
+					performanceReportDir = matcher.replaceAll(testResultsType);
+					sb.append(performanceReportDir);
+				}
+				File file = new File(sb.toString());
+				String resultExtension = PhrescoUtil.getPerformanceResultFileExtension(appInfo.getAppDirName());
+				if (StringUtils.isNotEmpty(resultExtension)) {
+					File[] children = file.listFiles(new XmlNameFileFilter(resultExtension));
+					if (!ArrayUtils.isEmpty(children)) {
+						isResultFileAvailable = true;
+						break;
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+
+		return isResultFileAvailable;
+	}
+
+	
+	private boolean xmlFileSearch(File file, boolean xmlResultsAvailable) {
+		File[] children = file.listFiles(new XmlNameFileFilter(FILE_EXTENSION_XML));
+		if (children != null && children.length > 0) {
+			xmlResultsAvailable = true;
+		}
+		return xmlResultsAvailable;
+	}
+	
+	/**
+	 * The Class XmlNameFileFilter.
+	 */
+	public class XmlNameFileFilter implements FilenameFilter {
+		
+		/** The filter_. */
+		private String filter_;
+
+		/**
+		 * Instantiates a new xml name file filter.
+		 *
+		 * @param filter the filter
+		 */
+		public XmlNameFileFilter(String filter) {
+			filter_ = filter;
+		}
+		
+		public boolean accept(File dir, String name) {
+			return name.endsWith(filter_);
+		}
+	}
+	
+	public void printAsPdf (Shell reportDialog) throws PhrescoException {
+		try {
+			String userId = PhrescoUtil.getUserId();
+			String fromPage = "ALL";
+			String pdfName = pdfReportNameText.getText();
+			String report = reportTypeCombo.getText();
+			String reportDataType = "crisp";
+			if("Detailed".equals(report)) {
+				reportDataType = "detail";
+			}
+			ApplicationManager applicationManager = new ApplicationManagerImpl();
+			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
+			String customerId = projectInfo.getCustomerIds().get(0);
+
+			ApplicationInfo applicationInfo = projectInfo.getAppInfos().get(0);
+			String techId = applicationInfo.getTechInfo().getId();
+			ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
+			if(serviceManager == null) {
+				PhrescoDialog.errorDialog(reportDialog, Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
+				return;
+			}
+			Technology technology = serviceManager.getTechnology(techId);
+			StringBuilder sb = new StringBuilder(PhrescoUtil.getApplicationHome());
+			sb.append(File.separator);
+			sb.append(FOLDER_DOT_PHRESCO);
+			sb.append(File.separator);
+			sb.append(LBL_PHRESCO);
+			sb.append(HYPHEN);
+			sb.append(Constants.PHASE_PDF_REPORT);
+			sb.append(Constants.INFO_XML);
+			MojoProcessor mojo = new MojoProcessor(new File(sb.toString()));
+			List<Parameter> parameters = getMojoParameters(mojo, Constants.PHASE_PDF_REPORT);
+			//String sonarUrl = (String) getReqAttribute(REQ_SONAR_URL);
+			if (CollectionUtils.isNotEmpty(parameters)) {
+				for (Parameter parameter : parameters) {
+					String key = parameter.getKey();
+					if (REQ_REPORT_TYPE.equals(key)) {
+						parameter.setValue(reportDataType);
+					} else if (REQ_TEST_TYPE.equals(key)) {
+						/*if (StringUtils.isEmpty(fromPage)) {
+							setFromPage(FROMPAGE_ALL);
+						}*/
+						parameter.setValue(fromPage);
+					} /*else if (REQ_SONAR_URL.equals(key)) {
 	            		parameter.setValue(sonarUrl);
-	            	} else if ("logo".equals(key)) {
-	            		parameter.setValue(getLogoImageString());
+	            	}*/ else if ("logo".equals(key)) {
+	            		parameter.setValue(getLogoImageString(userId, customerId));
 	            	} else if ("theme".equals(key)) {
-	            		parameter.setValue(getThemeColorJson());
+	            		parameter.setValue(getThemeColorJson(userId, customerId));
+	            	} else if (REQ_REPORT_NAME.equals(key)) {
+	            		parameter.setValue(pdfName);
 	            	} else if ("technologyName".equals(key)) {
 	            		parameter.setValue(technology.getName());
 	            	}
-	            }
-	        }
-	        mojo.save();
-	        
+				}
+			}
+			mojo.save();
+
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
 			buildArgCmds.add(HYPHEN_N);
-			String pomFileName = Utility.getPomFileName(applicationInfo);
-			if(!Constants.POM_NAME.equals(pomFileName)) {
-				buildArgCmds.add(Constants.HYPHEN_F);
-				buildArgCmds.add(pomFileName);
+			String workingDirectory = PhrescoUtil.getApplicationHome();
+			BufferedInputStream reader = applicationManager.performAction(projectInfo, ActionType.PDF_REPORT, buildArgCmds, workingDirectory);
+			
+			int available = reader.available();
+			while (available != 0) {
+				byte[] buf = new byte[available];
+                int read = reader.read(buf);
+                if (read == -1 ||  buf[available-1] == -1) {
+                	break;
+                } else {
+                	System.out.println("Restart Start Console : " + new String(buf));
+                }
+                available = reader.available();
 			}
-			String workingDirectory = getAppDirectoryPath(applicationInfo);
-			BufferedReader reader = applicationManager.performAction(projectInfo, ActionType.PDF_REPORT, buildArgCmds, workingDirectory);
-			String line;
-			line = reader.readLine();
-			while (line != null) {
-				line = reader.readLine();
-				System.out.println("Restart Start Console : " + line);
+			
+		} catch (Exception e) {
+			throw new PhrescoException("exception occured in the Print As PDF functionality");
+		}
+	}
+	
+	private String getLogoImageString(String username, String customerId) throws PhrescoException {
+		String encodeImg = "";
+		try {
+			InputStream fileInputStream = null;
+			fileInputStream = PhrescoUtil.getServiceManager(username).getIcon(customerId);
+			if (fileInputStream != null) {
+				byte[] imgByte = null;
+				imgByte = IOUtils.toByteArray(fileInputStream);
+				byte[] encodedImage = Base64.encodeBase64(imgByte);
+				encodeImg = new String(encodedImage);
 			}
-			setReqAttribute(REQ_APPINFO, applicationInfo);
-			setReqAttribute(REQ_FROM_PAGE, getFromPage());
-            setReqAttribute(REQ_REPORT_STATUS, getText(SUCCESS_REPORT_STATUS));
-        } catch (Exception e) {
-        	S_LOGGER.error("Entered into catch block of Quality.printAsPdf()"+ e);
-        	if (e.getLocalizedMessage().contains(getText(ERROR_REPORT_MISSISNG_FONT_MSG))) {
-        		setReqAttribute(REQ_REPORT_STATUS, getText(ERROR_REPORT_MISSISNG_FONT));
-        	} else {
-        		setReqAttribute(REQ_REPORT_STATUS, getText(ERROR_REPORT_STATUS));
-        	}
-        }
-        return showGeneratePdfPopup();
-    }*/
-
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return encodeImg;
+	}
+	
+	protected String getThemeColorJson(String username, String customerId) throws PhrescoException {
+		String themeJsonStr = "";
+		try {
+			Customer customer = PhrescoUtil.getServiceManager(username).getCustomer(customerId);
+			if (customer != null) {
+				Map<String, String> frameworkTheme = customer.getFrameworkTheme();
+				if (frameworkTheme != null) {
+					Gson gson = new Gson();
+					themeJsonStr = gson.toJson(frameworkTheme);
+				}
+			}
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return themeJsonStr;
+	}
+	
+	protected List<String> getMavenArgCommands(List<Parameter> parameters) throws PhrescoException {
+		List<String> buildArgCmds = new ArrayList<String>();	
+		if(CollectionUtils.isEmpty(parameters)) {
+			return buildArgCmds;
+		}
+		for (Parameter parameter : parameters) {
+			if (parameter.getPluginParameter()!= null && PLUGIN_PARAMETER_FRAMEWORK.equalsIgnoreCase(parameter.getPluginParameter())) {
+				List<MavenCommand> mavenCommand = parameter.getMavenCommands().getMavenCommand();
+				for (MavenCommand mavenCmd : mavenCommand) {
+					if (StringUtils.isNotEmpty(parameter.getValue()) && parameter.getValue().equalsIgnoreCase(mavenCmd.getKey())) {
+						buildArgCmds.add(mavenCmd.getValue());
+					}
+				}
+			}
+		}
+		return buildArgCmds;
+	}
 }

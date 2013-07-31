@@ -14,10 +14,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.internal.events.BuildCommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -43,11 +44,13 @@ import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.service.client.factory.ServiceClientFactory;
 import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 import com.photon.phresco.ui.PhrescoNature;
+import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
 import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.model.Model.Modules;
 import com.phresco.pom.util.PomProcessor;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -145,12 +148,24 @@ public class PhrescoUtil implements PhrescoConstants {
 	
 	public static void updateProjectIntoWorkspace(String projectName) {
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject(projectName);
-
+		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+		description.setLocation(new Path(getProjectHome() + projectName));
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
 		try {
-			project.create(progressMonitor);
+			project.create(description, progressMonitor);
 			project.open(progressMonitor);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void deleteProjectIntoWorkspace(String projectName) {
+		IProgressMonitor progressMonitor = new NullProgressMonitor();
+		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+		description.setLocation(new Path(getProjectHome() + projectName));
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
+		try {
+			project.delete(true, true, progressMonitor);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -353,7 +368,13 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 	
 	public static String getProjectHome() {
-		return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+		File path = null;
+		String workingDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separatorChar + "projects";
+		path = new File(workingDir);
+		if(path.isDirectory()) {
+			return path.getPath() + File.separatorChar;
+		}
+		return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separatorChar;
 	}
 
 	public static String getProjectName() {
@@ -363,7 +384,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 
 	public static File getBuildInfoPath() {
-		File buildInfoPath = new File(getProjectHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
+		File buildInfoPath = new File(getApplicationHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
 		return buildInfoPath;
 	}
 
@@ -411,7 +432,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	
 
 	public static String getPomFileName(ApplicationInfo appInfo) {
-		File pomFile = new File(getApplicationHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
+		File pomFile = new File(getProjectHome()+ File.separator + appInfo.getAppDirName() + File.separator + appInfo.getPomFile());
 		if(pomFile.exists()) {
 			return appInfo.getPomFile();
 		}
@@ -455,7 +476,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static PomProcessor getPomProcessor(String appDirName) throws PhrescoException {
 		String applicationHome = getProjectHome() + File.separator + appDirName;
 		try {
-			return new PomProcessor(new File(applicationHome));
+			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
 		}
@@ -464,5 +485,92 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static String getSqlFilePath(String appDirName) throws PhrescoException, PhrescoPomException {
 		String sqlPath = getPomProcessor(appDirName).getProperty(PHRESCO_SQL_PATH);
 		return getApplicationHome() + File.separatorChar + sqlPath;
+	}
+	
+	public static String getArchiveHome() {
+        String phrescoHome = getProjectHome();
+        StringBuilder builder = new StringBuilder(phrescoHome);
+        builder.append(File.separator);
+        builder.append(Constants.ARCHIVE_HOME);
+        builder.append(File.separator);
+        FileUtils.mkdir(builder.toString());
+        return builder.toString();
+    }
+	
+	public static List<String> getProjectModules(String appDirName) throws PhrescoException {
+    	try {
+            PomProcessor processor = getPomProcessor(appDirName);
+    		Modules pomModule = processor.getPomModule();
+    		if (pomModule != null) {
+    			return pomModule.getModule();
+    		}
+    	} catch (PhrescoPomException e) {
+    		 throw new PhrescoException(e);
+    	}
+    	
+    	return null;
+    }
+	
+	public static String getUnitTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
+        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR);
+    }
+	
+	public static String getUnitTestReportOptions(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
+		return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.PHRESCO_UNIT_TEST);
+	}
+	
+	public static String getUnitTestReportDir(ApplicationInfo appInfo, String option) throws PhrescoPomException, PhrescoException {
+        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_START + option + Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_END);
+    }
+	
+	public static String getFunctionalTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
+        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_FUNCTEST_RPT_DIR);
+    }
+	
+	public static String getComponentTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
+        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_COMPONENTTEST_RPT_DIR);
+    }
+	
+	public static String isIphoneTagExists(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
+        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.PHRESCO_CODE_VALIDATE_REPORT);
+    }
+	
+	public static String getLoadTestReportDir(ApplicationInfo appinfo) throws PhrescoPomException, PhrescoException {
+    	return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_LOADTEST_RPT_DIR);
+    }
+	
+	public static String getPerformanceTestReportDir(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
+        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RPT_DIR);
+    }
+	
+	public static String getPerformanceResultFileExtension(String appDirName) throws PhrescoException, PhrescoPomException {
+		return getPomProcessor(appDirName).getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RESULT_EXTENSION);
+	}
+	
+	public static String getLoadResultFileExtension(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
+        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_LOADTEST_RESULT_EXTENSION);
+    }
+	
+	public static String getPhrescoPluginInfoFilePath(String goal, String phase, String appDirName) throws PhrescoException {
+		StringBuilder sb = new StringBuilder(getApplicationHome());
+		sb.append(File.separator);
+		sb.append(FOLDER_DOT_PHRESCO);
+		sb.append(File.separator);
+		sb.append(LBL_PHRESCO);
+		sb.append(HYPHEN);
+		// when phase is CI, it have to take ci info file for update dependency
+		if (Constants.PHASE_CI.equals(phase)) {
+			sb.append(phase);
+		} else if (StringUtils.isNotEmpty(goal) && goal.contains(FUNCTIONAL)) {
+			sb.append(Constants.PHASE_FUNCTIONAL_TEST);
+		} else if (Constants.PHASE_RUNGAINST_SRC_START.equals(goal)|| Constants.PHASE_RUNGAINST_SRC_STOP.equals(goal) ) {
+			sb.append(Constants.PHASE_RUNAGAINST_SOURCE);
+		} else {
+			sb.append(goal);
+		}
+		sb.append(Constants.INFO_XML);
+
+		System.out.println("sb....." + sb.toString());
+		return sb.toString();
 	}
 }

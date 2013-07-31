@@ -7,15 +7,22 @@
 	<artifactId>com.photon.phresco.ui</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
+	
+	
 
 	<properties>
-		<phresco.version>3.0.0.17001</phresco.version>
+		<phresco.version>3.0.0.19001-SNAPSHOT</phresco.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.photon.phresco.service.client</groupId>
 			<artifactId>phresco-service-client</artifactId>
+			<version>${phresco.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.photon.phresco.framework</groupId>
+			<artifactId>phresco-framework-impl</artifactId>
 			<version>${phresco.version}</version>
 		</dependency>
 		<dependency>
@@ -26,6 +33,7 @@
 	</dependencies>
 
 	<build>
+	<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>

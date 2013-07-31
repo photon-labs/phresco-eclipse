@@ -288,8 +288,14 @@
 
          <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.ReportPage"
-            id="PDFReport"
-            name="PDF Report">
+            id="Generate"
+            name="Generate">
+        </command>
+        
+        <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.PdfDownloadPage"
+            id="Download"
+            name="Download">
         </command>
                 
    </extension>
@@ -313,6 +319,13 @@
                </with>
             </visibleWhen>
 
+			<command
+			   commandId="Phresco"
+			   id="%project.feature.id"
+			   label="%project.feature.label"
+			   style="push"
+			   tooltip="%project.feature.tooltip">
+			</command>
 			<command
          		commandId="editProject"
          		icon="icons/edit_icon.png"
@@ -404,13 +417,30 @@
 				</command>
 			</menu>
 
-			<command
+			<menu 
 				commandId="PDFReport"
 				id="PDFReport"
 				label="%project.pdfreport.label"
 				style="push"
 				tooltip="%project.pdfreport.tooltip">
-			</command>
+				<command
+					commandId="Generate"
+					id="%project.pdfreport.generate.id"
+					label="%project.pdfreport.generate.name"
+					style="push"
+					tooltip="%project.pdfreport.generate.tooltip">
+				</command>
+				<command
+					commandId="Download"
+					id="%project.pdfreport.download.id"
+					label="%project.pdfreport.download.name"
+					style="push"
+					tooltip="%project.pdfreport.download.tooltip">
+				</command>
+				
+			</menu>
+
+
 						
 		</menu>
 	</menuContribution>

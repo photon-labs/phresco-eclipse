@@ -212,6 +212,26 @@ public interface PhrescoConstants {
 	String BIT_86 = "86";
 	
 	String PHRESCO_SQL_PATH = "phresco.sql.path";
-	
 	String KEY_EMPTY = "KEY_EMPTY";
+	
+	//Pdf constants 
+	
+	String STATIC_ANALYSIS_REPORT = "static-analysis-report";
+	String INDEX_HTML = "index.html";
+	String FILE_EXTENSION_XML = "xml";
+	String FUNCTIONAL = "functional";
+	String TYPE_LIST = "list";
+	String REQ_TEST_AGAINST = "testAgainst";
+	String TEST_DIRECTORY = "dir_type";
+	String REQ_REPORT_TYPE = "reportType";
+	String REQ_TEST_TYPE = "testType";
+	String FROMPAGE_ALL = "All";
+	String REQ_REPORT_NAME = "reportName";
+	String HYPHEN_N = "-N";
+	String PLUGIN_PARAMETER_FRAMEWORK = "framework";
+	String LBL_PHRESCO = "phresco";
+	String ARCHIVES = "archives";
+	String CUMULATIVE = "cumulativeReports";
+	String PDF = "pdf";
+	
 }

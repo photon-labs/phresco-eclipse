@@ -99,10 +99,16 @@ public class SCMManagerUtil implements PhrescoConstants {
 		} else if (GIT.equals(type)) {
 			String uuid = UUID.randomUUID().toString();
 			File gitImportTemp = new File(workspacePath, uuid);
+			if (gitImportTemp.exists()) {
+				FileUtils.deleteDirectory(gitImportTemp);
+			}
 			importFromGit(url, gitImportTemp, username, password);
 			ApplicationInfo applicationInfo = cloneFilter(gitImportTemp, url, true);
+			if (gitImportTemp.exists()) {
+				FileUtils.deleteDirectory(gitImportTemp);
+			}
 			if (applicationInfo != null) {
-				updateProjectIntoWorkspace(uuid);
+				PhrescoUtil.updateProjectIntoWorkspace(applicationInfo.getAppDirName());
 				return applicationInfo;
 			} 
 		} else if (BITKEEPER.equals(type)) {
