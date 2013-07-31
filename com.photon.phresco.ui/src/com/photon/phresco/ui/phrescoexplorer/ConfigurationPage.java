@@ -42,7 +42,6 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.PropertyTemplate;
 import com.photon.phresco.commons.model.SettingsTemplate;
-import com.photon.phresco.commons.util.BaseAction;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.configuration.Configuration;
 import com.photon.phresco.configuration.Environment;
@@ -50,6 +49,7 @@ import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.BaseAction;
 
 public class ConfigurationPage extends AbstractHandler implements  PhrescoConstants {
 	private Button addButton;
