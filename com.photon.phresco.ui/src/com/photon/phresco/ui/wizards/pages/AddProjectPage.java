@@ -121,7 +121,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		basicComposite.setLayout(new GridLayout(2,false));
 		basicComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Label customerLabel = new Label(basicComposite, SWT.NONE);
+		/*Label customerLabel = new Label(basicComposite, SWT.NONE);
 		customerLabel.setText("Customers");
 		
 		customerIds = new Combo(basicComposite, SWT.BOLD | SWT.RIGHT | SWT.READ_ONLY);
@@ -137,7 +137,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 			customerIds.select(0);
 		} catch (PhrescoException e2) {
 			e2.printStackTrace();
-		}
+		}*/
 		Label projectName = new Label(basicComposite, SWT.NONE);
 		projectName.setText("Project name *");
 		projectName.setFont(DesignUtil.getLabelFont());
