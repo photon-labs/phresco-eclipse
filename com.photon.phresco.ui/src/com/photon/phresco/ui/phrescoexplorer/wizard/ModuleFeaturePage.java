@@ -1,6 +1,8 @@
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -8,7 +10,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 
 import com.photon.phresco.commons.model.ArtifactGroup;
 
@@ -59,24 +60,29 @@ public class ModuleFeaturePage extends AbstractFeatureWizardPage {
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		scrolledComposite.setAlwaysShowScrollBars(false);
-		
-		scrolledComposite.setLocation(5, 5);
-		scrolledComposite.setBounds(5, 5, 500, 200);
+		scrolledComposite.setBounds(5, 5, 500, 350);
 		
 		jsLibTable = getFeatureTable(scrolledComposite, PAGE_NAME, features);
 	}
 	
 	
 	public void getSelectedItems() {
-		if (jsLibTable != null) {
-			TableItem[] selection = jsLibTable.getSelection();
-			System.out.println(" selection : " + selection);
-			
-			for (int i = 0; i < selection.length; i++) {
-				TableItem tableItem = selection[i];
-				String id = (String) tableItem.getData();
-				System.out.println(" selected id : " + id);
-			}
+		System.out.println(" getSelectedCheckBoxRows : " + getSelectedCheckBoxRows());
+		Map<ArtifactGroup, String> selectedComboBoxRows = getSelectedComboBoxRows();
+		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
+		
+		Iterator entries = selectedCheckBoxRows.entrySet().iterator();
+		while (entries.hasNext()) {
+		    Map.Entry entry = (Map.Entry) entries.next();
+		    ArtifactGroup key = (ArtifactGroup)entry.getKey();
+		    
+		    String value = (String)entry.getValue();
+		    System.out.println("Key = " + key.getDisplayName() + " = " + value);
+		    
+		    if (value != null && KEY_EMPTY.equals(value)) {
+		    	String comboValue = selectedComboBoxRows.get(key);
+		    	System.out.println(" comboValue :" + comboValue);
+		    }
 		}
 	}
 }

@@ -212,4 +212,6 @@ public interface PhrescoConstants {
 	String BIT_86 = "86";
 	
 	String PHRESCO_SQL_PATH = "phresco.sql.path";
+	
+	String KEY_EMPTY = "KEY_EMPTY";
 }
