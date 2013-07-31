@@ -98,7 +98,6 @@ class FeatureWizard extends Wizard {
 		for (int i = 0; i < pages.length; i++) {
 			IWizardPage wizardPage = pages[i];
 			
-			System.out.println(" wizardPage :"  + wizardPage);
 			if (wizardPage instanceof JSLibraryFeaturePage) {
 				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
 				jsLibPage.getSelectedItems();

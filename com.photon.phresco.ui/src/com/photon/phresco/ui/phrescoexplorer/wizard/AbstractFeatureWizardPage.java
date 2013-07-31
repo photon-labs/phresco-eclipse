@@ -20,6 +20,7 @@
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -60,119 +61,19 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Table getFeatureTable(final Composite composite, String featureName, List<ArtifactGroup> features) {
+	public void renderFeatureTable(final Composite composite, String featureName, List<ArtifactGroup> features) {
 		
 		Group jsLibGroups = new Group(composite, SWT.SHADOW_ETCHED_IN);
 		jsLibGroups.setText(featureName);
 
-		Table table = renderFeatureTable(jsLibGroups, features);
+		renderTable(jsLibGroups, features);
 		
 		jsLibGroups.setBounds(0, 5, 250, 240);
 	    jsLibGroups.pack();
 		
-	    return table;
-	    
-		/*final Table jsLibTable = new Table(jsLibGroups, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-		jsLibTable.setLinesVisible(true);
-		jsLibTable.setHeaderVisible(true);
-		jsLibTable.setLayoutData(new GridData());
-		
-		jsLibTable.setBounds(12, 20, 455, 150);
-
-        TableColumn nameColumn = new TableColumn(jsLibTable, SWT.LEFT, 0);
-        nameColumn.setText("Name");
-        nameColumn.setWidth(160);
-        
-        TableColumn descColumn = new TableColumn(jsLibTable, SWT.LEFT, 1);
-        descColumn.setText("Description");
-        descColumn.setWidth(160);
-        
-        TableColumn versionColumn = new TableColumn(jsLibTable, SWT.LEFT, 2);
-        versionColumn.setText("Version");
-        versionColumn.setWidth(160);
-        
-        for (ArtifactGroup artifactGroup : features) {
-        	TableItem item = new TableItem(jsLibTable, SWT.NONE);
-        	
-        	item.setData(artifactGroup);
-        	
-        	item.setText(0, artifactGroup.getDisplayName());
-        	String description = artifactGroup.getDescription();
-        	if (description == null) {
-        		description = "";
-        	}
-        	
-        	item.setText(1, description);
-        	
-        	// Versions should be in combo
-            ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
-            item.setText(2, artifactInfo.getVersion());
-            
-            TableEditor editor = new TableEditor(jsLibTable);
-            final Combo combo = new Combo(jsLibTable, SWT.VERTICAL | SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-            
-            List<ArtifactInfo> versions = artifactGroup.getVersions();
-            for (ArtifactInfo artifactInfo : versions) {
-            	combo.add(artifactInfo.getVersion()); 
-			}
-            
-            combo.pack();
-            
-            editor.setEditor(combo, item, 2);
-		}
-        
-        jsLibTable.addListener(SWT.Selection, new Listener() {
-            public void handleEvent(Event event) {
-            	String string = event.detail == SWT.CHECK ? "Checked" : "Selected";
-            	
-            	System.out.println(event.item + " " + string);
-            	
-            	if ("Checked".equals(string)) {
-            		System.out.println("checked");
-            	} else {
-            		System.out.println("unchecked");
-            	}
-            	
-            	TableItem tItem = (TableItem) event.item;
-            	if ("Checked".equals(string) && !selectedTableItem.contains(tItem)) {
-            		selectedTableItem.add(tItem);
-            		tItem.setChecked(true);
-            	} else if ("Selected".equals(string) ) {
-            		tItem.setChecked(false);
-            		if (selectedTableItem.contains(tItem)) {
-            			selectedTableItem.remove(tItem);
-            		}
-            	}
-            }
-        });
-        
-        SelectionListener listener = new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-            	if (e.widget == jsLibTable) {
-            		
-            		TableColumn[] columns = jsLibTable.getColumns();
-            		TableColumn ta = null;
-            		TableItem[] selection = jsLibTable.getSelection();
-            		jsLibTable.setSelection(selection);
-            		
-            		
-            		TableItem ti = (TableItem) e.item;
-            		ti.setChecked(true);
-            	}
-            	
-            	System.out.println(" e.item : " + e.item);
-            }
-        };
-        
-        jsLibTable.addSelectionListener(listener);
-        
-        jsLibGroups.setLocation(0, 95);
-        jsLibGroups.pack();
-        
-        return null;*/
 	}
 	
-	private Table renderFeatureTable(Group jsLibGroups, List<ArtifactGroup> features) {
+	private Table renderTable(Group jsLibGroups, List<ArtifactGroup> features) {
 		Table table = new Table(jsLibGroups, SWT.BORDER | SWT.MULTI);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
@@ -301,5 +202,30 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	
 	public Map<ArtifactGroup, String> getSelectedComboBoxRows() {
 		return selectedArtifactGroupWithComboVersion;
+	}
+	
+	public Map getSelectedItems() {
+		Map<ArtifactGroup, String> finalDataMap = new HashMap<ArtifactGroup, String>();
+		
+		Map<ArtifactGroup, String> selectedComboBoxRows = getSelectedComboBoxRows();
+		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
+		
+		Iterator entries = selectedCheckBoxRows.entrySet().iterator();
+		while (entries.hasNext()) {
+		    Map.Entry entry = (Map.Entry) entries.next();
+		    ArtifactGroup key = (ArtifactGroup)entry.getKey();
+		    
+		    String value = (String)entry.getValue();
+		    System.out.println("Key = " + key.getDisplayName() + " = " + value);
+		    
+		    if (value != null && KEY_EMPTY.equals(value)) {
+		    	value = selectedComboBoxRows.get(key);
+		    	System.out.println(" comboValue :" + value);
+		    }
+		    
+		    finalDataMap.put(key, value);
+		}
+		
+		return finalDataMap;
 	}
 }
