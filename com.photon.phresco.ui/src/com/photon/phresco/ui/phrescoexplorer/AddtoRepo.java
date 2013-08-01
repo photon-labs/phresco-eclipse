@@ -22,6 +22,7 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.SCMManagerUtil;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.resource.Messages;
 
 /**
@@ -36,11 +37,11 @@ public class AddtoRepo extends AbstractHandler implements PhrescoConstants {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		
 		// To check the user has logged in
-		/*ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
 		if(serviceManager == null) {
 			PhrescoDialog.errorDialog(shell,Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
 			return null;
-		}*/
+		}
 		
 		Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.MAX | SWT.TITLE | SWT.RESIZE);
 		GridLayout layout = new GridLayout(1, false);
@@ -163,6 +164,9 @@ public class AddtoRepo extends AbstractHandler implements PhrescoConstants {
 				return false;
 			} else if(StringUtils.isEmpty(passwordText.getText())) {
 				PhrescoDialog.errorDialog(getShell(), Messages.WARNING, "Password" + STR_SPACE + Messages.EMPTY_STRING_WARNING);
+				return false;
+			} else if(StringUtils.isEmpty(messageText.getText())) {
+				PhrescoDialog.errorDialog(getShell(), Messages.WARNING, "Message" + STR_SPACE + Messages.EMPTY_STRING_WARNING);
 				return false;
 			}
 			return true;

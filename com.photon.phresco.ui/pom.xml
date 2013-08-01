@@ -11,7 +11,7 @@
 	
 
 	<properties>
-		<phresco.version>3.0.0.19001-SNAPSHOT</phresco.version>
+		<phresco.version>3.0.0.19005-SNAPSHOT</phresco.version>
 	</properties>
 
 	<dependencies>
@@ -30,6 +30,12 @@
 			<artifactId>svnkit</artifactId>
 			<version>1.3.4-hudson-2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>3.0.0.201306101825-r</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
