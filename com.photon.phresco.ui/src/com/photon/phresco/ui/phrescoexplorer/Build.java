@@ -1,7 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +18,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -34,6 +34,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
+import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.dynamicParameter.DependantParameters;
@@ -75,7 +76,14 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			@Override
 			public void handleEvent(Event events) {
 				saveCongfiguration();
-				build();
+				
+		        BusyIndicator.showWhile(null, new Runnable() {
+		            public void run() {
+		            	build();
+		            }
+		        });
+		        
+				generateDialog.close();
 			}
 		};
 
@@ -251,15 +259,10 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.BUILD, buildArgCmds, workingDirectory);
-			String line;
 
-			while ((line = performAction.readLine())!= null) {
-				System.out.println(line);
-			}
+			ConsoleViewManager.getDefault("Build Logs").println(performAction);
 			
 		} catch (PhrescoException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
