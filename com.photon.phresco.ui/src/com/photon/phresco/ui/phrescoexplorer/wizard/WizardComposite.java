@@ -118,28 +118,31 @@ class FeatureWizard extends Wizard {
 	public boolean performFinish() {
 		
 		IWizardPage[] pages = getPages();
-		List<SelectedFeature> selectedFeatures = null;
+		List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
 		for (int i = 0; i < pages.length; i++) {
 			IWizardPage wizardPage = pages[i];
 			
 			if (wizardPage instanceof JSLibraryFeaturePage) {
 				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
-				selectedFeatures = jsLibPage.getSelectedItems();
-				if(CollectionUtils.isNotEmpty(selectedFeatures)) {
-					updateFeatures(selectedFeatures);
+				List<SelectedFeature> selectedItems = jsLibPage.getSelectedItems();
+				for (SelectedFeature selectedFeature : selectedItems) {
+					selectedFeatures.add(selectedFeature);
 				}
 			} else if (wizardPage instanceof ModuleFeaturePage) {
 				ModuleFeaturePage modulePage = (ModuleFeaturePage) wizardPage;
-				selectedFeatures = modulePage.getSelectedItems();
-				if(CollectionUtils.isNotEmpty(selectedFeatures)) {
-					updateFeatures(selectedFeatures);
+				List<SelectedFeature> selectedItems = modulePage.getSelectedItems();
+				for (SelectedFeature selectedFeature : selectedItems) {
+					selectedFeatures.add(selectedFeature);
 				}
 			} else if (wizardPage instanceof ComponentFeaturePage) {
 				ComponentFeaturePage componentPage = (ComponentFeaturePage) wizardPage;
-				selectedFeatures = componentPage.getSelectedItems();
-				if(CollectionUtils.isNotEmpty(selectedFeatures)) {
-					updateFeatures(selectedFeatures);
+				List<SelectedFeature> selectedItems = componentPage.getSelectedItems();
+				for (SelectedFeature selectedFeature : selectedItems) {
+					selectedFeatures.add(selectedFeature);
 				}
+			}
+			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
+				updateFeatures(selectedFeatures);
 			}
 		}
 		

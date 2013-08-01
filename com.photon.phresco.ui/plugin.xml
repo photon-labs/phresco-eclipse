@@ -290,6 +290,24 @@
             id="Download"
             name="Download">
         </command>
+        
+        <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.AddtoRepo"
+            id="addtorepo"
+            name="Add to Repo">
+        </command>
+        
+        <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.Commit"
+            id="commit"
+            name="Commit">
+        </command>
+        
+        <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.Update"
+            id="update"
+            name="Update">
+        </command>
                 
    </extension>
    
@@ -312,13 +330,6 @@
                </with>
             </visibleWhen>
 
-			<command
-			   commandId="Phresco"
-			   id="%project.feature.id"
-			   label="%project.feature.label"
-			   style="push"
-			   tooltip="%project.feature.tooltip">
-			</command>
 			<command
          		commandId="editProject"
          		icon="icons/edit_icon.png"
@@ -432,6 +443,37 @@
 		          label="%project.pdfreport.download.name"
 		          style="push"
 		          tooltip="%project.pdfreport.download.tooltip">
+				</command>
+				
+			</menu>
+			
+			<menu
+		         commandId="SCM"
+		         id="scm"
+		         label="%project.scm.label"
+		         style="push"
+		         tooltip="%project.scm.tooltip">
+				<command
+		          commandId="addtorepo"
+		          id="%project.scm.addtorepo.id"
+		          label="%project.scm.addtorepo.name"
+		          style="push"
+		          tooltip="%project.scm.addtorepo.tooltip">
+				</command>
+				<command
+		          commandId="commit"
+		          icon=""
+		          id="%project.scm.commit.id"
+		          label="%project.scm.commit.name"
+		          style="push"
+		          tooltip="%project.scm.commit.tooltip">
+				</command>
+				<command
+		          commandId="update"
+		          id="%project.scm.update.id"
+		          label="%project.scm.update.name"
+		          style="push"
+		          tooltip="%project.scm.update.tooltip">
 				</command>
 				
 			</menu>

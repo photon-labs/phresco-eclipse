@@ -1,8 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
