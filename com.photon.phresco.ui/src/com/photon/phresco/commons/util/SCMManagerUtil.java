@@ -25,11 +25,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -37,13 +39,25 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNDirEntry;
+import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -116,6 +130,179 @@ public class SCMManagerUtil implements PhrescoConstants {
 		}
 		
 		return null;
+	}
+	
+	public boolean importToRepo(String type, String url, String username,
+			String password, String branch, String revision, ApplicationInfo appInfo, String commitMessage) throws Exception {
+		File dir = new File(Utility.getProjectHome() + appInfo.getAppDirName());
+		try {
+			if (SVN.equals(type)) {
+				String tail = addAppFolderToSVN(url, dir, username, password, commitMessage);
+				String appendedUrl = url + FORWARD_SLASH + tail;
+				importDirectoryContentToSubversion(appendedUrl, dir.getPath(), username, password, commitMessage);
+				// checkout to get .svn folder
+				checkoutImportedApp(appendedUrl, appInfo, username, password);
+			} else if (GIT.equals(type)) {
+				importToGITRepo(url,appInfo, username, password, dir, commitMessage);
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		return true;
+	}
+	
+	private void importToGITRepo(String url,ApplicationInfo appInfo, String username, String password, File appDir, String commitMessage) throws Exception {
+		boolean gitExists = false;
+		if(new File(appDir.getPath() + FORWARD_SLASH + DOT + GIT).exists()) {
+			gitExists = true;
+		}
+		try {
+			CredentialsProvider cp = new UsernamePasswordCredentialsProvider(username, password);
+			FileRepositoryBuilder builder = new FileRepositoryBuilder();
+			System.out.println("inside framework impl....");
+			Repository repository = builder.setGitDir(appDir).readEnvironment().findGitDir().build();
+			String dirPath = appDir.getPath();
+			File gitignore = new File(dirPath + GITIGNORE_FILE);
+			gitignore.createNewFile();
+			
+			if (gitignore.exists()) {
+				String contents = FileUtils.readFileToString(gitignore);
+				if (!contents.isEmpty() && !contents.contains(DO_NOT_CHECKIN_DIR)) {
+					String source = NEWLINE + DO_NOT_CHECKIN_DIR + NEWLINE;
+					OutputStream out = new FileOutputStream((dirPath + GITIGNORE_FILE), true);
+					byte buf[] = source.getBytes();
+					out.write(buf);
+					out.close();
+				} else if (contents.isEmpty()){
+				String source = NEWLINE + DO_NOT_CHECKIN_DIR + NEWLINE;
+				OutputStream out = new FileOutputStream((dirPath + GITIGNORE_FILE), true);
+				byte buf[] = source.getBytes();
+				out.write(buf);
+				out.close();
+				}
+			}
+		
+			Git git = new Git(repository);
+		
+			InitCommand initCommand = Git.init();
+			initCommand.setDirectory(appDir);
+			git = initCommand.call();
+		
+			AddCommand add = git.add();
+			add.addFilepattern(".");
+			add.call();
+
+			CommitCommand commit = git.commit().setAll(true);
+			commit.setMessage(commitMessage).call();
+			StoredConfig config = git.getRepository().getConfig();
+
+			config.setString(REMOTE, ORIGIN, URL, url);
+			config.setString(REMOTE, ORIGIN, FETCH, REFS_HEADS_REMOTE_ORIGIN);
+			config.setString(BRANCH, MASTER, REMOTE, ORIGIN);
+			config.setString(BRANCH, MASTER, MERGE, REF_HEAD_MASTER);
+			config.save();
+
+			try {
+				PushCommand pc = git.push();
+				pc.setCredentialsProvider(cp).setForce(true);
+				pc.setPushAll().call();
+			} catch (Exception e){
+				System.out.println("1st Exception....");
+				e.printStackTrace();
+				git.getRepository().close();
+				throw e;
+			}
+		
+			if (appInfo != null) {
+				updateSCMConnection(appInfo, url);
+			}
+			git.getRepository().close();
+		} catch (Exception e) {
+			System.out.println("2st Exception....");
+			e.printStackTrace();
+			Exception s = e;
+			resetLocalCommit(appDir, gitExists, e);
+			throw s;
+		}
+	}
+	
+	private void resetLocalCommit(File appDir, boolean gitExists, Exception e) throws PhrescoException {
+		try {
+			if(gitExists == true && e.getLocalizedMessage().contains("not authorized")) {
+				FileRepositoryBuilder builder = new FileRepositoryBuilder();
+				Repository repository = builder.setGitDir(appDir).readEnvironment().findGitDir().build();
+				Git git = new Git(repository);
+
+				InitCommand initCommand = Git.init();
+				initCommand.setDirectory(appDir);
+				git = initCommand.call();
+			
+				ResetCommand reset = git.reset();
+				ResetType mode = ResetType.SOFT;
+				reset.setRef("HEAD~1").setMode(mode);
+				reset.call();
+						
+				git.getRepository().close();
+			}
+		} catch (Exception pe) {
+			new PhrescoException(pe);
+		}
+	}
+	
+	private String addAppFolderToSVN(String url, final File dir, final String username, final String password, final String commitMessage) throws PhrescoException {
+		try {
+			//get DirName
+			ProjectInfo projectInfo;
+			projectInfo = getGitAppInfo(dir);
+			List<ApplicationInfo> appInfos = projectInfo.getAppInfos();
+			String appDirName = "";
+			if (CollectionUtils.isNotEmpty(appInfos)) {
+				ApplicationInfo appInfo = appInfos.get(0);
+				appDirName = appInfo.getAppDirName();
+			}
+			
+			//CreateTempFolder
+			File temp = new File(dir, TEMP_FOLDER);
+			if (temp.exists()) {
+				FileUtils.deleteDirectory(temp);
+			}
+			temp.mkdir();
+			
+			File folderName = new File(temp, appDirName);
+			folderName.mkdir();
+			
+			//Checkin rootFolder
+			importDirectoryContentToSubversion(url, temp.getPath(), username, password, commitMessage);
+			
+			//deleteing temp
+			if (temp.exists()) {
+				FileUtils.deleteDirectory(temp);
+			}
+			
+			return appDirName;
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		} 
+	}
+	
+	private SVNCommitInfo importDirectoryContentToSubversion(String repositoryURL, final String subVersionedDirectory, final String userName, final String hashedPassword, final String commitMessage) throws SVNException {
+		setupLibrary();
+		DefaultSVNOptions defaultSVNOptions = new DefaultSVNOptions();
+        defaultSVNOptions.setIgnorePatterns(new String[] {DO_NOT_CHECKIN_DIR});
+        final SVNClientManager cm = SVNClientManager.newInstance(defaultSVNOptions, userName, hashedPassword);
+        return cm.getCommitClient().doImport(new File(subVersionedDirectory), SVNURL.parseURIEncoded(repositoryURL), commitMessage, null, true, true, SVNDepth.fromRecurse(true));
+    }
+	
+	private void checkoutImportedApp(String repositoryURL, ApplicationInfo appInfo, String userName, String password) throws Exception {
+		DefaultSVNOptions options = new DefaultSVNOptions();
+		SVNClientManager cm = SVNClientManager.newInstance(options, userName, password);
+		SVNUpdateClient uc = cm.getUpdateClient();
+		SVNURL svnURL = SVNURL.parseURIEncoded(repositoryURL);
+		String subVersionedDirectory = Utility.getProjectHome() + appInfo.getAppDirName();
+		File subVersDir = new File(subVersionedDirectory);
+		uc.doCheckout(SVNURL.parseURIEncoded(repositoryURL), subVersDir, SVNRevision.UNDEFINED, SVNRevision.parse(HEAD_REVISION), SVNDepth.INFINITY, true);
+		// update connection url in pom.xml
+		updateSCMConnection(appInfo, svnURL.toDecodedString());
 	}
 	
 	private static boolean checkOutFilter(String url, String name, String password,String revision, SVNURL svnURL) throws Exception {

@@ -121,6 +121,10 @@ public class Messages extends NLS {
 	public static String DATABASES="Databases";
 	public static String WEBSERVICES="Web Services";
 	public static String UPDATE="Update";	
+	public static String REPO_URL = "*Application Repo URL";
+	public static String MESSAGE = "Message";
+	public static String EMPTY_STRING_WARNING = "should not be empty";
+	public static String INFORMATION = "information";
 /*	
 	static {
 		// initialize resource bundle

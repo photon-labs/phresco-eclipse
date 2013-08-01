@@ -31,7 +31,11 @@ import org.eclipse.ui.IWorkbench;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.SCMManagerUtil;
+import com.photon.phresco.framework.api.SCMManager;
+import com.photon.phresco.framework.impl.SCMManagerImpl;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.pages.ImportFromSCMPage;
 
@@ -61,15 +65,18 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 				try {
 					
 					//get location of workspace (java.io.File)
-					IWorkspace workspace = ResourcesPlugin.getWorkspace();  
-					File workspaceDirectory = workspace.getRoot().getLocation().toFile();
 					String scmType = GIT;
 					if (scmPage.svnRadio.getSelection()) {
 						scmType = SVN;
 					}
+					String scmUrl = scmPage.repoURLText.getText();
+					String username = scmPage.userName.getText();
+					String password = scmPage.password.getText();
+					String revision = scmPage.revisionText.getText();
 					
-					SCMManagerUtil.importProject(scmType, scmPage.repoURLText.getText(), 
-							scmPage.userName.getText(), scmPage.password.getText(), STR_EMPTY, scmPage.revisionText.getText(), workspaceDirectory.getPath());
+					SCMManager scmManager = new SCMManagerImpl();
+					ApplicationInfo appInfo = scmManager.importProject(scmType, scmUrl, username, password, STR_EMPTY, revision);
+					PhrescoUtil.updateProjectIntoWorkspace(appInfo.getAppDirName());
 				} catch (Exception e) {
 					e.printStackTrace();
 					PhrescoDialog.errorDialog(getShell(), "ERROR", e.getLocalizedMessage()); //$NON-NLS-1$

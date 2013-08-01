@@ -20,4 +20,8 @@ public class PhrescoDialog {
 		Status status = new Status(IStatus.ERROR, PhrescoPlugin.PLUGIN_ID,  e.getLocalizedMessage(), e);
 		ErrorDialog.openError(shell, Messages.ERROR, e.getMessage(), status);
 	}
+	
+	public static void messageDialog(Shell shell, String message) {
+		MessageDialog.openInformation(shell, Messages.INFORMATION, message);
+	}
 }
