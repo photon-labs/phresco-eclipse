@@ -20,6 +20,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -39,6 +40,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
+import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.dynamicParameter.DependantParameters;
@@ -80,7 +82,12 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			@Override
 			public void handleEvent(Event event) {
 				saveCongfiguration();
-				UnitTest();				
+				BusyIndicator.showWhile(null, new Runnable() {
+					@Override
+					public void run() {
+						UnitTest();		
+					}
+				});
 			}
 		});
 		return null;
@@ -103,15 +110,10 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.UNIT_TEST, buildArgCmds, workingDirectory);
-			String line;
-
-			while ((line = performAction.readLine())!= null) {
-				System.out.println(line);
-			}
+			
+			ConsoleViewManager.getDefault(UNIT_LOGS).println(performAction);
 
 		} catch (PhrescoException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -223,6 +225,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		unitTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
 		unitTestDialog.setText("Code");
 		unitTestDialog.setLocation(385, 130);
+		unitTestDialog.setSize(451,188);
 
 		GridLayout gridLayout = new GridLayout(2, false);
 		GridData data = new GridData(GridData.FILL_BOTH);
@@ -360,21 +363,21 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			Composite composite = new Composite(unitTestDialog, SWT.BORDER);
 
 			GridLayout layout = new GridLayout(2, true);
-			GridData datas = new GridData();
-			datas.horizontalAlignment = SWT.RIGHT;
+			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
 			composite.setLayout(layout);
-			composite.setLayoutData(datas);
 
 
 			unitButton = new Button(composite, SWT.BORDER);
 			unitButton.setText(VALIDATE);
 			unitButton.setSize(74, 23);
-
+			unitButton.setLayoutData(datas);
+			
 			cancelButton = new Button(composite, SWT.BORDER);
 			cancelButton.setText(CANCEL);
 			cancelButton.setSize(74, 23);
-
-			unitTestDialog.pack();
+			cancelButton.setLayoutData(datas);
+			
+//			unitTestDialog.pack();
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();

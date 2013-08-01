@@ -28,6 +28,7 @@ package com.photon.phresco.commons;
 public interface PhrescoConstants {
 	
 	String DEFAULT_SERVICE_URL = "http://172.16.8.250:7070/service-testing/rest/api";
+	String SONAR_REPORT_URL = "http://localhost:9000/dashboard/index/";
 	
 	char CHAR_ASTERISK = '*';
 	
@@ -189,13 +190,20 @@ public interface PhrescoConstants {
 	String VALIDATECODE_INFO_FILE = "phresco-validate-code-info.xml";
 	String VALIDATE_CODE_GOAL     = "validate-code";
 	String VALIDATE				  = "Validate";
-	
+	String SONAR_BRANCH			  = "sonar.branch";
+	String SONAR_STATUS 		  = "Sonar Status";
+	String SONAR_DIALOG_NAME      = "Code Validation";
+	String SONAR_STATUS_MESSAGE    = "Sonar is not Yet Started . Start the sonar to continue";
+	String SONAR_REPORT_NOTAVAILABLE = "Reports Not Available";
+	String SONAR_HOST_URL            = "http://localhost:9000";
+	String SONAR_LOGS 				= "Sonar Logs ";
 	
 	// Unit Test
 	
 	String UNITTEST_INFO_FILE = "phresco-unit-test-info.xml";
 	String UNIT_TEST_GOAL     = "unit-test";
 	String TEST				  = "Test";
+	String UNIT_LOGS 		  = "Unit logs";
 	
 
 	String FAILED = "FAILED";

@@ -1,7 +1,7 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +20,9 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -35,11 +38,13 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.w3c.dom.Element;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
+import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.SonarUtil;
@@ -52,6 +57,12 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.ui.model.ActionType;
+import com.photon.phresco.ui.model.CodeValidationReportType;
+import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.model.Model;
+import com.phresco.pom.model.Profile;
+import com.phresco.pom.model.Profile.Properties;
+import com.phresco.pom.util.PomProcessor;
 
 public class Code extends AbstractHandler implements PhrescoConstants {
 
@@ -59,44 +70,222 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Button cancelButton;
 	private Button checkBoxButton;	
 
-	private Shell codeDialog;	
 	private Button envSelectionButton;
 
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
-	private Combo listLogs;
+//	private Combo listLogs;
 	private static Map<String, Object> map = new HashedMap();
+	private static Map<String, String> techValues = new HashedMap();
+	Map<String, String> typeMaps = new HashedMap();
+	private Shell dialog;
+	private Shell codeDialog;
+	private Shell createConfigureDialog;
+	private Browser browser;
+	private Combo reportType;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
-		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+		Shell createSonarDialog = createSonarDialog(shell);
+		createSonarDialog.open();
+		return null;
+	}
 
+	private Shell createSonarDialog(final Shell shell) {
+		codeDialog = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
+		codeDialog.setText(SONAR_DIALOG_NAME);
+		codeDialog.setLocation(385,130);
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 3;
+		codeDialog.setLayout(gridLayout);
+
+
+		Button testButton = new Button(codeDialog, SWT.PUSH);
+		testButton.setText("Test");
+
+		Label reportTypeLabel = new Label(codeDialog, SWT.NONE);
+		reportTypeLabel.setText("Report Type");
+
+		
+		
+		reportType =  new Combo(codeDialog, SWT.READ_ONLY | SWT.BORDER);
+		List<CodeValidationReportType> codeValidationReportTypes = SonarUtil.getCodeValidationReportTypes();
+		if (CollectionUtils.isNotEmpty(codeValidationReportTypes)) {
+			for (CodeValidationReportType codeValidationReportType : codeValidationReportTypes) {
+				List<Value> options = codeValidationReportType.getOptions();
+				if (CollectionUtils.isNotEmpty(options)) {
+					for (Value value : options) {
+						reportType.add(value.getValue());
+						techValues.put(value.getValue(), value.getKey());
+					}
+				}
+			}
+			boolean ifFunctional = SonarUtil.checkFunctionalDir();
+			if (ifFunctional) {
+				reportType.add("source");
+				reportType.add("functional");
+			}
+			reportType.select(0);
+		}		
+
+		GridData data = new GridData();
+		data.horizontalAlignment = GridData.FILL;
+		data.horizontalSpan = 1;
+		data.grabExcessHorizontalSpace = true;
+		reportType.setLayoutData(data);
+		
 		try {
-			int status = SonarUtil.getSonarServerStatus();
-			if (status == 200) {
-				final Shell createCodeDialog = createCodeDialog(dialog);
-				createCodeDialog.open();
+			browser = new Browser(codeDialog, SWT.NONE);
+		} catch (SWTError e) {
+			codeDialog.pack();
+			return codeDialog;
+		}
+		data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		data.horizontalSpan = 3;
+		browser.setLayoutData(data);
+		setBrowserUrl();
+		reportType.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				setBrowserUrl();
+			}
+		});
+		
+		
+
+		Composite cancelComposite = new Composite(codeDialog, SWT.NONE);
+		GridLayout subLayout = new GridLayout(1, false);
+		codeDialog.setLayout(subLayout);
+		cancelComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
+		testButton.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				codeDialog.setVisible(false);
+				createConfigureDialog  = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+				try {
+					int status = SonarUtil.getSonarServerStatus();
+					if (status == 200) {
+						dialog = createCodeDialog(createConfigureDialog);
+						dialog.open();
+					} else {
+						PhrescoDialog.errorDialog(shell, SONAR_STATUS, SONAR_STATUS_MESSAGE);
+						return;
+					}
+				} catch (PhrescoException e) {
+					e.printStackTrace();
+				}
+		
+				codeButton.addListener(SWT.Selection, new Listener() {
+		
+					@Override
+					public void handleEvent(Event event) {
+						saveCongfiguration();
+						BusyIndicator.showWhile(null, new Runnable() {
+							@Override
+							public void run() {
+								ValidateCode();
+							}
+						});
+						
+						dialog.setVisible(false);
+						codeDialog.setVisible(true);
+						setBrowserUrl();
+					}
+				});
+			}
+		});
+		
+		cancelButton = new Button(cancelComposite, SWT.PUSH);
+		cancelButton.setText(CANCEL);
+		cancelButton.setSize(74, 23);
+		
+		Listener cancelListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				codeDialog.close();				
+			}
+		};
+		
+		cancelButton.addListener(SWT.Selection, cancelListener);
+
+		return codeDialog;
+	}
+
+	private void setBrowserUrl() {
+		String url = SONAR_REPORT_URL + getReportUrl();
+		try {
+			int sonarServerStatus = SonarUtil.getSonarServerStatus(url);
+			if (sonarServerStatus == 200) {
+				browser.setUrl(url);
 			} else {
-				PhrescoDialog.errorDialog(shell, "Sonar Status", "Sonar is not Yet Started . Start the sonar to continue");
-				return "";
+				browser.setText(SONAR_REPORT_NOTAVAILABLE);
 			}
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
-
-		codeButton.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
-				saveCongfiguration();
-				ValidateCode();
-			}
-		});
-		return null;
 	}
+	
+	private String getReportUrl() {
+		try {
+			String appDirName = PhrescoUtil.getApplicationInfo().getAppDirName();
+			PomProcessor processor = PhrescoUtil.getPomProcessor(appDirName);
+			StringBuilder builder = new StringBuilder();
+			String branchValue = "";
+			String sourceType = "";
+			String functionalDir = processor.getProperty("phresco.functionalTest.dir");
+			boolean startsWith = functionalDir.startsWith("/");
+			
+			if (StringUtils.isNotEmpty(functionalDir) && !startsWith) {
+				functionalDir = File.separator + functionalDir;
+			}
+			sourceType = reportType.getText();
+			if (sourceType.contains("functional")) {
+				PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(appDirName + functionalDir);
+				Model model = pomProcessor.getModel();
+				model.getGroupId();
+				builder.append(model.getGroupId());
+				builder.append(COLON);
+				builder.append(model.getArtifactId());
+				builder.append(COLON);
+				builder.append("functional");
+			} else {
+				Model model = processor.getModel();
+				builder.append(model.getGroupId());
+				builder.append(COLON);
+				builder.append(model.getArtifactId());
+				String key = reportType.getText();
+				String profile = techValues.get(key);
+				if (StringUtils.isNotEmpty(profile)) {
+					Profile typeProfile = processor.getProfile(profile);
+					Properties properties = typeProfile.getProperties();
+					if (properties != null) {
+						List<Element> elements = properties.getAny();
+						if (CollectionUtils.isNotEmpty(elements)) {
+							for (Element element : elements) {
+								if (element.getTagName().equals(SONAR_BRANCH)) {
+									branchValue = element.getTextContent();
+									builder.append(COLON);
+									builder.append(branchValue);
+								}
+							}
+						}
+					}
+				}
+			}
+			return builder.toString();
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		} catch (PhrescoPomException e) {
+			e.printStackTrace();
+		}
+		return null;
 
+	}
+	
 	public void ValidateCode() {
 		try {
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
@@ -112,18 +301,16 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				buildArgCmds.add(pomFileName);
 			}
 			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
-		
+
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.CODE_VALIDATE, buildArgCmds, workingDirectory);
-			String line;
-
-			while ((line = performAction.readLine())!= null) {
-				System.out.println(line);
-			}
-
+			
+			ConsoleViewManager.getDefault(SONAR_LOGS).println(performAction);
+			
+			createConfigureDialog.setVisible(false);
+			codeDialog.setVisible(true);
+			
 		} catch (PhrescoException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -150,8 +337,8 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		StringBuilder command = buildMavenCommand(build, mavenArgCommands);
 		return executeMavenCommand(projectInfo, build, command, workingDirectory);
 	}
-	
-	
+
+
 	public StringBuilder buildMavenCommand(ActionType actionType, List<String> mavenArgCommands) {
 		StringBuilder builder = new StringBuilder(MAVEN_COMMAND);
 		builder.append(STR_SPACE);
@@ -203,9 +390,11 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						String encodedString = new String(encodedPwd);
 						parameter.setValue(encodedString);
 					} else if (parameter.getType().equalsIgnoreCase(LIST)) {
-						List<String> list =  (List<String>) map.get(parameter.getKey());
-						if (CollectionUtils.isNotEmpty(list)) {
-							for (String value : list) {
+						Combo list =  (Combo) map.get(parameter.getKey());
+						String[] items = list.getItems();
+						for (String string : items) {
+							if (list.getText().equalsIgnoreCase(string)) {
+								String value = typeMaps.get(string);
 								parameter.setValue(value);
 							}
 						}
@@ -231,14 +420,14 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 	public Shell createCodeDialog(Shell dialog) {
 
-		codeDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
-		codeDialog.setText("Code");
-		codeDialog.setLocation(385, 130);
+		createConfigureDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+		createConfigureDialog.setText("Code");
+		createConfigureDialog.setLocation(385, 130);
 
 		GridLayout gridLayout = new GridLayout(2, false);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		codeDialog.setLayout(gridLayout);
-		codeDialog.setLayoutData(data);
+		createConfigureDialog.setLayout(gridLayout);
+		createConfigureDialog.setLayoutData(data);
 
 		try {
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
@@ -252,26 +441,25 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 			for (Parameter parameter : parameters) {
 				String type = parameter.getType();
-
 				if (type.equalsIgnoreCase(STRING)) {
-					Label buildNameLabel = new Label(codeDialog, SWT.NONE);
+					Label buildNameLabel = new Label(createConfigureDialog, SWT.NONE);
 					buildNameLabel.setText(parameter.getKey());
 					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					nameText = new Text(codeDialog, SWT.BORDER);
+					nameText = new Text(createConfigureDialog, SWT.BORDER);
 					nameText.setToolTipText(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
 					nameText.setLayoutData(data);
 					map.put(parameter.getKey(), nameText);
 
 				} else if (type.equalsIgnoreCase(NUMBER)) {
-					Label buildNumberLabel = new Label(codeDialog, SWT.NONE);
+					Label buildNumberLabel = new Label(createConfigureDialog, SWT.NONE);
 					buildNumberLabel.setText(parameter.getKey());
 					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					numberText = new Text(codeDialog, SWT.BORDER);
+					numberText = new Text(createConfigureDialog, SWT.BORDER);
 					numberText.setToolTipText(parameter.getKey());
 					numberText.setMessage(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
@@ -279,12 +467,12 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					map.put(parameter.getKey(), numberText);
 
 				} else if (type.equalsIgnoreCase(BOOLEAN)) {
-					Label defaults = new Label(codeDialog, SWT.LEFT);
+					Label defaults = new Label(createConfigureDialog, SWT.LEFT);
 					defaults.setText(parameter.getKey());
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					checkBoxButton = new Button(codeDialog, SWT.CHECK);
+					checkBoxButton = new Button(createConfigureDialog, SWT.CHECK);
 					checkBoxButton.setLayoutData(new GridData(75, 20));
 					data = new GridData(GridData.FILL_BOTH);
 					checkBoxButton.setLayoutData(data);
@@ -292,12 +480,12 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					map.put(parameter.getKey(), checkBoxButton);
 				}
 				else if (type.equalsIgnoreCase(PASSWORD)) {
-					Label defaults = new Label(codeDialog, SWT.LEFT);
+					Label defaults = new Label(createConfigureDialog, SWT.LEFT);
 					defaults.setText(parameter.getKey());
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					passwordText = new Text(codeDialog, SWT.PASSWORD | SWT.BORDER);
+					passwordText = new Text(createConfigureDialog, SWT.PASSWORD | SWT.BORDER);
 					passwordText.setToolTipText(PASSWORD);
 					passwordText.setMessage(parameter.getKey());
 					passwordText.setLayoutData(new GridData(100, 13));
@@ -306,31 +494,31 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					map.put(parameter.getKey(), passwordText);
 				}
 				else if (type.equalsIgnoreCase(LIST)) {
-					Label Logs = new Label(codeDialog, SWT.LEFT);
+					Label Logs = new Label(createConfigureDialog, SWT.LEFT);
 					Logs.setText(parameter.getKey());
 					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					listLogs = new Combo(codeDialog, SWT.DROP_DOWN);
-					List<String> listValues = new ArrayList<String>();
+					Combo listLogs = new Combo(createConfigureDialog, SWT.DROP_DOWN);
+					
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
-						listValues.add(value.getKey());
+						typeMaps.put(value.getValue(), value.getKey());
 					}
 					data = new GridData(GridData.FILL_BOTH);
 					listLogs.select(0);
 					listLogs.setLayoutData(data);
-					map.put(parameter.getKey(), listValues); 
+					map.put(parameter.getKey(), listLogs); 
 
 				} else if (type.equalsIgnoreCase("DynamicParameter")) {
 					int yaxis = 0;
 					String key = null;
-					Label Logs = new Label(codeDialog, SWT.LEFT);
+					Label Logs = new Label(createConfigureDialog, SWT.LEFT);
 					Logs.setText("Environment:");
 					Logs.setBounds(24, 40, 80, 23);
 
-					Group group = new Group(codeDialog, SWT.SHADOW_IN);
+					Group group = new Group(createConfigureDialog, SWT.SHADOW_IN);
 					group.setText("Environment");
 					group.setLocation(146, 26);
 
@@ -368,7 +556,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(codeDialog, SWT.BORDER);
+			Composite composite = new Composite(createConfigureDialog, SWT.BORDER);
 
 			GridLayout layout = new GridLayout(2, true);
 			GridData datas = new GridData();
@@ -384,13 +572,26 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			cancelButton = new Button(composite, SWT.BORDER);
 			cancelButton.setText(CANCEL);
 			cancelButton.setSize(74, 23);
+			
+			
+			Listener cancelListener = new Listener() {
+				
+				@Override
+				public void handleEvent(Event event) {
+					createConfigureDialog.close();
+				}
+			};
+			cancelButton.addListener(SWT.Selection, cancelListener);
+			
+			
+			
 
-			codeDialog.pack();
+			createConfigureDialog.pack();
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
-		return codeDialog;
+		return createConfigureDialog;
 	}
 
 

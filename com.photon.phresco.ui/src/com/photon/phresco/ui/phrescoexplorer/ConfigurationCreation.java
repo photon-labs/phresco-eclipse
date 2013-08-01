@@ -56,7 +56,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 	private void createTemplateByType(String type) {
 		try {
-			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE);
+			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.H_SCROLL | SWT.V_SCROLL);
 			configDialog.setText("Configuration");
 			configDialog.setLocation(385,130);
 			configDialog.setSize(400, 230);
@@ -130,7 +130,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 				@Override
 				public void handleEvent(Event event) {
-					createDynamicDialog(configDialog, typeList.getText());
+					Composite createDynamicDialog = createDynamicDialog(configDialog, typeList.getText());
+					createDynamicDialog.layout();
 				}
 			});
 
@@ -145,9 +146,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 
-	private void createDynamicDialog(Shell configDialog, String types) {
+	private Composite createDynamicDialog(Shell configDialog, String types) {
+		Composite composite = new Composite(configDialog, SWT.NONE);
 		try {
-			Composite composite = new Composite(configDialog, SWT.NONE);
 			GridLayout subLayout = new GridLayout(2, false);
 			composite.setLayout(subLayout);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -252,10 +253,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			cancelButton.setText("Cancel");
 			cancelButton.setSize(74, 23);
 			cancelButton.setLayoutData(datas);
-
+			
+			composite.layout();
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+		return composite;
 	}
 
 
