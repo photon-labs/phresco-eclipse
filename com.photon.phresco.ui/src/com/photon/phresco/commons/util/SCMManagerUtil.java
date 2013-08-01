@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -142,14 +143,82 @@ public class SCMManagerUtil implements PhrescoConstants {
 				importDirectoryContentToSubversion(appendedUrl, dir.getPath(), username, password, commitMessage);
 				// checkout to get .svn folder
 				checkoutImportedApp(appendedUrl, appInfo, username, password);
+				return true;
 			} else if (GIT.equals(type)) {
 				importToGITRepo(url,appInfo, username, password, dir, commitMessage);
+				return true;
 			}
 		} catch (Exception e) {
 			throw e;
 		}
-		return true;
+		return false;
 	}
+	
+	public boolean updateProject(String type, String url, String username ,
+			String password, String branch, String revision, ApplicationInfo appInfo) throws Exception  {
+		if (SVN.equals(type)) {
+			DAVRepositoryFactory.setup();
+			DefaultSVNOptions options = new DefaultSVNOptions();
+			cm = SVNClientManager.newInstance(options, username, password);
+			updateSCMConnection(appInfo, url);
+				// revision = HEAD_REVISION.equals(revision) ? revision
+				// : revisionVal;
+			File updateDir = new File(Utility.getProjectHome(), appInfo.getAppDirName());
+			SVNUpdateClient uc = cm.getUpdateClient();
+			uc.doUpdate(updateDir, SVNRevision.parse(revision), SVNDepth.UNKNOWN, true, true);
+			return true;
+		} else if (GIT.equals(type)) {
+			updateSCMConnection(appInfo, url);
+			File updateDir = new File(Utility.getProjectHome(), appInfo.getAppDirName()); 
+			Git git = Git.open(updateDir); // checkout is the folder with .git
+			git.pull().call(); // succeeds
+			git.getRepository().close();
+			return true;
+		} else if (BITKEEPER.equals(type)) {
+		    StringBuilder sb = new StringBuilder(Utility.getProjectHome())
+		    .append(appInfo.getAppDirName());
+		    updateFromBitKeeperRepo(url, sb.toString());
+		}
+		return false;
+	}
+	
+	private boolean updateFromBitKeeperRepo(String repoUrl, String appDir) throws PhrescoException {
+        BufferedReader reader = null;
+        File file = new File(Utility.getPhrescoTemp() + "bitkeeper.info");
+        boolean isUpdated = false;
+        try {
+            List<String> commands = new ArrayList<String>();
+            commands.add(BK_PARENT + SPACE + repoUrl);
+            commands.add(BK_PULL);
+            for (String command : commands) {
+                Utility.executeStreamconsumer(appDir, command, new FileOutputStream(file));
+            }
+            reader = new BufferedReader(new FileReader(file));
+            String strLine;
+            while ((strLine = reader.readLine()) != null) {
+                if (strLine.contains("Nothing to pull")) {
+                    throw new PhrescoException("Nothing to pull");
+                } else if (strLine.contains("[pull] 100%")) {
+                    isUpdated = true;
+                }
+            }
+        } catch (Exception e) {
+            throw new PhrescoException(e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    throw new PhrescoException(e);
+                }
+            }
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+        
+        return isUpdated;
+    }
 	
 	private void importToGITRepo(String url,ApplicationInfo appInfo, String username, String password, File appDir, String commitMessage) throws Exception {
 		boolean gitExists = false;
@@ -159,7 +228,6 @@ public class SCMManagerUtil implements PhrescoConstants {
 		try {
 			CredentialsProvider cp = new UsernamePasswordCredentialsProvider(username, password);
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
-			System.out.println("inside framework impl....");
 			Repository repository = builder.setGitDir(appDir).readEnvironment().findGitDir().build();
 			String dirPath = appDir.getPath();
 			File gitignore = new File(dirPath + GITIGNORE_FILE);
@@ -207,8 +275,6 @@ public class SCMManagerUtil implements PhrescoConstants {
 				pc.setCredentialsProvider(cp).setForce(true);
 				pc.setPushAll().call();
 			} catch (Exception e){
-				System.out.println("1st Exception....");
-				e.printStackTrace();
 				git.getRepository().close();
 				throw e;
 			}
@@ -218,8 +284,6 @@ public class SCMManagerUtil implements PhrescoConstants {
 			}
 			git.getRepository().close();
 		} catch (Exception e) {
-			System.out.println("2st Exception....");
-			e.printStackTrace();
 			Exception s = e;
 			resetLocalCommit(appDir, gitExists, e);
 			throw s;
