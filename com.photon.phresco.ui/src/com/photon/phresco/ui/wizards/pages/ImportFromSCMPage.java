@@ -50,6 +50,17 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
     public Button svnRadio;
     public Button headRevisionButton;
     public Text revisionText;
+    public Button testCheckOutButton;
+    
+    public Label testRepoUrlLabel;
+    public Text testRepoUrlText;
+    public Label otherCredentialLbl;
+    public Button testOtherCredentialButton;
+    public Label testRepoUsernameLabel;
+    public Text testRepoUsernameText;
+    public Text testRepoPasswordText;
+    public Button repoUrlHeadRevisionButton;
+    public Text testRepoRevisionText;
     
 	public ImportFromSCMPage(String pageName, String message) {
 		super(pageName);
@@ -57,7 +68,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 	}
 
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		
 		if(!PhrescoUtil.isLoggedIn()) {
 			ConfirmDialog.getConfirmDialog().showConfirm(getShell());
@@ -122,9 +133,82 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		
 		final Label lblTestCheckout = new Label(composite, SWT.NONE);
 		lblTestCheckout.setText(Messages.TEST_CHECKOUT);
-		final Button testCheckOutButton = new Button(composite, SWT.CHECK);
+		testCheckOutButton = new Button(composite, SWT.CHECK);
 		testCheckOutButton.setLayoutData(new GridData(15,13));
 		
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		composite.setLayoutData(gridData);
+		
+		testRepoUrlLabel = new Label(composite, SWT.NONE);
+		testRepoUrlLabel.setText(Messages.REPO_RUL);
+		
+		testRepoUrlText = new Text(composite, SWT.BORDER);
+		testRepoUrlText.setLayoutData(new GridData(160,15));
+		
+		otherCredentialLbl = new Label(composite, SWT.NONE);
+		otherCredentialLbl.setText(Messages.OTHER_CREDENTIALS);
+		
+		testOtherCredentialButton = new Button(composite, SWT.CHECK);
+		testOtherCredentialButton.setLayoutData(new GridData(15, 13));
+		
+		final Label testRepouserNameLabel = new Label(composite, SWT.LEFT);
+        testRepouserNameLabel.setText(Messages.USER_NAME);
+        testRepoUsernameText = new Text(composite, SWT.BORDER);
+        testRepoUsernameText.setText(ADMIN_USER);
+        testRepoUsernameText.setEnabled(false);
+        testRepoUsernameText.setLayoutData(new GridData(160,15));
+		
+        final Label testRepopasswordLabel = new Label(composite, SWT.LEFT);
+        testRepopasswordLabel.setText(Messages.USER_PWD);
+        testRepoPasswordText = new Text(composite, SWT.BORDER);
+        testRepoPasswordText.setEchoChar(CHAR_ASTERISK);
+        testRepoPasswordText.setText(ADMIN_PWD);
+        testRepoPasswordText.setEnabled(false);
+        testRepoPasswordText.setLayoutData(new GridData(160,15));
+		
+        final Label testRepoLblHeadRevision = new Label(composite, SWT.NONE);
+		testRepoLblHeadRevision.setText(Messages.REVISION);
+		testRepoLblHeadRevision.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+		
+		repoUrlHeadRevisionButton = new Button(composite, SWT.CHECK);
+		repoUrlHeadRevisionButton.setText(Messages.HEAD_REVISION);
+		repoUrlHeadRevisionButton.setLayoutData(new GridData(80,13));
+		
+		new Label(composite, SWT.NONE);
+		testRepoRevisionText = new Text(composite, SWT.BORDER);
+		testRepoRevisionText.setLayoutData(new GridData(160,13));
+		
+		testCheckOutButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(testCheckOutButton.getSelection()) {
+					testRepoUrlLabel.setVisible(true);
+					testRepoUrlText.setVisible(true);
+					otherCredentialLbl.setVisible(true);
+					testOtherCredentialButton.setVisible(true);
+					testRepouserNameLabel.setVisible(true);
+					testRepoUsernameText.setVisible(true);
+					testRepopasswordLabel.setVisible(true);
+					testRepoPasswordText.setVisible(true);
+					testRepoLblHeadRevision.setVisible(true);
+					repoUrlHeadRevisionButton.setVisible(true);
+					testRepoRevisionText.setVisible(true);
+				} else {
+					testRepoUrlLabel.setVisible(false);
+					testRepoUrlText.setVisible(false);
+					otherCredentialLbl.setVisible(false);
+					testOtherCredentialButton.setVisible(false);
+					testRepouserNameLabel.setVisible(false);
+					testRepoUsernameText.setVisible(false);
+					testRepopasswordLabel.setVisible(false);
+					testRepoPasswordText.setVisible(false);
+					testRepoLblHeadRevision.setVisible(false);
+					repoUrlHeadRevisionButton.setVisible(false);
+					testRepoRevisionText.setVisible(false);
+				}
+				super.widgetSelected(e);
+			}
+		});
 		// To hide for default selection scm type Git
 		
 		lblHeadRevision.setVisible(false);
@@ -137,6 +221,17 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		otherCredentialButton.setVisible(false);
 		userName.setEnabled(false);
 		password.setEnabled(false);
+		testRepoUrlLabel.setVisible(false);
+		testRepoUrlText.setVisible(false);
+		otherCredentialLbl.setVisible(false);
+		testOtherCredentialButton.setVisible(false);
+		testRepouserNameLabel.setVisible(false);
+		testRepoUsernameText.setVisible(false);
+		testRepopasswordLabel.setVisible(false);
+		testRepoPasswordText.setVisible(false);
+		testRepoLblHeadRevision.setVisible(false);
+		repoUrlHeadRevisionButton.setVisible(false);
+		testRepoRevisionText.setVisible(false);
 		
 		// To handle based on SCM type selection
 		gitRadio.addSelectionListener(new SelectionAdapter() {
@@ -153,6 +248,17 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    		testCheckOutButton.setVisible(false);
 		    		lblOtherCredentials.setVisible(false);
 		    		otherCredentialButton.setVisible(false);
+		    		testRepoUrlLabel.setVisible(false);
+		    		testRepoUrlText.setVisible(false);
+		    		otherCredentialLbl.setVisible(false);
+		    		testOtherCredentialButton.setVisible(false);
+		    		testRepouserNameLabel.setVisible(false);
+		    		testRepoUsernameText.setVisible(false);
+		    		testRepopasswordLabel.setVisible(false);
+		    		testRepoPasswordText.setVisible(false);
+		    		testRepoLblHeadRevision.setVisible(false);
+		    		repoUrlHeadRevisionButton.setVisible(false);
+		    		testRepoRevisionText.setVisible(false);
 		    	} else {
 		    		lblHeadRevision.setVisible(true);
 		    		headRevisionButton.setVisible(true);
@@ -162,6 +268,19 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    		testCheckOutButton.setVisible(true);
 		    		lblOtherCredentials.setVisible(true);
 		    		otherCredentialButton.setVisible(true);
+		    		if(testCheckOutButton.getSelection()) {
+		    			testRepoUrlLabel.setVisible(true);
+						testRepoUrlText.setVisible(true);
+						otherCredentialLbl.setVisible(true);
+						testOtherCredentialButton.setVisible(true);
+						testRepouserNameLabel.setVisible(true);
+						testRepoUsernameText.setVisible(true);
+						testRepopasswordLabel.setVisible(true);
+						testRepoPasswordText.setVisible(true);
+						testRepoLblHeadRevision.setVisible(true);
+						repoUrlHeadRevisionButton.setVisible(true);
+						testRepoRevisionText.setVisible(true);
+		    		}
 		    	}
 		    }
 		});
@@ -173,6 +292,15 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		        // Handle the selection event
 				boolean selection = !headRevisionButton.getSelection();
 				revisionText.setEnabled(selection);
+		    }
+		}); 
+		
+		repoUrlHeadRevisionButton.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        // Handle the selection event
+				boolean selection = !repoUrlHeadRevisionButton.getSelection();
+				testRepoRevisionText.setEnabled(selection);
 		    }
 		}); 
 		
@@ -193,6 +321,22 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    }
 		}); 
 		
+		testOtherCredentialButton.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        // Handle the selection event
+				boolean selection = testOtherCredentialButton.getSelection();
+				testRepoUsernameText.setEnabled(selection);
+				testRepoPasswordText.setEnabled(selection);
+				if (selection) {
+					testRepoUsernameText.setText(STR_EMPTY);
+					testRepoPasswordText.setText(STR_EMPTY);
+				} else {
+					testRepoUsernameText.setText(ADMIN_USER);
+					testRepoPasswordText.setText(ADMIN_PWD);
+				}
+		    }
+		}); 
+		
 	}
-	
 }

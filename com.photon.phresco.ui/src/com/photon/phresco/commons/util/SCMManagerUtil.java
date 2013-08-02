@@ -64,6 +64,7 @@ import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory;
@@ -381,6 +382,24 @@ public class SCMManagerUtil implements PhrescoConstants {
 		}
 		git.getRepository().close();
 		return fileslist;
+	}
+	
+	public String svnCheckout(String userName, String Password, String repoUrl, String Path, String revision) {
+		DAVRepositoryFactory.setup();
+		SVNClientManager clientManager = SVNClientManager.newInstance();
+		ISVNAuthenticationManager authManager = new BasicAuthenticationManager(userName, Password);
+		clientManager.setAuthenticationManager(authManager);
+		SVNUpdateClient updateClient = clientManager.getUpdateClient();
+		try
+		{
+			File file = new File(Path);
+			SVNURL url = SVNURL.parseURIEncoded(repoUrl);
+			updateClient.doCheckout(url, file, SVNRevision.UNDEFINED, SVNRevision.parse(revision), true);
+		}
+		catch (SVNException e) {
+			return e.getLocalizedMessage();
+		}
+		return SUCCESSFUL;
 	}
 	
 	private boolean updateFromBitKeeperRepo(String repoUrl, String appDir) throws PhrescoException {

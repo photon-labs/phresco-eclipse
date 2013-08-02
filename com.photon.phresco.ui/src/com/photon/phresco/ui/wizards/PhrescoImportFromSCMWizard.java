@@ -19,6 +19,9 @@
 
 package com.photon.phresco.ui.wizards;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -30,9 +33,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.framework.api.SCMManager;
-import com.photon.phresco.framework.impl.SCMManagerImpl;
+import com.photon.phresco.commons.util.SCMManagerUtil;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.pages.ImportFromSCMPage;
 
@@ -59,11 +60,9 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 		if (wizardPage instanceof ImportFromSCMPage) {
 			final ImportFromSCMPage scmPage = (ImportFromSCMPage) wizardPage;
 			if (validate(scmPage)) {
-				
-		        BusyIndicator.showWhile(null, new Runnable() {
+				BusyIndicator.showWhile(null, new Runnable() {
 		            public void run() {
-		            	try {
-							
+						try {
 							//get location of workspace (java.io.File)
 							String scmType = GIT;
 							if (scmPage.svnRadio.getSelection()) {
@@ -73,17 +72,38 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 							String username = scmPage.userName.getText();
 							String password = scmPage.password.getText();
 							String revision = scmPage.revisionText.getText();
+							String testRepoUsername = scmPage.testRepoUsernameText.getText();
+							String testRepoPassword = scmPage.testRepoPasswordText.getText();
+							String testRepoUrl = scmPage.testRepoUrlText.getText();
+							boolean selection = scmPage.repoUrlHeadRevisionButton.getSelection();
+							String testRepoRevision = "";
+							if(selection) {
+								testRepoRevision = HEAD_REVISION;
+							} else {
+								testRepoRevision = scmPage.testRepoRevisionText.getText();
+							}
+							String projectHome = PhrescoUtil.getProjectHome();
+							ApplicationInfo importedProject = SCMManagerUtil.importProject(scmType, scmUrl, username, password, STR_EMPTY, revision, projectHome);
 							
-							SCMManager scmManager = new SCMManagerImpl();
-							ApplicationInfo appInfo = scmManager.importProject(scmType, scmUrl, username, password, STR_EMPTY, revision);
-							PhrescoUtil.updateProjectIntoWorkspace(appInfo.getAppDirName());
+							if(SVN.equals(scmType) && scmPage.testCheckOutButton.getSelection() && importedProject != null) {
+								String path = PhrescoUtil.getProjectHome() + File.separator + importedProject.getAppDirName()
+										+ File.separator;
+								File testFolder = new File(path, TEST);
+								if (!testFolder.exists()) {
+									testFolder.mkdirs();
+								}
+								SCMManagerUtil managerUtil = new SCMManagerUtil();
+								FileUtils.cleanDirectory(testFolder);
+								managerUtil.svnCheckout(testRepoUsername, testRepoPassword, testRepoUrl, testFolder.getPath(), testRepoRevision);
+							}
+							PhrescoUtil.updateProjectIntoWorkspace(importedProject.getAppDirName());
 						} catch (Exception e) {
 							e.printStackTrace();
 							PhrescoDialog.errorDialog(getShell(), "ERROR", e.getLocalizedMessage()); //$NON-NLS-1$
 						}
 		            }
 		        });
-		        
+				PhrescoDialog.messageDialog(getShell(), "Check out Successfull");
 				return true;
 			}
 		}
@@ -103,6 +123,11 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 			canFinish = true;
 		} else if (isValueDefined(scmPage) && (scmPage.headRevisionButton.getSelection() || !scmPage.revisionText.getText().equals(STR_EMPTY)) ){
 			canFinish = true;
+			if(istestRepoValueDefined(scmPage) && (scmPage.repoUrlHeadRevisionButton.getSelection() || !scmPage.testRepoRevisionText.getText().equals(STR_EMPTY))) {
+				canFinish = true;
+			} else {
+				canFinish = false;
+			}
 		} else {
 			canFinish = false;
 		}
@@ -118,6 +143,17 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 		boolean canFinish = false;
 		if (!scmPage.repoURLText.getText().equals(STR_EMPTY) && !scmPage.userName.getText().equals(STR_EMPTY) && 
 						!scmPage.password.getText().equals(STR_EMPTY)) {
+			canFinish = true;
+		} else {
+			canFinish = false;
+		}
+		return canFinish;
+	}
+	
+	private boolean istestRepoValueDefined(ImportFromSCMPage scmPage) {
+		boolean canFinish = false;
+		if (!scmPage.testRepoUrlText.getText().equals(STR_EMPTY) && !scmPage.testRepoUsernameText.getText().equals(STR_EMPTY) && 
+						!scmPage.testRepoPasswordText.getText().equals(STR_EMPTY)) {
 			canFinish = true;
 		} else {
 			canFinish = false;
