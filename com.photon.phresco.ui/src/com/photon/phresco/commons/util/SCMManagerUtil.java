@@ -46,11 +46,11 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -71,12 +71,15 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNCommitParameters;
 import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNCommitClient;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNStatus;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
+import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.google.gson.Gson;
@@ -189,6 +192,82 @@ public class SCMManagerUtil implements PhrescoConstants {
 		return false;
 	}
 	
+	public boolean commitToRepo(String type, String url, String username, String password, String branch, String revision, File dir, String commitMessage) throws Exception {
+		try {
+			if (SVN.equals(type)) {
+				commitDirectoryContentToSubversion(url, dir.getPath(), username, password, commitMessage);
+			} else if (GIT.equals(type)) {
+				importToGITRepo(url, null, username, password, dir, commitMessage);
+			} 
+		} catch (PhrescoException e) {
+			throw e;
+		}
+		return true;
+	}
+	
+	public SVNCommitInfo commitSpecifiedFiles(List<File> listModifiedFiles, String username, String password, String commitMessage) throws Exception {
+		setupLibrary();
+		
+		final SVNClientManager cm = SVNClientManager.newInstance(new DefaultSVNOptions(), username, password);
+		SVNWCClient wcClient = cm.getWCClient();
+		File[] comittableFiles = listModifiedFiles.toArray(new File[listModifiedFiles.size()]);
+
+		SVNCommitClient cc = SVNClientManager.newInstance().getCommitClient(); 
+		cc.setCommitParameters(new ISVNCommitParameters() { 
+
+			// delete even those files 
+			// that are not scheduled for deletion. 
+			public Action onMissingFile(File file) { 
+				return DELETE; 
+			} 
+			public Action onMissingDirectory(File file) { 
+				return DELETE; 
+			} 
+
+			// delete files from disk after committing deletion. 
+			public boolean onDirectoryDeletion(File directory) { 
+				return true; 
+			} 
+			public boolean onFileDeletion(File file) { 
+				return true; 
+			} 
+		}); 
+		
+		//to List Unversioned Files 
+		List<File> unversionedFiles = new ArrayList<File>();
+		for (File file : comittableFiles) {
+			List<RepoFileInfo> status = getCommitableFiles(new File(file.getPath()), HEAD_REVISION);
+			if (CollectionUtils.isNotEmpty(status)) {
+				RepoFileInfo svnStatus = status.get(0);
+				SVNStatusType contentsStatus = svnStatus.getContentsStatus();
+				if(UNVERSIONED.equalsIgnoreCase(contentsStatus.toString())) {
+					unversionedFiles.add(file);
+				} 
+			}
+		}
+		
+		//Add only Unversioned Files
+		if (CollectionUtils.isNotEmpty(unversionedFiles)) {
+			File[] newlyAddedFiles = unversionedFiles.toArray(new File[unversionedFiles.size()]);
+			wcClient.doAdd(newlyAddedFiles, true, false, false, SVNDepth.INFINITY, false, false, false);
+		}
+
+		SVNCommitInfo commitInfo = cc.doCommit(comittableFiles, false, commitMessage, null, null, false, true, SVNDepth.INFINITY);
+
+		return commitInfo;
+	}
+	
+	private SVNCommitInfo commitDirectoryContentToSubversion(String repositoryURL, String subVersionedDirectory, String userName, String hashedPassword, String commitMessage) throws SVNException {
+		setupLibrary();
+		
+		final SVNClientManager cm = SVNClientManager.newInstance(new DefaultSVNOptions(), userName, hashedPassword);
+		SVNWCClient wcClient = cm.getWCClient();
+		File subVerDir = new File(subVersionedDirectory);
+		// This one recursively adds an existing local item under version control (schedules for addition)
+		wcClient.doAdd(subVerDir, true, false, false, SVNDepth.INFINITY, false, false);
+		return cm.getCommitClient().doCommit(new File[]{subVerDir}, false, commitMessage, null, null, false, true, SVNDepth.INFINITY);
+    }
+	
 	public List<RepoFileInfo> getCommitableFiles(File path, String revision) throws SVNException {
 		
 	    SVNClientManager svnClientManager = SVNClientManager.newInstance();
@@ -218,7 +297,6 @@ public class SCMManagerUtil implements PhrescoConstants {
 		Repository repository = builder.setGitDir(path).readEnvironment().findGitDir().build(); 
 		Git git = new Git(repository);
 		List<RepoFileInfo> fileslist = new ArrayList<RepoFileInfo>();
-		RepoFileInfo repoFileInfo = new RepoFileInfo();
 		InitCommand initCommand = Git.init();
 		initCommand.setDirectory(path);
 		git = initCommand.call();
@@ -234,6 +312,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 		
 		if (!added.isEmpty()) {
 			for (String add : added) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + add;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("A");
@@ -243,6 +322,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 
 		if (!changed.isEmpty()) {
 			for (String change : changed) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + change;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("M");
@@ -252,6 +332,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 
 		if (!conflicting.isEmpty()) {
 			for (String conflict : conflicting) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + conflict;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("C");
@@ -261,6 +342,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 
 		if (!missing.isEmpty()) {
 			for (String miss : missing) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + miss;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("!");
@@ -270,15 +352,17 @@ public class SCMManagerUtil implements PhrescoConstants {
 
 		if (!modified.isEmpty()) {
 			for (String modify : modified) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + modify;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("M");
-				fileslist.add(repoFileInfo);
+				fileslist.add(repoFileInfo); 
 			}
 		}
 
 		if (!removed.isEmpty()) {
 			for (String remove : removed) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + remove;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("D");
@@ -288,6 +372,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 
 		if (!untracked.isEmpty()) {
 			for (String untrack : untracked) {
+				RepoFileInfo repoFileInfo = new RepoFileInfo();
 				String filePath = path + BACK_SLASH + untrack;
 				repoFileInfo.setCommitFilePath(filePath);
 				repoFileInfo.setStatus("?");

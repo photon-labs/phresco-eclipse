@@ -1,7 +1,7 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -10,9 +10,10 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.StatusDialog;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,20 +27,29 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.tmatesoft.svn.core.SVNCommitInfo;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.SCMManagerUtil;
+import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.framework.model.RepoFileInfo;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.resource.Messages;
+import com.phresco.pom.model.Scm;
+import com.phresco.pom.util.PomProcessor;
 
+/**
+ * @author suresh_ma
+ *
+ */
 public class Commit extends AbstractHandler implements PhrescoConstants {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-Shell shell = HandlerUtil.getActiveShell(event);
+		Shell shell = HandlerUtil.getActiveShell(event);
 		
 		// To check the user has logged in
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
@@ -77,6 +87,8 @@ Shell shell = HandlerUtil.getActiveShell(event);
 		private Label usernameLabel;
 		private Label passwordLabel;
 		private Label messageLabel;
+		private String connectionUrl;
+		private List<File> filesTobeCommit = new ArrayList<File>();
 		
 		public CommitScm(Shell parent) {
 			super(parent);
@@ -93,6 +105,13 @@ Shell shell = HandlerUtil.getActiveShell(event);
 			composite.setLayout(new GridLayout(2, false));
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			
+			try {
+				ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+				connectionUrl = getConnectionUrl(appInfo);
+			} catch (PhrescoException e1) {
+				PhrescoDialog.exceptionDialog(getShell(), e1);
+			}
+			
 			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 			
 			typeLabel = new Label(composite, SWT.NONE);
@@ -108,6 +127,7 @@ Shell shell = HandlerUtil.getActiveShell(event);
 			applicationRepoURLLabel.setText(Messages.REPO_URL);
 			
 			applicationRepoURLText = new Text(composite, SWT.BORDER);
+			applicationRepoURLText.setText(connectionUrl);
 			applicationRepoURLText.setLayoutData(gridData);
 			
 			usernameLabel = new Label(composite, SWT.NONE);
@@ -154,33 +174,47 @@ Shell shell = HandlerUtil.getActiveShell(event);
 	        statusColumn.setText("Status");
 	        statusColumn.setWidth(140);
 	        
-	        String applicationHome = PhrescoUtil.getApplicationHome();
-	        
-	        SCMManagerUtil managerUtil = new SCMManagerUtil();
-	        List<RepoFileInfo> gitCommitableFiles = null;
+	        List<RepoFileInfo> commitableFiles = null;
 			try {
-				 gitCommitableFiles = managerUtil.getGITCommitableFiles(new File(applicationHome));
-				 for (int i = 0; i < gitCommitableFiles.size(); i++) {
+				if(connectionUrl.contains(GIT)) {
+					commitableFiles = gitCommitableFiles();
+				} else {
+					commitableFiles = svnCommitableFiles();
+				}
+				 for (int i = 0; i < commitableFiles.size(); i++) {
 			            new TableItem(table, SWT.NONE);
 			        }
-			} catch (IOException e) {
+			} catch (PhrescoException e) {
 				PhrescoDialog.exceptionDialog(getShell(), e);
-			} catch (GitAPIException e) {
-				PhrescoDialog.exceptionDialog(getShell(), e);
+				parentComposite.dispose();
 			}
 			TableItem[] tableItems = table.getItems();
-			if(CollectionUtils.isNotEmpty(gitCommitableFiles)) {
+			if(CollectionUtils.isNotEmpty(commitableFiles)) {
 				int i = 0;
-				for (RepoFileInfo repoFileInfo : gitCommitableFiles) {
-					System.out.println("file===>"  + repoFileInfo.getCommitFilePath());
+				for (final RepoFileInfo repoFileInfo : commitableFiles) {
 					TableItem tableItem = tableItems[i];
 					TableEditor editor = new TableEditor(table);
-					Button checkButton = new Button(table, SWT.CHECK);
+					final Button checkButton = new Button(table, SWT.CHECK);
 					checkButton.pack();
 					editor.minimumWidth = checkButton.getSize().x;
 					editor.horizontalAlignment = SWT.LEFT;
 					editor.setEditor(checkButton, tableItem, 0);
 					
+					if(connectionUrl.contains(GIT)) {
+						checkButton.setEnabled(false);
+					}
+					checkButton.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							File commitFile = new File(repoFileInfo.getCommitFilePath());
+							if(checkButton.getSelection()) {
+								filesTobeCommit.add(commitFile);
+							} else {
+								filesTobeCommit.remove(commitFile);
+							}
+							super.widgetSelected(e);
+						}
+					});
 					editor = new TableEditor(table);
 					Label fileLabel = new Label(table, SWT.NONE);
 					fileLabel.setText(repoFileInfo.getCommitFilePath());
@@ -206,10 +240,36 @@ Shell shell = HandlerUtil.getActiveShell(event);
 			if(!validate) {
 				return;
 			}
-			
+			String username = usernameText.getText();
+			String password = passwordText.getText();
+			String applicationHome = PhrescoUtil.getApplicationHome();
+			File commitHome = new File(applicationHome);
+			String message = messageText.getText();
+			SCMManagerUtil util = new SCMManagerUtil();
+			boolean commitToRepo = false;
+			if(connectionUrl.contains(GIT)) {
+				try {
+					commitToRepo = util.commitToRepo(GIT, connectionUrl, username, password, "", "", commitHome, message);
+				} catch (Exception e) {
+					PhrescoDialog.exceptionDialog(getShell(), e);
+				}
+			} else if(connectionUrl.contains(SVN)) {
+				try {
+					util.commitSpecifiedFiles(filesTobeCommit, username, password, message);
+					commitToRepo = true;
+				} catch (Exception e) {
+					PhrescoDialog.exceptionDialog(getShell(), e);
+				}
+			}
+			if(commitToRepo) {
+				PhrescoDialog.messageDialog(getShell(), "Files commited");
+			}
 			super.okPressed();
 		}
 		
+		/**
+		 * @return
+		 */
 		private boolean validate() {
 			if(StringUtils.isEmpty(typeCombo.getText())) {
 				PhrescoDialog.errorDialog(getShell(), Messages.WARNING, "Type" + STR_SPACE + Messages.EMPTY_STRING_WARNING);
@@ -229,5 +289,60 @@ Shell shell = HandlerUtil.getActiveShell(event);
 			}
 			return true;
 		}
+	}
+	
+	/**
+	 * @param applicationInfo
+	 * @return
+	 * @throws PhrescoException
+	 */
+	private String getConnectionUrl(ApplicationInfo applicationInfo) throws PhrescoException {
+		try {
+			PomProcessor processor = PhrescoUtil.getPomProcessor(applicationInfo.getAppDirName());
+			Scm scm = processor.getSCM();
+			if (scm != null && !scm.getConnection().isEmpty()) {
+				return scm.getConnection();
+			}
+		} catch (PhrescoException e) {
+			throw new PhrescoException(e);
+		}
+
+		return "";
+	}
+	
+	/**
+	 * @return
+	 * @throws PhrescoException
+	 */
+	private List<RepoFileInfo> svnCommitableFiles() throws PhrescoException {
+		List<RepoFileInfo> commitableFiles = null;
+		String revision = "";
+		try {
+			SCMManagerUtil util = new SCMManagerUtil();
+			String applicationHome = PhrescoUtil.getApplicationHome();
+			File appDir = new File(applicationHome);
+			revision = HEAD_REVISION;
+			commitableFiles = util.getCommitableFiles(appDir, revision);
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return commitableFiles;
+	}
+	
+	/**
+	 * @return
+	 * @throws PhrescoException
+	 */
+	private List<RepoFileInfo> gitCommitableFiles() throws PhrescoException {
+		List<RepoFileInfo> gitCommitableFiles = null;
+		try {
+			SCMManagerUtil util = new SCMManagerUtil();
+			String applicationHome = PhrescoUtil.getApplicationHome();
+			File appDir = new File(applicationHome);
+			gitCommitableFiles = util.getGITCommitableFiles(appDir);
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return gitCommitableFiles;
 	}
 }
