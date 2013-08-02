@@ -1,7 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +66,8 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	private Text numberText;
 	private Text passwordText;
 	private Combo listLogs;
+	Map<String, String> typeMaps = new HashedMap();
+	
 	private static Map<String, Object> map = new HashedMap();
 
 	@Override
@@ -192,10 +193,12 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
 						String encodedString = new String(encodedPwd);
 						parameter.setValue(encodedString);
-					} else if (parameter.getType().equalsIgnoreCase(LIST)) {
-						List<String> list =  (List<String>) map.get(parameter.getKey());
-						if (CollectionUtils.isNotEmpty(list)) {
-							for (String value : list) {
+					}  else if (parameter.getType().equalsIgnoreCase(LIST)) {
+						Combo list =  (Combo) map.get(parameter.getKey());
+						String[] items = list.getItems();
+						for (String string : items) {
+							if (list.getText().equalsIgnoreCase(string)) {
+								String value = typeMaps.get(string);
 								parameter.setValue(value);
 							}
 						}
@@ -296,24 +299,24 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					data = new GridData(GridData.FILL_BOTH);
 					passwordText.setLayoutData(data);
 					map.put(parameter.getKey(), passwordText);
-				}
-				else if (type.equalsIgnoreCase(LIST)) {
+					
+				} else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(unitTestDialog, SWT.LEFT);
 					Logs.setText(parameter.getKey());
 					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN);
-					List<String> listValues = new ArrayList<String>();
+					Combo listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN);
+					
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
-						listValues.add(value.getKey());
+						typeMaps.put(value.getValue(), value.getKey());
 					}
 					data = new GridData(GridData.FILL_BOTH);
 					listLogs.select(0);
 					listLogs.setLayoutData(data);
-					map.put(parameter.getKey(), listValues); 
+					map.put(parameter.getKey(), listLogs); 
 
 				} else if (type.equalsIgnoreCase("DynamicParameter")) {
 					int yaxis = 0;

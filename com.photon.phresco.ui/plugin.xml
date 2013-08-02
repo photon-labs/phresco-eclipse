@@ -262,6 +262,12 @@
         </command>
         
          <command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.Deploy"
+            id="Deploy"
+            name="Deploy">
+        </command>
+        
+         <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.View"
             id="View"
             name="view">
@@ -388,12 +394,12 @@
 				
 			</menu>
 	
-		<command
-         commandId="Phresco"
-         icon="icons/deploy_icon.png"
-         label="%project.deploy.label"
-         style="push"
-         tooltip="%project.deploy.tooltip">
+			<command
+	         commandId="Deploy"
+	         icon="icons/deploy_icon.png"
+	         label="%project.deploy.label"
+	         style="push"
+	         tooltip="%project.deploy.tooltip">
 			</command>
 	
 			 <separator
