@@ -24,13 +24,16 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.ConfirmDialog;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.phrescoexplorer.wizard.WizardComposite;
@@ -61,10 +64,15 @@ public class UpdateFeature extends AbstractHandler  {
 		buildDialog.setLocation(385, 130);
 		buildDialog.setLayout(layout);
 		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		WizardComposite wizardComposite = new WizardComposite(shell);
-		WizardDialog wizardControl = wizardComposite.getWizardControl();
-		wizardControl.open();
+		final WizardComposite wizardComposite = new WizardComposite(shell);
 		
+        BusyIndicator.showWhile(null, new Runnable() {
+            public void run() {
+        		WizardDialog wizardControl = wizardComposite.getWizardControl();
+        		wizardControl.open();
+            }
+        });
+        
 		return null;
 		
 	}

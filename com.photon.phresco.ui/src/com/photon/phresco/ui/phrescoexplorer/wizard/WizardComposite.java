@@ -34,6 +34,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -117,35 +118,40 @@ class FeatureWizard extends Wizard {
 
 	public boolean performFinish() {
 		
-		IWizardPage[] pages = getPages();
-		List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
-		for (int i = 0; i < pages.length; i++) {
-			IWizardPage wizardPage = pages[i];
-			
-			if (wizardPage instanceof JSLibraryFeaturePage) {
-				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
-				List<SelectedFeature> selectedItems = jsLibPage.getSelectedItems();
-				for (SelectedFeature selectedFeature : selectedItems) {
-					selectedFeatures.add(selectedFeature);
-				}
-			} else if (wizardPage instanceof ModuleFeaturePage) {
-				ModuleFeaturePage modulePage = (ModuleFeaturePage) wizardPage;
-				List<SelectedFeature> selectedItems = modulePage.getSelectedItems();
-				for (SelectedFeature selectedFeature : selectedItems) {
-					selectedFeatures.add(selectedFeature);
-				}
-			} else if (wizardPage instanceof ComponentFeaturePage) {
-				ComponentFeaturePage componentPage = (ComponentFeaturePage) wizardPage;
-				List<SelectedFeature> selectedItems = componentPage.getSelectedItems();
-				for (SelectedFeature selectedFeature : selectedItems) {
-					selectedFeatures.add(selectedFeature);
-				}
-			}
-			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
-				updateFeatures(selectedFeatures);
-			}
-		}
+		final IWizardPage[] pages = getPages();
+		final List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
 		
+        BusyIndicator.showWhile(null, new Runnable() {
+            public void run() {
+        		for (int i = 0; i < pages.length; i++) {
+        			IWizardPage wizardPage = pages[i];
+        			
+        			if (wizardPage instanceof JSLibraryFeaturePage) {
+        				JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
+        				List<SelectedFeature> selectedItems = jsLibPage.getSelectedItems();
+        				for (SelectedFeature selectedFeature : selectedItems) {
+        					selectedFeatures.add(selectedFeature);
+        				}
+        			} else if (wizardPage instanceof ModuleFeaturePage) {
+        				ModuleFeaturePage modulePage = (ModuleFeaturePage) wizardPage;
+        				List<SelectedFeature> selectedItems = modulePage.getSelectedItems();
+        				for (SelectedFeature selectedFeature : selectedItems) {
+        					selectedFeatures.add(selectedFeature);
+        				}
+        			} else if (wizardPage instanceof ComponentFeaturePage) {
+        				ComponentFeaturePage componentPage = (ComponentFeaturePage) wizardPage;
+        				List<SelectedFeature> selectedItems = componentPage.getSelectedItems();
+        				for (SelectedFeature selectedFeature : selectedItems) {
+        					selectedFeatures.add(selectedFeature);
+        				}
+        			}
+        			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
+        				updateFeatures(selectedFeatures);
+        			}
+        		}
+            }
+        });
+        
 		return true;
 	}
 
