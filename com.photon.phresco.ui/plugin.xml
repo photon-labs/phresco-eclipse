@@ -279,6 +279,12 @@
             name="Unit Test">
         </command>
 
+		<command
+            defaultHandler="com.photon.phresco.ui.phrescoexplorer.Functional"
+            id="Functional"
+            name="Functional Test">
+        </command>
+
          <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.ReportPage"
             id="Generate"
@@ -412,7 +418,7 @@
 				</command>
 		
 				<command
-			          commandId="Quality"
+			          commandId="Functional"
 			          icon="icons/func_quality_icon.png"
 			          id="%project.functionaltest.id"
 			          label="%project.functionaltest.label"

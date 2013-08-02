@@ -407,6 +407,11 @@ public class PhrescoUtil implements PhrescoConstants {
 		File unitTestconfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + UNITTEST_INFO_FILE );
 		return unitTestconfigPath;
 	}
+	
+	public static File getFunctionalTestInfoConfigurationPath() {
+		File unitTestconfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + FUNCTIONALTEST_INFO_FILE );
+		return unitTestconfigPath;
+	}
 
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
 		try {

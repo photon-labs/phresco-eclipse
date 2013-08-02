@@ -102,7 +102,6 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 				String environmentName = envText.getText();
 				String description = descText.getText();
 				boolean selection = defaultCheckBoxButton.getSelection();
-				System.out.println("selection = " + selection);
 				List<Environment> environments = new ArrayList<Environment>();
 
 				Environment environment = new Environment();
@@ -211,24 +210,6 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		return configureDialogs;
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	public Shell createEnvironmentDialog(Shell dialog) {
 		envDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);

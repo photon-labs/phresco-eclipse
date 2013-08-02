@@ -492,8 +492,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					data = new GridData(GridData.FILL_BOTH);
 					passwordText.setLayoutData(data);
 					map.put(parameter.getKey(), passwordText);
-				}
-				else if (type.equalsIgnoreCase(LIST)) {
+				}	else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(createConfigureDialog, SWT.LEFT);
 					Logs.setText(parameter.getKey());
 					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));

@@ -182,7 +182,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					try {
 						if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("Protocol")) {
 							String name = propertyTemplate.getName();
-							System.out.println("Name in combo = " + name);
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();

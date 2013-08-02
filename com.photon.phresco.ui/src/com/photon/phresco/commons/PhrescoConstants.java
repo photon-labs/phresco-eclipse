@@ -209,6 +209,11 @@ public interface PhrescoConstants {
 	String FAILED = "FAILED";
 	String OK = "OK";	
 	
+	
+	// Functional Test
+	
+	String FUNCTIONALTEST_INFO_FILE = "phresco-functional-test-info.xml";
+	
 	//platform Constants
 	String OS_NAME = "os.name";
 	String OS_ARCH = "os.arch";
