@@ -123,10 +123,12 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 			canFinish = true;
 		} else if (isValueDefined(scmPage) && (scmPage.headRevisionButton.getSelection() || !scmPage.revisionText.getText().equals(STR_EMPTY)) ){
 			canFinish = true;
-			if(istestRepoValueDefined(scmPage) && (scmPage.repoUrlHeadRevisionButton.getSelection() || !scmPage.testRepoRevisionText.getText().equals(STR_EMPTY))) {
-				canFinish = true;
-			} else {
-				canFinish = false;
+			if(scmPage.testCheckOutButton.getSelection()) {
+				if(istestRepoValueDefined(scmPage) && (scmPage.repoUrlHeadRevisionButton.getSelection() || !scmPage.testRepoRevisionText.getText().equals(STR_EMPTY))) {
+					canFinish = true;
+				} else {
+					canFinish = false;
+				}
 			}
 		} else {
 			canFinish = false;
