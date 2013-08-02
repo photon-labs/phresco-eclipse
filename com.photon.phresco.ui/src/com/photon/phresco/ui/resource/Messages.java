@@ -86,7 +86,7 @@ public class Messages extends NLS {
 	public static String IMPORT_FROM_SCM="Import from SCM";
 	public static String PROVIDE_MANDATORY_VALUES="Provide Mandatory Values";
 	public static String PHRESCO_LOGIN_WARNING="Please Login before making Request";
-	public static String SCM_TYPE="Type";
+	public static String SCM_TYPE="*Type";
 	public static String TYPE_GIT="Git";
 	public static String TYPE_SVN="Svn";
 	public static String REPO_RUL="*Repo URL";

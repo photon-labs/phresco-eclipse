@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -45,10 +46,12 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -68,8 +71,11 @@ import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tmatesoft.svn.core.wc.SVNStatus;
+import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
@@ -78,6 +84,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.model.RepoFileInfo;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.FileUtil;
 import com.photon.phresco.util.Utility;
@@ -180,6 +187,115 @@ public class SCMManagerUtil implements PhrescoConstants {
 		    updateFromBitKeeperRepo(url, sb.toString());
 		}
 		return false;
+	}
+	
+	public List<RepoFileInfo> getCommitableFiles(File path, String revision) throws SVNException {
+		
+	    SVNClientManager svnClientManager = SVNClientManager.newInstance();
+	    final List<RepoFileInfo> filesList = new ArrayList<RepoFileInfo>();
+	    svnClientManager.getStatusClient().doStatus(path, SVNRevision.parse(revision), SVNDepth.INFINITY, false, false, false, false, new ISVNStatusHandler() {
+	        public void handleStatus(SVNStatus status) throws SVNException {
+	            SVNStatusType statusType = status.getContentsStatus();
+	            if (statusType != SVNStatusType.STATUS_NONE && statusType != SVNStatusType.STATUS_NORMAL
+	                    && statusType != SVNStatusType.STATUS_IGNORED) {
+	            	RepoFileInfo repoFileInfo = new RepoFileInfo();
+	            	String filePath = status.getFile().getPath();
+	            	 String FileStatus = Character.toString(statusType.getCode());
+	            	 repoFileInfo.setContentsStatus(statusType);
+	            	 repoFileInfo.setStatus(FileStatus);
+	            	 repoFileInfo.setCommitFilePath(filePath);
+	            	 filesList.add(repoFileInfo);
+	            }
+	        }
+	    }, null);
+	    
+	    return filesList;
+	}
+	
+	public List<RepoFileInfo> getGITCommitableFiles(File path) throws IOException, GitAPIException
+	{
+		FileRepositoryBuilder builder = new FileRepositoryBuilder();
+		Repository repository = builder.setGitDir(path).readEnvironment().findGitDir().build(); 
+		Git git = new Git(repository);
+		List<RepoFileInfo> fileslist = new ArrayList<RepoFileInfo>();
+		RepoFileInfo repoFileInfo = new RepoFileInfo();
+		InitCommand initCommand = Git.init();
+		initCommand.setDirectory(path);
+		git = initCommand.call();
+		Status status = git.status().call();
+		
+		Set<String> added = status.getAdded();
+		Set<String> changed = status.getChanged();
+		Set<String> conflicting = status.getConflicting();
+		Set<String> missing= status.getMissing();
+		Set<String> modified = status.getModified();
+		Set<String> removed = status.getRemoved();
+		Set<String> untracked = status.getUntracked();
+		
+		if (!added.isEmpty()) {
+			for (String add : added) {
+				String filePath = path + BACK_SLASH + add;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("A");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!changed.isEmpty()) {
+			for (String change : changed) {
+				String filePath = path + BACK_SLASH + change;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("M");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!conflicting.isEmpty()) {
+			for (String conflict : conflicting) {
+				String filePath = path + BACK_SLASH + conflict;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("C");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!missing.isEmpty()) {
+			for (String miss : missing) {
+				String filePath = path + BACK_SLASH + miss;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("!");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!modified.isEmpty()) {
+			for (String modify : modified) {
+				String filePath = path + BACK_SLASH + modify;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("M");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!removed.isEmpty()) {
+			for (String remove : removed) {
+				String filePath = path + BACK_SLASH + remove;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("D");
+				fileslist.add(repoFileInfo);
+			}
+		}
+
+		if (!untracked.isEmpty()) {
+			for (String untrack : untracked) {
+				String filePath = path + BACK_SLASH + untrack;
+				repoFileInfo.setCommitFilePath(filePath);
+				repoFileInfo.setStatus("?");
+				fileslist.add(repoFileInfo);
+			}
+		}
+		git.getRepository().close();
+		return fileslist;
 	}
 	
 	private boolean updateFromBitKeeperRepo(String repoUrl, String appDir) throws PhrescoException {

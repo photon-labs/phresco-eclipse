@@ -49,6 +49,7 @@ Shell shell = HandlerUtil.getActiveShell(event);
 		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		UpdateSCM scm = new UpdateSCM(buildDialog);
+		scm.setTitle("Update");
 		scm.open();
 		return null;
 	}

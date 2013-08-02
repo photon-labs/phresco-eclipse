@@ -39,7 +39,6 @@
 	</dependencies>
 
 	<build>
-	<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
