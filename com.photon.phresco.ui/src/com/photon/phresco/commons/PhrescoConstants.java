@@ -248,4 +248,6 @@ public interface PhrescoConstants {
 	String PDF = "pdf";
 
 	String PHRESCO_PREFERENCE_ID = "com.photon.phresco.ui.preferences.PhrescoPreferences";
+	String MSG_TITLE = "Login into Phresco";
+	String MESSAGE = "Uset Not logged In... \n\n Do you want to login now?";
 }

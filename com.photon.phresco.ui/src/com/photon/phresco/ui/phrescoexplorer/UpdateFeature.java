@@ -31,9 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.ConfirmDialog;
-import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.phrescoexplorer.wizard.WizardComposite;

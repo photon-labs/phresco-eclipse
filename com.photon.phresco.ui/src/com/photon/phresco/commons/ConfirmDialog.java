@@ -38,8 +38,6 @@ import org.eclipse.ui.internal.OpenPreferencesAction;
 public class ConfirmDialog implements PhrescoConstants {
 
 	static ConfirmDialog confirmDialog = null;
-	String msgTitle = "Login into Phresco";
-	String message = "Uset Not logged In... \n\n Do you want login now?";
 	
 	public ConfirmDialog() {		
 		confirmDialog = this;
@@ -55,8 +53,8 @@ public class ConfirmDialog implements PhrescoConstants {
 	public void showConfirm(Shell s) {
 		MessageBox messageBox = new MessageBox(s, SWT.ICON_QUESTION
 	            | SWT.YES | SWT.NO);
-	        messageBox.setMessage(message);
-	        messageBox.setText(msgTitle);
+	        messageBox.setMessage(MESSAGE);
+	        messageBox.setText(MSG_TITLE);
 	    int response = messageBox.open();
 	    
 	    if (response==SWT.YES) {
