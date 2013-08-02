@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
@@ -81,15 +82,16 @@ public class EditProject extends AbstractHandler {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		try {
+			
 			BaseAction baseAction = new BaseAction();
-			String userId = baseAction.getUserId();
-			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
-			final ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
-			final ServiceManager serviceManager = PhrescoUtil.getServiceManager(userId);
+			ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 			if(serviceManager == null) {
-				PhrescoDialog.errorDialog(buildDialog, Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
+				ConfirmDialog.getConfirmDialog().showConfirm(shell);
 				return null;
 			}
+			
+			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
+			final ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 			final String customerId = PhrescoUtil.getCustomerId();
 			final String techId = PhrescoUtil.getTechId();
 			final String platform = PhrescoUtil.findPlatform();

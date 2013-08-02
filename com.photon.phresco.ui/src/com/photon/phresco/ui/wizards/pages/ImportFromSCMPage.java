@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
-import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.ui.resource.Messages;
 
@@ -60,7 +60,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 	public void createControl(Composite parent) {
 		
 		if(!PhrescoUtil.isLoggedIn()) {
-			PhrescoDialog.errorDialog(getShell(), "Warning", Messages.PHRESCO_LOGIN_WARNING);
+			ConfirmDialog.getConfirmDialog().showConfirm(getShell());
 			return;
 		}
 		

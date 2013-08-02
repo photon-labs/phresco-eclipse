@@ -20,10 +20,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
-import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationType;
-import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
@@ -110,7 +109,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
-			PhrescoDialog.errorDialog(getShell(),"Error", "Please Login before making Request");
+			ConfirmDialog.getConfirmDialog().showConfirm(getShell());
 			return;
 		}
 		Composite parentComposite = new Composite(parent, SWT.NULL);

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
@@ -39,6 +40,8 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Utility;
 
@@ -47,6 +50,14 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
+		
+		BaseAction baseAction = new BaseAction();
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
+		
 		final Shell downloadDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE | SWT.RESIZE);
 		GridLayout layout = new GridLayout(1, false);
 		downloadDialog.setLocation(downloadDialog.getLocation());

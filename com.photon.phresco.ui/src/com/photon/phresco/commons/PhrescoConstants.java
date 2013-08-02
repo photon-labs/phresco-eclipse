@@ -246,5 +246,6 @@ public interface PhrescoConstants {
 	String ARCHIVES = "archives";
 	String CUMULATIVE = "cumulativeReports";
 	String PDF = "pdf";
-	
+
+	String PHRESCO_PREFERENCE_ID = "com.photon.phresco.ui.preferences.PhrescoPreferences";
 }

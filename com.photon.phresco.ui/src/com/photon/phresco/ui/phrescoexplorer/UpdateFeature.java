@@ -29,7 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
@@ -52,7 +52,7 @@ public class UpdateFeature extends AbstractHandler  {
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
-			PhrescoDialog.errorDialog(shell,"Error", "Please Login before making Request");
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return null;
 		}
 		

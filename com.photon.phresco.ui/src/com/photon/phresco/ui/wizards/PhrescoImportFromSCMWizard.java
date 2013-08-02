@@ -19,10 +19,6 @@
 
 package com.photon.phresco.ui.wizards;
 
-import java.io.File;
-
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -33,7 +29,6 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.commons.util.SCMManagerUtil;
 import com.photon.phresco.framework.api.SCMManager;
 import com.photon.phresco.framework.impl.SCMManagerImpl;
 import com.photon.phresco.ui.resource.Messages;

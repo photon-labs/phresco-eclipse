@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.w3c.dom.Element;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
@@ -56,7 +57,9 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
+import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.model.CodeValidationReportType;
 import com.phresco.pom.exception.PhrescoPomException;
 import com.phresco.pom.model.Model;
@@ -88,6 +91,14 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
+		
+		BaseAction baseAction = new BaseAction();
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
+		
 		Shell createSonarDialog = createSonarDialog(shell);
 		createSonarDialog.open();
 		return null;

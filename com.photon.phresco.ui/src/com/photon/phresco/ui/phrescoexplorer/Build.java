@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
@@ -45,7 +46,9 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
+import com.photon.phresco.ui.model.BaseAction;
 
 public class Build extends AbstractHandler implements PhrescoConstants {
 
@@ -68,6 +71,14 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
+		
+		BaseAction baseAction = new BaseAction();
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
+		
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
 		generateDialog = createBuildDialog(buildDialog);
