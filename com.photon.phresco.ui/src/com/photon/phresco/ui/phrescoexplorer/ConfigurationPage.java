@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.configuration.Configuration;
@@ -31,6 +32,8 @@ import com.photon.phresco.configuration.Environment;
 import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
+import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.BaseAction;
 
 public class ConfigurationPage extends AbstractHandler implements  PhrescoConstants {
 	private Button envSaveButton;
@@ -52,6 +55,13 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		shell = HandlerUtil.getActiveShell(event);
 
+		BaseAction baseAction = new BaseAction();
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
+		
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL| SWT.DIALOG_TRIM | SWT.TITLE | SWT.MAX | SWT.MIN | SWT.RESIZE);
 
 		GridLayout layout = new GridLayout(2,false);
