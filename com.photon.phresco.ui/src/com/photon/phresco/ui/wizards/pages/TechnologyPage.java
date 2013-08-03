@@ -21,12 +21,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
+import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.ui.wizards.componets.AppLayerComponent;
 import com.photon.phresco.ui.wizards.componets.MobLayerComponent;
 import com.photon.phresco.ui.wizards.componets.WebLayerComponent;
 
-public class TechnologyPage extends WizardPage implements IWizardPage {
+public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoConstants {
 
 	public List<AppLayerComponent> appLayerComponents = new ArrayList<AppLayerComponent>();
 	public List<WebLayerComponent> webLayerComponents = new ArrayList<WebLayerComponent>();
@@ -62,7 +63,7 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		
 		return super.getPreviousPage();
 	}
-	
+	int x = 20;
 	public void renderLayer(List<Button> selectedLayers) {
 		final Composite parentComposite = (Composite) getControl();
 		clearExistingControls(parentComposite);
@@ -76,9 +77,16 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		for (final Button layerButton : selectedLayers) {
-			if("app-layer".equals(layerButton.getData(layerButton.getText()))) {
-				final Group appLayerGroup = new Group(composite, SWT.NONE);
-				appLayerGroup.setText(layerButton.getText());
+			if(APP_LAYER.equals(layerButton.getData(layerButton.getText()))) {
+				
+				final Group mainApplayerGroup = new Group(composite, SWT.NONE);
+				mainApplayerGroup.setText(layerButton.getText());
+				GridLayout mainLayout = new GridLayout(1, false);
+				mainApplayerGroup.setLayout(mainLayout);
+				mainApplayerGroup.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+				mainApplayerGroup.setFont(DesignUtil.getHeaderFont());
+				
+				final Group appLayerGroup = new Group(mainApplayerGroup, SWT.NONE);
 				GridLayout layout = new GridLayout(7, false);
 		        appLayerGroup.setLayout(layout);
 				appLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -89,38 +97,71 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 				appLayerComponents.add(appLayerComponent);
 				
 				Button appAddButton = new Button(appLayerGroup, SWT.PUSH);
-				appAddButton.setText("+");
+				appAddButton.setText(PLUS_SYMBOL);
 				
 				appAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						AppLayerComponent appLayerComponent = new AppLayerComponent(appLayerGroup, SWT.NONE);
+						final Group newGroup = new Group(mainApplayerGroup, SWT.NONE);
+						GridLayout newLayout = new GridLayout(7, false);
+						newGroup.setLayout(newLayout);
+						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+						newGroup.setBounds(x, 5, 275, 100);
+						x = x + 20;
+						
+						final AppLayerComponent appLayerComponent = new AppLayerComponent(newGroup, SWT.NONE);
 						appLayerComponents.add(appLayerComponent);
 						appLayerComponent.getComponent(layerButton);
 						
-						Button appDeleteButton = new Button(appLayerGroup, SWT.PUSH);
-						appDeleteButton.setText("-");
+						Button appDeleteButton = new Button(newGroup, SWT.PUSH);
+						appDeleteButton.setText(MINUS_SYMBOL);
+						
+						appDeleteButton.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								appLayerComponents.remove(appLayerComponent);
+								newGroup.dispose();
+							}
+						});
+						
 						reSize(composite, scrolledComposite);
+						
 						parentComposite.pack();
 						parentComposite.redraw();
+
 						composite.pack();
 						composite.redraw();
-						appLayerGroup.pack();
-						appLayerGroup.redraw();
+						
+						mainApplayerGroup.pack();
+						mainApplayerGroup.redraw();
+						
+						newGroup.pack();
+						newGroup.redraw();
+						
 						scrolledComposite.pack();
 						scrolledComposite.redraw();
+						
 						super.widgetSelected(e);
 					}
 				});
+				
 				if(pageWidth < appLayerGroup.getSize().x) {
 					pageWidth = appLayerGroup.getSize().x;
 				}
-				appLayerGroup.pack();
-				appLayerGroup.redraw();
+				mainApplayerGroup.pack();
+				mainApplayerGroup.redraw();
 			}
-			if("web-layer".equals(layerButton.getData(layerButton.getText()))) {
-				final Group webLayerGroup = new Group(composite, SWT.NONE);
-				webLayerGroup.setText(layerButton.getText());
+			
+			if(WEB_LAYER.equals(layerButton.getData(layerButton.getText()))) {
+				
+				final Group mainWebLayerGroup = new Group(composite, SWT.NONE);
+				mainWebLayerGroup.setText(layerButton.getText());
+				GridLayout mainLayout = new GridLayout(1, false);
+				mainWebLayerGroup.setLayout(mainLayout);
+				mainWebLayerGroup.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+				mainWebLayerGroup.setFont(DesignUtil.getHeaderFont());
+				
+				final Group webLayerGroup = new Group(mainWebLayerGroup, SWT.NONE);
 				GridLayout layout = new GridLayout(9, false);
 		        webLayerGroup.setLayout(layout);
 				webLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -131,31 +172,70 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 				webLayerComponent.getComponent(layerButton);
 				
 				Button webAddButton = new Button(webLayerGroup, SWT.PUSH);
-				webAddButton.setText("+");
+				webAddButton.setText(PLUS_SYMBOL);
 				
 				webAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						WebLayerComponent webLayerComponent = new WebLayerComponent(webLayerGroup, SWT.NONE);
+						
+						final Group newGroup = new Group(mainWebLayerGroup, SWT.NONE);
+						GridLayout newLayout = new GridLayout(7, false);
+						newGroup.setLayout(newLayout);
+						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+						newGroup.setBounds(x, 5, 250, 100);
+						x = x + 20;
+						
+						final WebLayerComponent webLayerComponent = new WebLayerComponent(newGroup, SWT.NONE);
 						webLayerComponents.add(webLayerComponent);
 						webLayerComponent.getComponent(layerButton);
 						
-						Button webDeleteButton = new Button(webLayerGroup, SWT.PUSH);
-						webDeleteButton.setText("-");
+						Button webDeleteButton = new Button(newGroup, SWT.PUSH);
+						webDeleteButton.setText(MINUS_SYMBOL);
+						webDeleteButton.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								webLayerComponents.remove(webLayerComponent);
+								newGroup.dispose();
+							}
+						});
+						
+						reSize(composite, scrolledComposite);
 						
 						parentComposite.pack();
 						parentComposite.redraw();
-						super.widgetDefaultSelected(e);
+
+						composite.pack();
+						composite.redraw();
+						
+						mainWebLayerGroup.pack();
+						mainWebLayerGroup.redraw();
+						
+						newGroup.pack();
+						newGroup.redraw();
+						
+						scrolledComposite.pack();
+						scrolledComposite.redraw();
+						
+						super.widgetSelected(e);
+						
 					}
 				});
 				if(pageWidth < webLayerGroup.getSize().x) {
 					pageWidth = webLayerGroup.getSize().x;
 				}
-				webLayerGroup.redraw();
+				mainWebLayerGroup.pack();
+				mainWebLayerGroup.redraw();
 			}
-			if("mob-layer".equals(layerButton.getData(layerButton.getText()))) {
-				final Group mobLayerGroup = new Group(composite, SWT.NONE);
-				mobLayerGroup.setText(layerButton.getText());
+			if(MOBILE_LAYER.equals(layerButton.getData(layerButton.getText()))) {
+				
+				final Group mainMobileLayerGroup = new Group(composite, SWT.NONE);
+				mainMobileLayerGroup.setText(layerButton.getText());
+				GridLayout mainLayout = new GridLayout(1, false);
+				mainMobileLayerGroup.setLayout(mainLayout);
+				mainMobileLayerGroup.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+				mainMobileLayerGroup.setFont(DesignUtil.getHeaderFont());
+				
+				final Group mobLayerGroup = new Group(mainMobileLayerGroup, SWT.NONE);
 				mobLayerGroup.setLayout(new GridLayout(9, false));
 				mobLayerGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				mobLayerGroup.setFont(DesignUtil.getHeaderFont());
@@ -165,28 +245,61 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 				mobLayerComponent.getComponent(layerButton);
 				
 				Button mobAddButton = new Button(mobLayerGroup, SWT.PUSH);
-				mobAddButton.setText("+");
+				mobAddButton.setText(PLUS_SYMBOL);
 				mobAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						MobLayerComponent mobLayerComponent = new MobLayerComponent(mobLayerGroup, SWT.NONE);
+						
+						final Group newGroup = new Group(mainMobileLayerGroup, SWT.NONE);
+						GridLayout newLayout = new GridLayout(7, false);
+						newGroup.setLayout(newLayout);
+						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+						newGroup.setBounds(x, 5, 350, 100);
+						x = x + 20;
+						
+						final MobLayerComponent mobLayerComponent = new MobLayerComponent(newGroup, SWT.NONE);
 						mobLayerComponents.add(mobLayerComponent);
 						mobLayerComponent.getComponent(layerButton);
 						
-						Button mobDeleteButton = new Button(mobLayerGroup, SWT.PUSH);
-						mobDeleteButton.setText("-");
+						Button mobDeleteButton = new Button(newGroup, SWT.PUSH);
+						mobDeleteButton.setText(MINUS_SYMBOL);
+						
+						mobDeleteButton.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								mobLayerComponents.remove(mobLayerComponent);
+								newGroup.dispose();
+							}
+						});
+						
+						reSize(composite, scrolledComposite);
 						
 						parentComposite.pack();
 						parentComposite.redraw();
-						super.widgetDefaultSelected(e);
+
+						composite.pack();
+						composite.redraw();
+						
+						mainMobileLayerGroup.pack();
+						mainMobileLayerGroup.redraw();
+						
+						newGroup.pack();
+						newGroup.redraw();
+						
+						scrolledComposite.pack();
+						scrolledComposite.redraw();
+						
+						super.widgetSelected(e);
 					}
 				});
 				if(pageWidth < mobLayerGroup.getSize().x) {
 					pageWidth = mobLayerGroup.getSize().x;
 				}
-				mobLayerGroup.redraw();
+				mainMobileLayerGroup.pack();
+				mainMobileLayerGroup.redraw();
 			}
 		}
+		
 		scrolledComposite.setContent(composite);
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);

@@ -250,4 +250,10 @@ public interface PhrescoConstants {
 	String PHRESCO_PREFERENCE_ID = "com.photon.phresco.ui.preferences.PhrescoPreferences";
 	String MSG_TITLE = "Login into Phresco";
 	String MESSAGE = "User Not logged In... \n\n Do you want to login now?";
+	
+	String APP_LAYER = "app-layer";
+	String WEB_LAYER = "web-layer";
+	String MOBILE_LAYER = "mob-layer";
+	String PLUS_SYMBOL = "+";
+	String MINUS_SYMBOL = "-";
 }
