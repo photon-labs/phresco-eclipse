@@ -14,6 +14,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -64,6 +65,7 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 	
 	public void renderLayer(List<Button> selectedLayers) {
 		final Composite parentComposite = (Composite) getControl();
+		clearExistingControls(parentComposite);
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.Resize | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		scrolledComposite.setAlwaysShowScrollBars(true);
@@ -196,6 +198,14 @@ public class TechnologyPage extends WizardPage implements IWizardPage {
 		parentComposite.pack();
 		parentComposite.redraw();
 		setControl(parentComposite);
+	}
+
+	// This will clear the previously added controls
+	private void clearExistingControls(final Composite parentComposite) {
+		Control[] children = parentComposite.getChildren();
+		for (Control control : children) {
+			control.dispose();
+		}
 	}
 	
 	private void reSize(final Composite composite, final ScrolledComposite scrolledComposite) {
