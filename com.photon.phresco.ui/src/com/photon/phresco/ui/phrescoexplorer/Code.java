@@ -534,9 +534,11 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 					final List<String> buttons = new ArrayList<String>();
 					Set<Entry<String,Object>> entrySet = maps.entrySet();
-
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
+						if (key.equalsIgnoreCase("watchermap")) {
+							continue;
+						}
 						List<Value> values = (List<Value>) entry.getValue();
 						for (Value value : values) {
 							envSelectionButton = new Button(group, SWT.CHECK);
@@ -592,10 +594,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				}
 			};
 			cancelButton.addListener(SWT.Selection, cancelListener);
-			
-			
-			
-
 			createConfigureDialog.pack();
 
 		} catch (PhrescoException e) {

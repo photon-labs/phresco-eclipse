@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
@@ -42,6 +43,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -79,7 +82,6 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	Map<String, String> deploytypeMaps = new HashedMap();
 	private static Map<String, Object> deploymap = new HashedMap();
 
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -98,6 +100,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 					e.printStackTrace();
 				}
 				deploy();
+				dialog.close();
 			}
 		});
 		createDeployDialog.open();
@@ -109,9 +112,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 				createDeployDialog.close();
 			}
 		};
-
 		cancelButton.addListener(SWT.Selection, generatePopupCancelListener);
-		
 		
 		return null;
 	}
@@ -211,7 +212,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
 			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
-			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, DEPLOY_GOAL);
+			final Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, DEPLOY_GOAL);
 			
 			for (final Parameter parameter : parameters) {
 				String type = parameter.getType();
@@ -328,7 +329,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 					} else {
 						Combo listLogs = new Combo(deployDialog,SWT.DROP_DOWN | SWT.READ_ONLY);
-						List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());
+						final List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());
 						if (CollectionUtils.isNotEmpty(dynParamPossibleValues)) {
 							for (Value value : dynParamPossibleValues) {
 								listLogs.add(value.getValue());
@@ -338,32 +339,106 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						listLogs.select(0);
 						listLogs.setLayoutData(data);
 						deploymap.put(parameter.getKey(), listLogs);
+						
+						listLogs.addListener(SWT.Selection, new Listener() {
+
+						@Override
+							public void handleEvent(Event event) {
+								Combo combo = (Combo)event.widget;
+								String value = combo.getText();
+								Map<String, DependantParameters> map = changeEveDependancyListener(parameter.getKey(), value, maps);
+								String dependency = parameter.getDependency();
+								String[] split = dependency.split(",");
+								Combo typecombo = null;
+								for (String dep : split) {
+									try {
+										List<Value> updateDependancy = updateDependancy(parameter.getKey(),dep, map);
+											typecombo = (Combo) deploymap.get(dep);
+											typecombo.removeAll();
+											for (Value val : updateDependancy) {
+												typecombo.add(val.getValue());
+											}
+											typecombo.select(0);
+											deploymap.put(parameter.getKey(), typecombo);
+										
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+						});
 					}
 				} 
 			}
+			
 
-			Composite composite = new Composite(deployDialog, SWT.BORDER);
+			
+			deployButton = new Button(deployDialog, SWT.RIGHT | SWT.PUSH);
+			deployButton.setText(DEPLOY);
 
-			GridLayout layout = new GridLayout(2, true);
-			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
-			composite.setLayout(layout);
-
-
-			deployButton = new Button(composite, SWT.BORDER);
-			deployButton.setText(VALIDATE);
-			deployButton.setSize(74, 23);
-			deployButton.setLayoutData(datas);
-
-			cancelButton = new Button(composite, SWT.BORDER);
+			cancelButton = new Button(deployDialog, SWT.RIGHT | SWT.PUSH);
 			cancelButton.setText(CANCEL);
-			cancelButton.setSize(74, 23);
-			cancelButton.setLayoutData(datas);
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
 		return deployDialog;
 	}
+	
+	
+	public Map<String, DependantParameters> changeEveDependancyListener(String currentParemeterKey, String currentSelection, Map<String, Object> maps) {
+		Map<String, DependantParameters> watcherMap = (Map<String, DependantParameters>) maps.get(WATCHER_MAP);
+		DependantParameters currentParameters = watcherMap.get(currentParemeterKey); //parameter key
+		if (currentParameters == null) {
+			currentParameters = new DependantParameters();
+		}
+		currentParameters.setValue(currentSelection);
+		watcherMap.put(currentParemeterKey, currentParameters);
+		return watcherMap;
+	}
+
+	public List<Value> updateDependancy(String paramKey, String dependency, Map<String, DependantParameters> watcherMaps) throws IOException {
+		List<Value> dependentPossibleValues = null;
+		try {
+			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
+			MojoProcessor mojo = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
+
+			List<Parameter> parameters = mojo.getParameters("deploy");
+			for (Parameter parameter : parameters) {
+				if (dependency != null) {
+					// Get the values from the dynamic parameter class
+						Parameter dependentParameter = mojo.getParameter("deploy", dependency);
+						if (dependentParameter.getDynamicParameter() != null) {
+							DynamicPossibleValues possibleValues = new DynamicPossibleValues();
+
+							Map<String, Object> constructMapForDynVals = possibleValues.constructMapForDynVals(applicationInfo, watcherMaps, dependency);
+							constructMapForDynVals.put("mojo", mojo);
+							constructMapForDynVals.put("goal", "deploy");
+							dependentPossibleValues = possibleValues.getDynamicPossibleValues(constructMapForDynVals, dependentParameter);
+
+							if (CollectionUtils.isNotEmpty(dependentPossibleValues) && watcherMaps.containsKey(dependency)) {
+								DependantParameters dependantParameters = (DependantParameters) watcherMaps.get(dependency);
+								dependantParameters.setValue(dependentPossibleValues.get(0).getValue());
+							} else {
+								DependantParameters dependantParameters = (DependantParameters) watcherMaps.get(dependency);
+								dependantParameters.setValue("");
+							}
+							if (CollectionUtils.isNotEmpty(dependentPossibleValues) && watcherMaps.containsKey(dependentPossibleValues.get(0).getDependency())) {
+								possibleValues.addValueDependToWatcher(watcherMaps, dependentParameter.getKey(), dependentPossibleValues, "");
+								if (CollectionUtils.isNotEmpty(dependentPossibleValues)) {
+									possibleValues.addWatcher(watcherMaps, dependentParameter.getDependency(), 
+											dependentParameter.getKey(), dependentPossibleValues.get(0).getValue());
+								}
+							}
+						}
+				} 
+			}
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+		return dependentPossibleValues;
+	}
+
 
 	private String checkMultiple(MojoProcessor processor, String goal) {
 		List<Parameter> parameters = processor.getParameters(goal);
@@ -381,6 +456,9 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 	public void saveCongfiguration() throws FileNotFoundException  {
 		try {
+			String databaseName = null;
+			JSONObject jsonObject = new JSONObject();
+			
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
 			List<Parameter> parameters = processor.getConfiguration(DEPLOY_GOAL).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
@@ -424,7 +502,20 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 							parameter.setValue(envValue); 
 						} else {
 							Combo list =  (Combo) deploymap.get(parameter.getKey());
-							parameter.setValue(list.getText());
+							if (parameter.getKey().equalsIgnoreCase("database")) {
+								databaseName = list.getText();
+							}
+							JSONArray sqlarray = new JSONArray();
+							if (parameter.getKey().equalsIgnoreCase("fetchSql")) {
+								String[] items = list.getItems();
+								for (String string : items) {
+									sqlarray.add(string);
+								}
+								jsonObject.put(databaseName, sqlarray);
+								parameter.setValue(jsonObject.toJSONString());
+							} else {
+								parameter.setValue(list.getText());
+							}
 						}
 					} else if (parameter.getType().equalsIgnoreCase("Hidden")) {
 						int buildNo = getLatestBuildNo();

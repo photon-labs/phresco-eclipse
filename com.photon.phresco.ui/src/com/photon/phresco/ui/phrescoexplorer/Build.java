@@ -212,26 +212,30 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
+						if (key.equalsIgnoreCase("watchermap")) {
+							continue;
+						}
 						List<Value> values = (List<Value>) entry.getValue();
-						
-						for (Value value : values) {
-							envSelectionButton = new Button(group, SWT.CHECK);
-							envSelectionButton.setText(value.getValue());
-							envSelectionButton.setLocation(20, 20+yaxis);
-							yaxis+=15;
-							envSelectionButton.addSelectionListener(new SelectionAdapter() {
-								@Override
-								public void widgetSelected(SelectionEvent e) {
-									Button button = (Button) e.widget;
-									boolean enabled = button.getSelection();
-									if (enabled) {
-										buttons.add(button.getText());
-									} else {
-										buttons.remove(button.getText());
+						if (CollectionUtils.isNotEmpty(values)) {
+							for (Value value : values) {
+								envSelectionButton = new Button(group, SWT.CHECK);
+								envSelectionButton.setText(value.getValue());
+								envSelectionButton.setLocation(20, 20+yaxis);
+								yaxis+=15;
+								envSelectionButton.addSelectionListener(new SelectionAdapter() {
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										Button button = (Button) e.widget;
+										boolean enabled = button.getSelection();
+										if (enabled) {
+											buttons.add(button.getText());
+										} else {
+											buttons.remove(button.getText());
+										}
 									}
-								}
-							});
-							envSelectionButton.pack();
+								});
+								envSelectionButton.pack();
+							}
 						}
 					}
 					map.put(key, buttons);

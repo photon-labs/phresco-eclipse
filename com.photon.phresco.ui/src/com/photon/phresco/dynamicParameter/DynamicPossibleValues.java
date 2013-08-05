@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -162,11 +161,11 @@ public class DynamicPossibleValues implements PhrescoConstants {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+		dynamicMap.put(WATCHER_MAP, watcherMap);
 		return dynamicMap;
 	}
 
-	protected Map<String, Object> constructMapForDynVals(ApplicationInfo appInfo, Map<String, DependantParameters> watcherMap, String parameterKey) throws PhrescoException {
+	public Map<String, Object> constructMapForDynVals(ApplicationInfo appInfo, Map<String, DependantParameters> watcherMap, String parameterKey) throws PhrescoException {
 		Map<String, Object> paramMap = new HashMap<String, Object>(8);
 		DependantParameters dependantParameters = watcherMap.get(parameterKey);
 		if (dependantParameters != null) {
@@ -193,14 +192,14 @@ public class DynamicPossibleValues implements PhrescoConstants {
 		return paramMap;
 	}
 
-	protected List<Value> getDynamicPossibleValues(Map<String, Object> watcherMap, Parameter parameter) throws PhrescoException {
+	public List<Value> getDynamicPossibleValues(Map<String, Object> watcherMap, Parameter parameter) throws PhrescoException {
 		PossibleValues possibleValue = getDynamicValues(watcherMap, parameter);
 		List<Value> possibleValues = (List<Value>) possibleValue.getValue();
 		return possibleValues;
 	}
 
 
-	private void addValueDependToWatcher(Map<String, DependantParameters> watcherMap, String parameterKey, List<Value> values, String previousValue) {
+	public void addValueDependToWatcher(Map<String, DependantParameters> watcherMap, String parameterKey, List<Value> values, String previousValue) {
 		for (Value value : values) {
 			if (StringUtils.isNotEmpty(value.getDependency())) {
 				if (StringUtils.isNotEmpty(previousValue)) {
@@ -212,7 +211,7 @@ public class DynamicPossibleValues implements PhrescoConstants {
 		}
 	}
 
-	private void addWatcher(Map<String, DependantParameters> watcherMap, String dependency, String parameterKey, String parameterValue) {
+	public void addWatcher(Map<String, DependantParameters> watcherMap, String dependency, String parameterKey, String parameterValue) {
 		if (StringUtils.isNotEmpty(dependency)) {
 			List<String> dependencyKeys = Arrays.asList(dependency.split("\\s*,\\s*"));
 			for (String dependentKey : dependencyKeys) {

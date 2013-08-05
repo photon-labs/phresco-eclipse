@@ -345,6 +345,9 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
+						if (key.equalsIgnoreCase("watchermap")) {
+							continue;
+						}
 						List<Value> values = (List<Value>) entry.getValue();
 						for (Value value : values) {
 							envSelectionButton = new Button(group, SWT.CHECK);

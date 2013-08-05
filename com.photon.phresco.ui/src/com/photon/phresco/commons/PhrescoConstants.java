@@ -180,6 +180,7 @@ public interface PhrescoConstants {
 	
 	String 	DEPLOY_INFO_FILE = "phresco-deploy-info.xml";
 	String DEPLOY_GOAL 		 = "deploy";
+	String WATCHER_MAP       = "watchermap";
 	
 	// Code Validate
 	
