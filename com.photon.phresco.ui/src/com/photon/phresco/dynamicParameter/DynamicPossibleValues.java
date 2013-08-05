@@ -1,22 +1,35 @@
 package com.photon.phresco.dynamicParameter;
 
+import java.io.File;
+import java.io.FileReader;
+import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.codehaus.plexus.util.StringUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.api.DynamicPageParameter;
 import com.photon.phresco.api.DynamicParameter;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
+import com.photon.phresco.commons.model.BuildInfo;
 import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.model.RepoInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
@@ -30,8 +43,8 @@ import com.photon.phresco.util.PhrescoDynamicLoader;
 
 public class DynamicPossibleValues implements PhrescoConstants {
 	private static Map<String, PhrescoDynamicLoader> pdlMap = new HashMap<String, PhrescoDynamicLoader>();
-	private static Map<String, Object> dynamicMap = new HashMap<String, Object>(); 
-
+	private static int buildNo = 0;
+	Map<String, Object> dynamicMap = new HashMap<String, Object>(); 
 	public  Map<String, Object> setPossibleValuesInReq(MojoProcessor mojo, ApplicationInfo appInfo, List<Parameter> parameters, 
 			Map<String, DependantParameters> watcherMap, String goal) throws PhrescoException {
 		try {
@@ -47,6 +60,18 @@ public class DynamicPossibleValues implements PhrescoConstants {
 						constructMapForDynVals.put("mojo", mojo);
 						constructMapForDynVals.put("goal", goal);
 						constructMapForDynVals.put("serviceManager", serviceManager);
+						constructMapForDynVals.put("customerId", PhrescoUtil.getCustomerId());
+						Gson gson = new Gson();
+						File buildInfoPath = PhrescoUtil.getBuildInfoPath();
+						Type type = new TypeToken<List<BuildInfo>>() {}  .getType();
+						FileReader reader = new FileReader(buildInfoPath);
+						List<BuildInfo> buildInfos = (List<BuildInfo>)gson.fromJson(reader, type);
+						if (CollectionUtils.isNotEmpty(buildInfos)) {
+							Collections.sort(buildInfos, new BuildComparator());
+							buildNo = buildInfos.get(0).getBuildNo();
+						}
+						constructMapForDynVals.put("buildNumber", String.valueOf(buildNo));
+						
 						// Get the values from the dynamic parameter class
 						List<Value> dynParamPossibleValues = getDynamicPossibleValues(constructMapForDynVals, parameter);
 						dynamicMap.put(parameterKey, dynParamPossibleValues);
@@ -134,6 +159,7 @@ public class DynamicPossibleValues implements PhrescoConstants {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+		
 		return dynamicMap;
 	}
 
@@ -294,5 +320,22 @@ public class DynamicPossibleValues implements PhrescoConstants {
 		}
 	}
 
-
+	class BuildComparator implements Comparator<BuildInfo> {
+		public int compare(BuildInfo buildInfo1, BuildInfo buildInfo2) {
+			DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy hh:mm:ss");
+			Date  buildTime1 = new Date();
+			Date buildTime2 = new Date();
+			try {
+				buildTime1 = (Date)formatter.parse(buildInfo1.getTimeStamp());
+				buildTime2 = (Date)formatter.parse(buildInfo2.getTimeStamp());
+			} catch (ParseException e) {
+			}
+			return buildTime2.compareTo(buildTime1);
+		}
+	}
+	
+	public int getBuildNumer() {
+		return buildNo;
+	}
+	
 }
