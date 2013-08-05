@@ -213,6 +213,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
 						List<Value> values = (List<Value>) entry.getValue();
+						
 						for (Value value : values) {
 							envSelectionButton = new Button(group, SWT.CHECK);
 							envSelectionButton.setText(value.getValue());
@@ -364,13 +365,15 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 						List<String> list =  (List<String>) map.get(parameter.getKey());
 						StringBuilder env = new StringBuilder();
-						for (String string: list) {
-							env.append(string);
-							env.append(",");
+						if (CollectionUtils.isNotEmpty(list)) {
+							for (String string: list) {
+								env.append(string);
+								env.append(",");
+							}
+							String envValue = env.toString();
+							envValue = envValue.substring(0, envValue.lastIndexOf(","));
+							parameter.setValue(envValue); 
 						}
-						String envValue = env.toString();
-						envValue = envValue.substring(0, envValue.lastIndexOf(","));
-						parameter.setValue(envValue); 
 					}
 				}
 			}
