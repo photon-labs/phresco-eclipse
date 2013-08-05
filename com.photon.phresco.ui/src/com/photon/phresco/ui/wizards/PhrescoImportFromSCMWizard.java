@@ -33,6 +33,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.SCMManagerUtil;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.pages.ImportFromSCMPage;
@@ -96,7 +97,7 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 								FileUtils.cleanDirectory(testFolder);
 								managerUtil.svnCheckout(testRepoUsername, testRepoPassword, testRepoUrl, testFolder.getPath(), testRepoRevision);
 							}
-							PhrescoUtil.updateProjectIntoWorkspace(importedProject.getAppDirName());
+							ProjectManager.updateProjectIntoWorkspace(importedProject.getAppDirName());
 						} catch (Exception e) {
 							e.printStackTrace();
 							PhrescoDialog.errorDialog(getShell(), "ERROR", e.getLocalizedMessage()); //$NON-NLS-1$

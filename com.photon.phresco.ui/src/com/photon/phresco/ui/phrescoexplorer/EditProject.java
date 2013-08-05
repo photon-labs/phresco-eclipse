@@ -37,6 +37,7 @@ import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.WebService;
 import com.photon.phresco.commons.util.ApplicationManagerUtil;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
@@ -223,8 +224,8 @@ public class EditProject extends AbstractHandler {
 						PhrescoDialog.exceptionDialog(shell, e);
 					}
 					if(!oldAppDirName.equals(appInfo.getAppDirName())) {
-						PhrescoUtil.deleteProjectIntoWorkspace(oldAppDirName);
-						PhrescoUtil.updateProjectIntoWorkspace(appInfo.getAppDirName());
+						ProjectManager.deleteProjectIntoWorkspace(oldAppDirName);
+						ProjectManager.updateProjectIntoWorkspace(appInfo.getAppDirName());
 					}
 					buildDialog.setVisible(false);
 				}

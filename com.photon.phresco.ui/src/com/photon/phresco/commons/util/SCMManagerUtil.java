@@ -134,7 +134,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 				FileUtils.deleteDirectory(gitImportTemp);
 			}
 			if (applicationInfo != null) {
-				PhrescoUtil.updateProjectIntoWorkspace(applicationInfo.getAppDirName());
+				ProjectManager.updateProjectIntoWorkspace(applicationInfo.getAppDirName());
 				return applicationInfo;
 			} 
 		} else if (BITKEEPER.equals(type)) {
