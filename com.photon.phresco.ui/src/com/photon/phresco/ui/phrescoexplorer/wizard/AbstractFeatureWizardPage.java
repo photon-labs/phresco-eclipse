@@ -19,12 +19,17 @@
 
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -41,10 +46,24 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
+import com.photon.phresco.commons.model.CoreOption;
+import com.photon.phresco.commons.model.RequiredOption;
 import com.photon.phresco.commons.model.SelectedFeature;
+import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.plugins.model.Mojos.ApplicationHandler;
+import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.util.Constants;
+import com.photon.phresco.util.Utility;
 
 /**
  * Abstract class to handle feature page
@@ -106,9 +125,14 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	    TableItem[] items = table.getItems();
 	    
 	    int i = 0;
+	    List<SelectedFeature> selectedFeatures = null;
+		try {
+			selectedFeatures = getSelectedFeatures();
+		} catch (PhrescoException e1) {
+			PhrescoDialog.exceptionDialog(getShell(), e1);
+		}
 	    
 	    for (final ArtifactGroup artifactGroup : features) {
-	    	
 	    	final TableItem tableItem = items[i];
 	    	TableEditor editor = new TableEditor(table);
 			final Button checkButton = new Button(table, SWT.CHECK);
@@ -116,6 +140,17 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			editor.minimumWidth = checkButton.getSize().x;
 			editor.horizontalAlignment = SWT.LEFT;
 			editor.setEditor(checkButton, tableItem, 0);
+			
+			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
+				for (SelectedFeature selectedFeature : selectedFeatures) {
+					String artifactGroupId = selectedFeature.getArtifactGroupId();
+					if(artifactGroupId.equals(artifactGroup.getId())) {
+						checkButton.setSelection(true);
+						selectedFeatures.remove(selectedFeature);
+						break;
+					}
+				}
+			}
 			  
 			editor = new TableEditor(table);
 			Text text = new Text(table, SWT.NONE);
@@ -167,6 +202,18 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			        }
 			    }
 			});
+			
+			String selectedVersion = versionText.getText();
+	    	
+	    	if (selectedVersion.equals("")) {
+	    		selectedVersion = KEY_EMPTY;
+	    	}
+	    	
+			if (checkButton.getSelection()) {
+	            selectedArtifactGroup.put(artifactGroup, selectedVersion);
+	        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+    			selectedArtifactGroup.remove(artifactGroup);
+	        }
 	        
 			checkButton.addSelectionListener(new SelectionAdapter() {
 			    @Override
@@ -221,14 +268,135 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 					selectedFeature.setVersionID(artifactInfo.getId());
 				}
 			}
-		    System.out.println("Key = " + key.getDisplayName() + " = " + value);
 		    
 		    if (value != null && KEY_EMPTY.equals(value)) {
 		    	value = selectedComboBoxRows.get(key);
-		    	System.out.println(" comboValue :" + value);
 		    }
 		    selectedFeatures.add(selectedFeature);
 		}
 		return selectedFeatures;
+	}
+	
+	private List<SelectedFeature> getSelectedFeatures() throws PhrescoException {
+		
+		List<SelectedFeature> listFeatures = new ArrayList<SelectedFeature>();
+		try {
+			ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
+			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+			String selectedTechId = appInfo.getTechInfo().getId();
+			List<String> selectedModules = appInfo.getSelectedModules();
+			if (CollectionUtils.isNotEmpty(selectedModules)) {
+				for (String selectedModule : selectedModules) {
+					SelectedFeature selectFeature = createArtifactInformation(selectedModule, selectedTechId, appInfo,
+							serviceManager);
+					listFeatures.add(selectFeature);
+				}
+			}
+
+			List<String> selectedJSLibs = appInfo.getSelectedJSLibs();
+			if (CollectionUtils.isNotEmpty(selectedJSLibs)) {
+				for (String selectedJSLib : selectedJSLibs) {
+					SelectedFeature selectFeature = createArtifactInformation(selectedJSLib, selectedTechId, appInfo,
+							serviceManager);
+					listFeatures.add(selectFeature);
+				}
+			}
+
+			List<String> selectedComponents = appInfo.getSelectedComponents();
+			if (CollectionUtils.isNotEmpty(selectedComponents)) {
+				for (String selectedComponent : selectedComponents) {
+					SelectedFeature selectFeature = createArtifactInformation(selectedComponent, selectedTechId,
+							appInfo, serviceManager);
+					listFeatures.add(selectFeature);
+				}
+			}
+		} catch (PhrescoException e) {
+			throw new PhrescoException(e);
+		}
+		
+		return listFeatures;
+	}
+	
+	/**
+	 * Creates the artifact information.
+	 *
+	 * @param selectedModule the selected module
+	 * @param techId the tech id
+	 * @param appInfo the app info
+	 * @param serviceManager the service manager
+	 * @return the selected feature
+	 * @throws PhrescoException the phresco exception
+	 */
+	private SelectedFeature createArtifactInformation(String selectedModule, String techId, ApplicationInfo appInfo,
+			ServiceManager serviceManager) throws PhrescoException {
+		SelectedFeature slctFeature = new SelectedFeature();
+		ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(selectedModule);
+
+		slctFeature.setDispValue(artifactInfo.getVersion());
+		slctFeature.setVersionID(artifactInfo.getId());
+		slctFeature.setModuleId(artifactInfo.getArtifactGroupId());
+
+		String artifactGroupId = artifactInfo.getArtifactGroupId();
+		ArtifactGroup artifactGroupInfo = serviceManager.getArtifactGroupInfo(artifactGroupId);
+		slctFeature.setName(artifactGroupInfo.getName());
+		slctFeature.setDispName(artifactGroupInfo.getDisplayName());
+		slctFeature.setType(artifactGroupInfo.getType().name());
+		slctFeature.setArtifactGroupId(artifactGroupInfo.getId());
+		slctFeature.setPackaging(artifactGroupInfo.getPackaging());
+		getScope(appInfo, artifactInfo.getId(), slctFeature);
+		List<CoreOption> appliesTo = artifactGroupInfo.getAppliesTo();
+		for (CoreOption coreOption : appliesTo) {
+			if (coreOption.getTechId().equals(techId) && !coreOption.isCore()
+					&& !slctFeature.getType().equals(FrameworkConstants.REQ_JAVASCRIPT_TYPE_MODULE)
+					&& artifactGroupInfo.getPackaging().equalsIgnoreCase(ZIP_FILE)) {
+				slctFeature.setCanConfigure(true);
+			} else {
+				slctFeature.setCanConfigure(false);
+			}
+		}
+		List<RequiredOption> appliesToReqird = artifactInfo.getAppliesTo();
+		if (CollectionUtils.isNotEmpty(appliesToReqird)) {
+			for (RequiredOption requiredOption : appliesToReqird) {
+				if (requiredOption.isRequired() && requiredOption.getTechId().equals(techId)) {
+					slctFeature.setDefaultModule(true);
+				}
+			}
+		}
+
+		return slctFeature;
+	}
+	
+	/**
+	 * Gets the scope.
+	 *
+	 * @param appInfo the app info
+	 * @param id the id
+	 * @param selectFeature the select feature
+	 * @return the scope
+	 * @throws PhrescoException the phresco exception
+	 */
+	private void getScope(ApplicationInfo appInfo, String id, SelectedFeature selectFeature) throws PhrescoException {
+		StringBuilder dotPhrescoPathSb = new StringBuilder(Utility.getProjectHome());
+		dotPhrescoPathSb.append(appInfo.getAppDirName());
+		dotPhrescoPathSb.append(File.separator);
+		dotPhrescoPathSb.append(Constants.DOT_PHRESCO_FOLDER);
+		dotPhrescoPathSb.append(File.separator);
+		String pluginInfoFile = dotPhrescoPathSb.toString() + APPLICATION_HANDLER_INFO_FILE;
+		MojoProcessor mojoProcessor = new MojoProcessor(new File(pluginInfoFile));
+		ApplicationHandler applicationHandler = mojoProcessor.getApplicationHandler();
+		String selectedFeatures = applicationHandler.getSelectedFeatures();
+		if (StringUtils.isNotEmpty(selectedFeatures)) {
+			Gson gson = new Gson();
+			Type jsonType = new TypeToken<Collection<ArtifactGroup>>() {
+			}.getType();
+			List<ArtifactGroup> artifactGroups = gson.fromJson(selectedFeatures, jsonType);
+			for (ArtifactGroup artifactGroup : artifactGroups) {
+				for (ArtifactInfo artifactInfo : artifactGroup.getVersions()) {
+					if (artifactInfo.getId().equals(id)) {
+						selectFeature.setScope(artifactInfo.getScope());
+					}
+				}
+			}
+		}
 	}
 }
