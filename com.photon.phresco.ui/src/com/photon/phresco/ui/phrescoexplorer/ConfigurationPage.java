@@ -199,7 +199,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		addButton.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				configureDialogs.setVisible(false);
+//				configureDialogs.setVisible(false);
 				ConfigurationCreation creation = new ConfigurationCreation();
 				creation.createTemplateByType(tree);
 			}

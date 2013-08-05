@@ -168,6 +168,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			cancelButton.setText("Cancel");
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
+					configDialog.close();
 			    }
 		    });
 			
