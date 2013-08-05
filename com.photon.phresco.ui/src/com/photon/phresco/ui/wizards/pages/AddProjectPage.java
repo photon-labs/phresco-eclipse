@@ -28,6 +28,7 @@ import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
+import com.photon.phresco.ui.resource.Messages;
 
 /**
  * App Info Page
@@ -80,8 +81,8 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 	public AddProjectPage(String pageName) {
 		super(pageName);
 		selectedLayersList.clear();
-		setTitle("{Phresco}");
-		setDescription("Project Creation Page");
+		setTitle(Messages.PROJECT_CREATION_NAME);
+		setDescription(Messages.PROJECT_CREATION_NAME);
 	}
 	
 	/**
@@ -138,20 +139,20 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 			e2.printStackTrace();
 		}*/
 		Label projectName = new Label(basicComposite, SWT.NONE);
-		projectName.setText("Project name *");
+		projectName.setText(Messages.PROJECT_BUTTON_NAME);
 		projectName.setFont(DesignUtil.getLabelFont());
 
 		projectTxt = new Text(basicComposite,SWT.BORDER);
-		projectTxt.setMessage("Name of the project");
+		projectTxt.setMessage(Messages.PROJECT_NAME_MSG_TEXT);
 		projectTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		projectTxt.setFocus();
 		
 		Label code = new Label(basicComposite, SWT.NONE);
-		code.setText("Code");
+		code.setText(Messages.PROJECT_LABEL_CODE);
 		code.setFont(DesignUtil.getLabelFont());
 		
 		codeTxt = new Text(basicComposite, SWT.BORDER);
-		codeTxt.setMessage("Project Code");
+		codeTxt.setMessage(Messages.PROJECT_CODE_MSG_TEXT);
 		codeTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		codeTxt.setEditable(false);
 		
@@ -173,18 +174,18 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		});
 
 		Label description = new Label(basicComposite, SWT.NONE);
-		description.setText("Description");
+		description.setText(Messages.PROJECT_LABEL_DESC);
 		description.setFont(DesignUtil.getLabelFont());
 
 		descriptionTxt = new StyledText(basicComposite, SWT.BORDER);
 		descriptionTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1));
 
 		Label version = new Label(basicComposite, SWT.NONE);
-		version.setText("Version");
+		version.setText(Messages.PROJECT_LABEL_VERSION);
 		version.setFont(DesignUtil.getLabelFont());
 
 		versionTxt = new Text(basicComposite, SWT.BORDER);
-		versionTxt.setText("1.0.0");
+		versionTxt.setText(Messages.PROJECT_VERSION_TEXT);
 
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));

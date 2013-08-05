@@ -78,7 +78,19 @@ public class Messages extends NLS {
 	public static String DATABASE;
 	public static String DATABASES;
 	public static String WEBSERVICES;
-	public static String UPDATE;*/
+	public static String UPDATE;
+	
+	//Add Project
+	public static String TECHNOLOGY_WIZARD_DESC;
+	public static String TECHNOLOGY_WIZARD_NAME;
+	public staitc String PROJECT_BUTTON_NAME;
+	public static String PROJECT_LABEL_CODE;
+	public static String PROJECT_CODE_MSG_TEXT;
+	public static String PROJECT_NAME_MSG_TEXT;
+	public static String PROJECT_LABEL_DESC;
+	public static String PROJECT_LABEL_VERSION;
+	public static String PROJECT_VERSION_TEXT;
+	*/
 	
 	// Needs to be localization
 	
@@ -125,6 +137,20 @@ public class Messages extends NLS {
 	public static String MESSAGE = "*Message";
 	public static String EMPTY_STRING_WARNING = "should not be empty";
 	public static String INFORMATION = "information";
+	
+	//Add Project
+	public static String PROJECT_CREATION_NAME="Phresco Project";
+	public static String PROJECT_CREATION_DESC="Project Creation Page";
+	public static String TECHNOLOGY_WIZARD_NAME="Technology";
+	public static String TECHNOLOGY_WIZARD_DESC="Technology Selection Page";
+	public static String PROJECT_BUTTON_NAME="Project name *";
+	public static String PROJECT_NAME_MSG_TEXT="Name of the project";
+	public static String PROJECT_LABEL_CODE="Code";
+	public static String PROJECT_CODE_MSG_TEXT="Project Code";
+	public static String PROJECT_LABEL_DESC="Description";
+	public static String PROJECT_LABEL_VERSION="Version";
+	public static String PROJECT_VERSION_TEXT="1.0.0";
+	
 /*	
 	static {
 		// initialize resource bundle

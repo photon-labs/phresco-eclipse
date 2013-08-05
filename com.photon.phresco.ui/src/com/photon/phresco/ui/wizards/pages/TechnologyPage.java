@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.util.DesignUtil;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.componets.AppLayerComponent;
 import com.photon.phresco.ui.wizards.componets.MobLayerComponent;
 import com.photon.phresco.ui.wizards.componets.WebLayerComponent;
@@ -44,8 +45,8 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 	
 	public TechnologyPage(String pageName) {
 		super(pageName);
-		setTitle("{Phresco}");
-		setDescription("Technology Selection Page");
+		setTitle(Messages.TECHNOLOGY_WIZARD_NAME);
+		setDescription(Messages.TECHNOLOGY_WIZARD_DESC);
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 		for (final Button layerButton : selectedLayers) {
 			if(APP_LAYER.equals(layerButton.getData(layerButton.getText()))) {
 				
-				final Group mainApplayerGroup = new Group(composite, SWT.NONE);
+				final Group mainApplayerGroup = new Group(composite, SWT.NONE | SWT.NO | SWT.SHADOW_OUT);
 				mainApplayerGroup.setText(layerButton.getText());
 				GridLayout mainLayout = new GridLayout(1, false);
 				mainApplayerGroup.setLayout(mainLayout);
