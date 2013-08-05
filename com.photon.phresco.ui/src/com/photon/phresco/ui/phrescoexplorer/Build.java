@@ -212,7 +212,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
-						if (key.equalsIgnoreCase("watchermap")) {
+						if (key.equalsIgnoreCase(WATCHER_MAP)) {
 							continue;
 						}
 						List<Value> values = (List<Value>) entry.getValue();

@@ -536,7 +536,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					Set<Entry<String,Object>> entrySet = maps.entrySet();
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
-						if (key.equalsIgnoreCase("watchermap")) {
+						if (key.equalsIgnoreCase(WATCHER_MAP)) {
 							continue;
 						}
 						List<Value> values = (List<Value>) entry.getValue();
