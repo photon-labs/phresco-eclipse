@@ -142,16 +142,11 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	        final CCombo combo = new CCombo(table, SWT.NONE);
 	        final Text versionText = new Text(table, SWT.NONE);
 	        
-	        boolean isFirst = true;
 	        if (versions.size() > 1) {
 		        for (ArtifactInfo artifactInfo : versions) {
 		        	combo.add(artifactInfo.getVersion()); 
-		        	
-		        	if (isFirst) {
-		        		combo.setItem(0, artifactInfo.getVersion()); 
-		        		isFirst = false;
-		        	}
 				}
+		        combo.select(0);
 				editor.grabHorizontal = true;
 				editor.setEditor(combo, tableItem, 3);
 	        } else {
