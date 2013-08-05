@@ -61,14 +61,17 @@ public class DynamicPossibleValues implements PhrescoConstants {
 						constructMapForDynVals.put("goal", goal);
 						constructMapForDynVals.put("serviceManager", serviceManager);
 						constructMapForDynVals.put("customerId", PhrescoUtil.getCustomerId());
-						Gson gson = new Gson();
 						File buildInfoPath = PhrescoUtil.getBuildInfoPath();
-						Type type = new TypeToken<List<BuildInfo>>() {}  .getType();
-						FileReader reader = new FileReader(buildInfoPath);
-						List<BuildInfo> buildInfos = (List<BuildInfo>)gson.fromJson(reader, type);
-						if (CollectionUtils.isNotEmpty(buildInfos)) {
-							Collections.sort(buildInfos, new BuildComparator());
-							buildNo = buildInfos.get(0).getBuildNo();
+						if (buildInfoPath.exists()) {
+							Gson gson = new Gson();
+							Type type = new TypeToken<List<BuildInfo>>() {}  .getType();
+							FileReader reader = new FileReader(buildInfoPath);
+							List<BuildInfo> buildInfos = (List<BuildInfo>)gson.fromJson(reader, type);
+							if (CollectionUtils.isNotEmpty(buildInfos)) {
+								Collections.sort(buildInfos, new BuildComparator());
+								buildNo = buildInfos.get(0).getBuildNo();
+							}
+							constructMapForDynVals.put("buildNumber", String.valueOf(buildNo));
 						}
 						constructMapForDynVals.put("buildNumber", String.valueOf(buildNo));
 						
