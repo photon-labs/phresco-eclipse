@@ -90,10 +90,22 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_DESC;
 	public static String PROJECT_LABEL_VERSION;
 	public static String PROJECT_VERSION_TEXT;
+	
+	//Import
+	public static String PHRESCO_IMPORT_WINDOW_TITLE;
+	public static String PHRESCO_IMPORT_PAGE_TITLE;
+	public static String PHRESCO_IMPORT_PAGE_DESC;
+	public static String IMPORT_ADD_PROJECT_PAGE_NAME;
+	public static String IMPORT_TECHNOLOGY_PAGE_NAME;
+	
 	*/
 	
 	// Needs to be localization
+	// Login
 	
+    public static String CONNECTION_TITLE = "Phresco Connection";
+    public static String LOGIN_SUCCESSFUL = "Logged In successfully";
+    
 	public static String PROVIDE_SCM_DETAILS="Provide SCM Details";
 	public static String IMPORT_FROM_SCM="Import from SCM";
 	public static String PROVIDE_MANDATORY_VALUES="Provide Mandatory Values";
@@ -150,6 +162,13 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_DESC="Description";
 	public static String PROJECT_LABEL_VERSION="Version";
 	public static String PROJECT_VERSION_TEXT="1.0.0";
+	
+	//Import
+	public static String PHRESCO_IMPORT_WINDOW_TITLE="Phresco";
+	public static String PHRESCO_IMPORT_PAGE_TITLE="Import Phresco Project to WorkSpace";
+	public static String PHRESCO_IMPORT_PAGE_DESC="Phresco Import Page Description Appears here";
+	public static String IMPORT_ADD_PROJECT_PAGE_NAME="AddProjectPage";
+	public static String IMPORT_TECHNOLOGY_PAGE_NAME="Technology Page";
 	
 /*	
 	static {

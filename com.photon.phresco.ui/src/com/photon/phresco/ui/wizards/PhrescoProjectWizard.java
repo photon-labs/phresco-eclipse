@@ -70,15 +70,15 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 				new Path("icons/phresco.gif"),null));
 		super.setDefaultPageImageDescriptor(myImage);
 		super.setNeedsProgressMonitor(true);
-		super.setWindowTitle("Phresco");
+		super.setWindowTitle(Messages.PHRESCO_IMPORT_WINDOW_TITLE);
 
 	}
 
 	@Override
 	public void addPages() {
 		super.addPages();
-		technologyPage = new TechnologyPage("Technology Page");
-		appInfoPage = new AddProjectPage("AddProjectPage");
+		technologyPage = new TechnologyPage(Messages.IMPORT_TECHNOLOGY_PAGE_NAME);
+		appInfoPage = new AddProjectPage(Messages.IMPORT_ADD_PROJECT_PAGE_NAME);
 		addPage(appInfoPage);
 		addPage(technologyPage);
 	}

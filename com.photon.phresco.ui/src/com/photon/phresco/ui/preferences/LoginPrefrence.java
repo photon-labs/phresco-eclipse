@@ -137,7 +137,7 @@ public class LoginPrefrence
             prefStore.setValue(PASSWORD, password.getText());
             PhrescoPlugin.getDefault().savePluginPreferences();
             result = true;
-            setMessage(LOGIN_SUCCESSFUL);
+            setMessage(Messages.LOGIN_SUCCESSFUL);
         } 
         return result;
     }

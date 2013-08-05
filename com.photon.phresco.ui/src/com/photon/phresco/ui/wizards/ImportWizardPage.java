@@ -16,6 +16,8 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.ui.internal.wizards.MavenImportWizardPage;
 import org.eclipse.ui.IWorkingSet;
 
+import com.photon.phresco.ui.resource.Messages;
+
 
 /**
  * @author suresh_ma
@@ -27,8 +29,8 @@ public class ImportWizardPage extends MavenImportWizardPage {
 	public ImportWizardPage(ProjectImportConfiguration importConfiguration,
 			List<IWorkingSet> workingSets) {
 		super(importConfiguration, workingSets);
-		setTitle("Import Phresco Project to WorkSpace");
-		setDescription("Phresco Import Page Description Appears here");
+		setTitle(Messages.PHRESCO_IMPORT_PAGE_TITLE);
+		setDescription(Messages.PHRESCO_IMPORT_PAGE_DESC);
 		// TODO Auto-generated constructor stub
 	}
 }

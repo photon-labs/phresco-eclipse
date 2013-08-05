@@ -109,14 +109,14 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         Label userNameLabel = new Label(composite, SWT.LEFT);
         userNameLabel.setText(Messages.USER_NAME);
         userName = new Text(composite, SWT.BORDER);
-        userName.setText(ADMIN_USER);
+        userName.setText(DEFAULT_USER_NAME);
         userName.setLayoutData(new GridData(160,15));
 
         Label passwordLabel = new Label(composite, SWT.LEFT);
         passwordLabel.setText(Messages.USER_PWD);
         password = new Text(composite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
-        password.setText(ADMIN_PWD);
+        password.setText(DEFAULT_PASSWORD);
         password.setLayoutData(new GridData(160,15));
         
 		final Label lblHeadRevision = new Label(composite, SWT.NONE);
@@ -154,7 +154,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		final Label testRepouserNameLabel = new Label(composite, SWT.LEFT);
         testRepouserNameLabel.setText(Messages.USER_NAME);
         testRepoUsernameText = new Text(composite, SWT.BORDER);
-        testRepoUsernameText.setText(ADMIN_USER);
+        testRepoUsernameText.setText(DEFAULT_USER_NAME);
         testRepoUsernameText.setEnabled(false);
         testRepoUsernameText.setLayoutData(new GridData(160,15));
 		
@@ -162,7 +162,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         testRepopasswordLabel.setText(Messages.USER_PWD);
         testRepoPasswordText = new Text(composite, SWT.BORDER);
         testRepoPasswordText.setEchoChar(CHAR_ASTERISK);
-        testRepoPasswordText.setText(ADMIN_PWD);
+        testRepoPasswordText.setText(DEFAULT_PASSWORD);
         testRepoPasswordText.setEnabled(false);
         testRepoPasswordText.setLayoutData(new GridData(160,15));
 		
@@ -315,8 +315,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					userName.setText(STR_EMPTY);
 					password.setText(STR_EMPTY);
 				} else {
-					userName.setText(ADMIN_USER);
-					password.setText(ADMIN_PWD);
+					userName.setText(DEFAULT_USER_NAME);
+					password.setText(DEFAULT_PASSWORD);
 				}
 		    }
 		}); 
@@ -332,8 +332,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					testRepoUsernameText.setText(STR_EMPTY);
 					testRepoPasswordText.setText(STR_EMPTY);
 				} else {
-					testRepoUsernameText.setText(ADMIN_USER);
-					testRepoPasswordText.setText(ADMIN_PWD);
+					testRepoUsernameText.setText(DEFAULT_USER_NAME);
+					testRepoPasswordText.setText(DEFAULT_PASSWORD);
 				}
 		    }
 		}); 
