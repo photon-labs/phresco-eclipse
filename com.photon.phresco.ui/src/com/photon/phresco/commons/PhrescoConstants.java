@@ -177,6 +177,7 @@ public interface PhrescoConstants {
 	// Deploy constants
 	
 	String 	DEPLOY_INFO_FILE = "phresco-deploy-info.xml";
+	String DEPLOY_GOAL 		 = "deploy";
 	
 	// Code Validate
 	
