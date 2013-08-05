@@ -175,6 +175,7 @@ public interface PhrescoConstants {
 	String DYNAMIC_PARAMETER = "DynamicParameter";
 	String TYPE_PACKAGE_FILE_BROWSE = "packageFileBrowse";
 	String TYPE_PASSWORD = "password";
+	String ALL 				= "All";
 	
 	// Deploy constants
 	
@@ -201,6 +202,7 @@ public interface PhrescoConstants {
 	String UNIT_TEST_GOAL     = "unit-test";
 	String TEST				  = "Test";
 	String UNIT_LOGS 		  = "Unit logs";
+	String UNIT				  = "unit";
 	
 
 	String FAILED = "FAILED";
@@ -210,6 +212,9 @@ public interface PhrescoConstants {
 	// Functional Test
 	
 	String FUNCTIONALTEST_INFO_FILE = "phresco-functional-test-info.xml";
+	
+	//component test
+	String COMPONENT = "component";
 	
 	//platform Constants
 	String OS_NAME = "os.name";

@@ -1,5 +1,9 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +13,11 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -30,59 +34,114 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.ProjectInfo;
+import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.api.ActionType;
+import com.photon.phresco.framework.api.ApplicationManager;
+import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
+import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.util.Constants;
+import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.util.PomProcessor;
 
 public class Functional extends AbstractHandler implements PhrescoConstants {
 
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
-	private Combo listLogs;
-	
 	private Button functionalButton;
 	private Button cancelButton;
 	private Button checkBoxButton;	
 
-	private Shell functionalTestDialog;	
 	private Button envSelectionButton;
-	
-	Map<String, String> typeMaps = new HashedMap();
-	private static Map<String, Object> map = new HashedMap();
+
+	Map<String, String> typeMaps = new HashMap<String, String>();
+	private static Map<String, Object> map = new HashMap<String, Object>();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
-		final Shell functionalDialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-
-		Shell generateDialog = createFunctionalDialog(functionalDialog);
-	
-		functionalButton.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
-				saveCongfiguration();
-			}
-		});
+		final Shell functionalDialog = new Shell(shell, SWT.CENTER | SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX | SWT.MIN);
+		functionalDialog.setLayout(new GridLayout(1, false));
 		
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
 
-		generateDialog.open();
+		try {
+			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
+			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(applicationInfo.getAppDirName());
+			String seleniumToolType = pomProcessor.getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
+			String phrescoPluginInfoFilePath = PhrescoUtil.getPhrescoPluginInfoFilePath(Constants.PHASE_FUNCTIONAL_TEST, "");
+			final MojoProcessor processor = new MojoProcessor(new File(phrescoPluginInfoFilePath));
+			Configuration configuration = processor.getConfiguration(Constants.PHASE_FUNCTIONAL_TEST + HYPHEN + seleniumToolType);
+			final List<Parameter> parameters = configuration.getParameters().getParameter();
 
+			Button testButton = new Button(functionalDialog, SWT.PUSH);
+			testButton.setText("Test");
+			final QualityUtil qualityUtil = new QualityUtil();
+			testButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Shell generateDialog = createFunctionalDialog(functionalDialog, parameters, processor);
+					generateDialog.open();
+					try {
+						qualityUtil.getTestReport(functionalDialog, "functional", "", "");
+					} catch (PhrescoException e1) {
+						PhrescoDialog.exceptionDialog(functionalDialog, e1);
+					}
+					super.widgetSelected(e);
+				}
+			});
+			
+			qualityUtil.getTestReport(functionalDialog,"functional", "", "");
+		} catch (PhrescoException e1) {
+			PhrescoDialog.exceptionDialog(functionalDialog, e1);
+		} catch (PhrescoPomException e2) {
+			PhrescoDialog.exceptionDialog(functionalDialog, e2);
+		}
+		functionalDialog.setSize(600, 400);
+		functionalDialog.open();
 		return null;
 	}
 
+	/**
+	 * @param functionalDialog
+	 */
+	private void runFunctionalTest(List<Parameter> parameters, final Shell functionalDialog) {
+		ApplicationManager applicationManager = new ApplicationManagerImpl();
+		try {
+			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
+			String applicationHome = PhrescoUtil.getApplicationHome();
+			List<String> mavenArgCommands = PhrescoUtil.getMavenArgCommands(parameters);
+			BufferedInputStream performAction = applicationManager.performAction(projectInfo, ActionType.FUNCTIONAL_TEST, mavenArgCommands, applicationHome);
 
-	public Shell createFunctionalDialog(Shell dialog) {
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(performAction));
+			ConsoleViewManager.getDefault("functional test").println(bufferedReader);
+		} catch (PhrescoException e) {
+			PhrescoDialog.exceptionDialog(functionalDialog, e);
+		}
+	}
 
-		Shell functionalTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+
+	public Shell createFunctionalDialog(final Shell dialog, final List<Parameter> parameters, MojoProcessor processor) {
+
+		final Shell functionalTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
 		functionalTestDialog.setText("Functional");
 		functionalTestDialog.setLocation(385, 130);
 		functionalTestDialog.setSize(451,188);
@@ -93,11 +152,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 		functionalTestDialog.setLayoutData(data);
 
 		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getFunctionalTestInfoConfigurationPath());
-			Configuration configuration = processor.getConfiguration("functional-test-webdriver");
-			List<Parameter> parameters = configuration.getParameters().getParameter();
-
-			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
+			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
 			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, "functional-test-webdriver");
@@ -163,7 +218,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 					Combo listLogs = new Combo(functionalTestDialog, SWT.DROP_DOWN);
-					
+
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
@@ -174,7 +229,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					listLogs.setLayoutData(data);
 					map.put(parameter.getKey(), listLogs); 
 
-				} else if (type.equalsIgnoreCase("DynamicParameter")) {
+				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					int yaxis = 0;
 					String key = null;
 					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
@@ -187,9 +242,11 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 					final List<String> buttons = new ArrayList<String>();
 					Set<Entry<String,Object>> entrySet = maps.entrySet();
-
 					for (Entry<String, Object> entry : entrySet) {
 						key = entry.getKey();
+						if (key.equalsIgnoreCase(WATCHER_MAP)) {
+							continue;
+						}
 						List<Value> values = (List<Value>) entry.getValue();
 						for (Value value : values) {
 							envSelectionButton = new Button(group, SWT.CHECK);
@@ -236,16 +293,37 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			cancelButton.setSize(74, 23);
 			cancelButton.setLayoutData(datas);
 
+			functionalButton.addListener(SWT.Selection, new Listener() {
+
+				@Override
+				public void handleEvent(Event event) {
+					try {
+						saveCongfiguration();
+					} catch (PhrescoException e) {
+						PhrescoDialog.exceptionDialog(functionalTestDialog, e);
+					}
+					BusyIndicator.showWhile(null, new Runnable() {
+						public void run() {
+							runFunctionalTest(parameters, dialog);
+						}
+					});
+					dialog.close();
+				}
+			});
+			
 		} catch (PhrescoException e) {
-			e.printStackTrace();
+			PhrescoDialog.exceptionDialog(functionalTestDialog, e);
 		}
 		return functionalTestDialog;
 	}
-	
-	public void saveCongfiguration()  {
+
+	public void saveCongfiguration() throws PhrescoException  {
 		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getFunctionalTestInfoConfigurationPath());
-			List<Parameter> parameters = processor.getConfiguration("functional-test-webdriver").getParameters().getParameter();
+			String phrescoPluginInfoFilePath = PhrescoUtil.getPhrescoPluginInfoFilePath(Constants.PHASE_FUNCTIONAL_TEST, "");
+			MojoProcessor processor = new MojoProcessor(new File(phrescoPluginInfoFilePath));
+			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
+			String seleniumToolType = PhrescoUtil.getSeleniumToolType(applicationInfo);
+			List<Parameter> parameters = processor.getConfiguration(Constants.PHASE_FUNCTIONAL_TEST + HYPHEN + seleniumToolType).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
 				for (Parameter parameter : parameters) {
 					if (parameter.getType().equalsIgnoreCase(STRING)) {
@@ -276,23 +354,23 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					} else if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 						List<String> list =  (List<String>) map.get(parameter.getKey());
 						StringBuilder env = new StringBuilder();
-						for (String string: list) {
-							env.append(string);
-							env.append(",");
+						if(CollectionUtils.isNotEmpty(list)) {
+							for (String string: list) {
+								env.append(string);
+								env.append(",");
+							}
+							String envValue = env.toString();
+							envValue = envValue.substring(0, envValue.lastIndexOf(","));
+							parameter.setValue(envValue); 
 						}
-						String envValue = env.toString();
-						envValue = envValue.substring(0, envValue.lastIndexOf(","));
-						parameter.setValue(envValue); 
 					}
 				}
 			}
 			processor.save();
 		} catch (PhrescoException e) {
-			e.printStackTrace();
+			throw new PhrescoException(e);
+		} catch (PhrescoPomException e) {
+			throw new PhrescoException(e);
 		}
 	}
-
-	
-	
-
 }

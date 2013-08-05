@@ -258,7 +258,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 				if (!xmlResultsAvailable) {
 					QualityUtil qualityUtil = new QualityUtil();
 					MojoProcessor mojo = new MojoProcessor(new File(PhrescoUtil.getPhrescoPluginInfoFilePath(Constants.PHASE_PERFORMANCE_TEST, 
-							Constants.PHASE_PERFORMANCE_TEST, appInfo.getAppDirName())));
+							Constants.PHASE_PERFORMANCE_TEST)));
 					List<String> testAgainsts = new ArrayList<String>();
 					Parameter testAgainstParameter = mojo.getParameter(Constants.PHASE_PERFORMANCE_TEST, REQ_TEST_AGAINST);
 					if (testAgainstParameter != null && TYPE_LIST.equalsIgnoreCase(testAgainstParameter.getType())) {

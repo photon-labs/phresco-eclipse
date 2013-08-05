@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IProject;
@@ -27,6 +29,8 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.User;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
+import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.service.client.api.ServiceContext;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.service.client.factory.ServiceClientFactory;
@@ -166,11 +170,6 @@ public class PhrescoUtil implements PhrescoConstants {
 		return unitTestconfigPath;
 	}
 	
-	public static File getFunctionalTestInfoConfigurationPath() {
-		File unitTestconfigPath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + FUNCTIONALTEST_INFO_FILE );
-		return unitTestconfigPath;
-	}
-
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
 		try {
 			File projectFilePath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
@@ -260,6 +259,24 @@ public class PhrescoUtil implements PhrescoConstants {
         return builder.toString();
     }
 	
+	public static List<String> getMavenArgCommands(List<Parameter> parameters) {
+		List<String> buildArgCmds = new ArrayList<String>();	
+		if(CollectionUtils.isEmpty(parameters)) {
+			return buildArgCmds;
+		}
+		for (Parameter parameter : parameters) {
+			if (parameter.getPluginParameter()!= null && FRAMEWORK.equalsIgnoreCase(parameter.getPluginParameter())) {
+				List<MavenCommand> mavenCommand = parameter.getMavenCommands().getMavenCommand();
+				for (MavenCommand mavenCmd : mavenCommand) {
+					if (StringUtils.isNotEmpty(parameter.getValue()) && parameter.getValue().equalsIgnoreCase(mavenCmd.getKey())) {
+						buildArgCmds.add(mavenCmd.getValue());
+					}
+				}
+			}
+		}
+		return buildArgCmds;
+	}
+	
 	public static List<String> getProjectModules(String appDirName) throws PhrescoException {
     	try {
             PomProcessor processor = getPomProcessor(appDirName);
@@ -314,7 +331,11 @@ public class PhrescoUtil implements PhrescoConstants {
         return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_LOADTEST_RESULT_EXTENSION);
     }
 	
-	public static String getPhrescoPluginInfoFilePath(String goal, String phase, String appDirName) throws PhrescoException {
+	public static String getSeleniumToolType(ApplicationInfo appInfo) throws PhrescoException, PhrescoPomException {
+        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
+    }
+	
+	public static String getPhrescoPluginInfoFilePath(String goal, String phase) throws PhrescoException {
 		StringBuilder sb = new StringBuilder(getApplicationHome());
 		sb.append(File.separator);
 		sb.append(FOLDER_DOT_PHRESCO);
@@ -333,7 +354,6 @@ public class PhrescoUtil implements PhrescoConstants {
 		}
 		sb.append(Constants.INFO_XML);
 
-		System.out.println("sb....." + sb.toString());
 		return sb.toString();
 	}
 }

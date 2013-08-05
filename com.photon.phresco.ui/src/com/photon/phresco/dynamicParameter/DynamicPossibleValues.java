@@ -159,7 +159,7 @@ public class DynamicPossibleValues implements PhrescoConstants {
 				//	setAvailableParams(paramBuilder.toString());
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 		dynamicMap.put(WATCHER_MAP, watcherMap);
 		return dynamicMap;
