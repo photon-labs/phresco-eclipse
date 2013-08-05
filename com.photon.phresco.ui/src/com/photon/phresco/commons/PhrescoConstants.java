@@ -173,6 +173,8 @@ public interface PhrescoConstants {
 	String DOWNLOAD 		 = "Download";
 	String DEPLOY 		     = "Deploy";
 	String DYNAMIC_PARAMETER = "DynamicParameter";
+	String TYPE_PACKAGE_FILE_BROWSE = "packageFileBrowse";
+	String TYPE_PASSWORD = "password";
 	
 	// Deploy constants
 	

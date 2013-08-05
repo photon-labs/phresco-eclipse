@@ -13,6 +13,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import com.photon.phresco.api.DynamicPageParameter;
 import com.photon.phresco.api.DynamicParameter;
+import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
@@ -27,7 +28,7 @@ import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.util.PhrescoDynamicLoader;
 
-public class DynamicPossibleValues {
+public class DynamicPossibleValues implements PhrescoConstants {
 	private static Map<String, PhrescoDynamicLoader> pdlMap = new HashMap<String, PhrescoDynamicLoader>();
 	private static Map<String, Object> dynamicMap = new HashMap<String, Object>(); 
 
@@ -39,7 +40,7 @@ public class DynamicPossibleValues {
 				ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
 				for (Parameter parameter : parameters) {
 					String parameterKey = parameter.getKey();
-					if ("DynamicParameter".equalsIgnoreCase(parameter.getType()) && parameter.getDynamicParameter() != null) { 
+					if (DYNAMIC_PARAMETER.equalsIgnoreCase(parameter.getType()) && parameter.getDynamicParameter() != null) { 
 						//Dynamic parameter
 						Map<String, Object> constructMapForDynVals = constructMapForDynVals(appInfo, watcherMap, parameterKey);
 						constructMapForDynVals.put("eclipseHome", PhrescoUtil.getApplicationHome());
