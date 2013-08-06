@@ -176,31 +176,31 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						for (PropertyTemplate propertyTemplate : propertyTemplates) {
 							if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 								Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
 								if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
 										|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("VErsion")) {
 									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
+									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
 								else {
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
-									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), nameText.getText());
+									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), nameText.getText());
 								}				
 							} 
 							else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
 								Text numberText = (Text) map.get(propertyTemplate.getKey());
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), numberText.getText());
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), numberText.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(BOOLEAN)) {
 								Button checkBoxButton = (Button) map.get(propertyTemplate.getKey());
 								boolean selection = checkBoxButton.getSelection();
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), (String.valueOf(selection)));
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), (String.valueOf(selection)));
 							} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 								Text passwordText = (Text) map.get(propertyTemplate.getKey());
 								String password = passwordText.getText();
 								byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
 								String encodedString = new String(encodedPwd);
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), encodedString);
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), encodedString);
 							} 
 						}
 
@@ -538,7 +538,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 						Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 						comboDropDown.removeAll();
-						String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+						String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						comboDropDown.add(value);
 						comboDropDown.select(0);
 					} else if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
@@ -565,7 +565,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 						} else {
 							comboDropDown.removeAll();
-							String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+							String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 							comboDropDown.add(value);
 							comboDropDown.select(0);
 						}
@@ -573,21 +573,21 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					} 
 					else {
 						Text text = (Text) map.get(propertyTemplate.getKey());
-						String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+						String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						text.setText(value);
 					}				
 				} 
 				else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
 					Text numberText = (Text) map.get(propertyTemplate.getKey());
-					String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+					String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 					numberText.setText(value);
 				} else if (propertyTemplate.getType().equalsIgnoreCase(BOOLEAN)) {
 					Button checkBoxButton = (Button) map.get(propertyTemplate.getKey());
-					String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+					String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 					checkBoxButton.setText(value);
 				} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 					Text passwordText = (Text) map.get(propertyTemplate.getKey());
-					String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+					String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 					passwordText.setText(value);
 				} 
 
@@ -613,12 +613,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						for (PropertyTemplate propertyTemplate : propertyTemplates) {
 							if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 								Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
 								if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
 										|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("Version")) {
 									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
+									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
 								else {
 									if (propertyTemplate.getKey().equalsIgnoreCase("Name")) {
@@ -626,22 +626,22 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										configName = nameText.getText();
 									}
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
-									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), nameText.getText());
+									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), nameText.getText());
 								}				
 							} 
 							else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
 								Text numberText = (Text) map.get(propertyTemplate.getKey());
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), numberText.getText());
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), numberText.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(BOOLEAN)) {
 								Button checkBoxButton = (Button) map.get(propertyTemplate.getKey());
 								boolean selection = checkBoxButton.getSelection();
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), (String.valueOf(selection)));
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), (String.valueOf(selection)));
 							} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 								Text passwordText = (Text) map.get(propertyTemplate.getKey());
 								String password = passwordText.getText();
 								byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
 								String encodedString = new String(encodedPwd);
-								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), encodedString);
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), encodedString);
 							} 
 						}
 
