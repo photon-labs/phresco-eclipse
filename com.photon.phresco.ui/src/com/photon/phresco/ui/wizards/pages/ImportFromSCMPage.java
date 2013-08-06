@@ -217,8 +217,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		revisionText.setVisible(false);
 		lblTestCheckout.setVisible(false);
 		testCheckOutButton.setVisible(false);
-		lblOtherCredentials.setVisible(false);
-		otherCredentialButton.setVisible(false);
+		lblOtherCredentials.setVisible(true);
+		otherCredentialButton.setVisible(true);
 		userName.setEnabled(false);
 		password.setEnabled(false);
 		testRepoUrlLabel.setVisible(false);
@@ -246,8 +246,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    		revisionText.setVisible(false);
 		    		lblTestCheckout.setVisible(false);
 		    		testCheckOutButton.setVisible(false);
-		    		lblOtherCredentials.setVisible(false);
-		    		otherCredentialButton.setVisible(false);
+		    		lblOtherCredentials.setVisible(true);
+		    		otherCredentialButton.setVisible(true);
 		    		testRepoUrlLabel.setVisible(false);
 		    		testRepoUrlText.setVisible(false);
 		    		otherCredentialLbl.setVisible(false);
