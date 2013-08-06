@@ -33,6 +33,8 @@ public class Messages extends NLS {
 	public static String LOGIN_ID;
 	public static String LOGIN_PWD;
 	public static String LOGIN_FAILED_MSG;
+	public static String LOGIN_CONFIRM_DIALOG_TITLE;
+	public static String LOGIN_CONFIRM_DIALOG_MSG;
 	
 	// Import From SCM related Keys
 	public static String PROVIDE_SCM_DETAILS;
@@ -108,6 +110,8 @@ public class Messages extends NLS {
 	
     public static String CONNECTION_TITLE = "Phresco Connection";
     public static String LOGIN_SUCCESSFUL = "Logged In successfully";
+    public static String LOGIN_CONFIRM_DIALOG_TITLE = "Login into Phresco";
+    public static String LOGIN_CONFIRM_DIALOG_MSG = "This requires Login. Do you want to configure login now";
     
 	public static String PROVIDE_SCM_DETAILS="Provide SCM Details";
 	public static String IMPORT_FROM_SCM="Import from SCM";

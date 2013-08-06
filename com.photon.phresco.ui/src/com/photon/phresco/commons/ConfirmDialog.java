@@ -29,6 +29,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.internal.OpenPreferencesAction;
 
+import com.photon.phresco.ui.resource.Messages;
+
 /**
  * confirm dialog to login
  * @author syed
@@ -53,8 +55,8 @@ public class ConfirmDialog implements PhrescoConstants {
 	public void showConfirm(Shell s) {
 		MessageBox messageBox = new MessageBox(s, SWT.ICON_QUESTION
 	            | SWT.YES | SWT.NO);
-	        messageBox.setMessage(MESSAGE);
-	        messageBox.setText(MSG_TITLE);
+			messageBox.setText(Messages.LOGIN_CONFIRM_DIALOG_TITLE);
+	        messageBox.setMessage(Messages.LOGIN_CONFIRM_DIALOG_MSG);
 	    int response = messageBox.open();
 	    
 	    if (response==SWT.YES) {
@@ -82,7 +84,7 @@ class PreferenceAction extends OpenPreferencesAction {
 	@Override
 	public void run() {
 		String displayLoginPage[] = new String[1];
-		displayLoginPage[0] = "com.photon.phresco.ui.preferences.LoginPrefrence";
+		displayLoginPage[0] = PhrescoConstants.PHRESCO_LOGIN_PREFERENCE_ID;
 		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(shell, PHRESCO_PREFERENCE_ID, displayLoginPage, null);
 		dialog.open();
 		
