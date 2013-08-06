@@ -616,6 +616,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						String environmentName = parent.getText();
 						Configuration configuration = new Configuration();
 						configuration.setEnvName(environmentName);
+						configuration.setName(item.getText());
 						configuration.setType(typeList.getText());
 						configuration.setProperties(properties);
 						impl.updateConfiguration(environmentName, item.getText(), configuration);
