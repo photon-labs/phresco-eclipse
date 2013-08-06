@@ -107,7 +107,6 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 			public void handleEvent(Event event) {
 				try {
 					boolean reportAvailable = isReportAvailable(reportDialog);
-					System.out.println("report available===> " + reportAvailable);
 					if(!reportAvailable) {
 						return;
 					}

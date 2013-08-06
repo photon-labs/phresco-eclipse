@@ -218,7 +218,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					Combo listLogs = new Combo(functionalTestDialog, SWT.DROP_DOWN);
+					Combo listLogs = new Combo(functionalTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
 
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
@@ -291,6 +291,14 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			cancelButton = new Button(composite, SWT.NONE);
 			cancelButton.setText(CANCEL);
 			cancelButton.setLayoutData(datas);
+			
+			cancelButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					functionalTestDialog.close();
+					super.widgetSelected(e);
+				}
+			});
 
 			functionalButton.addListener(SWT.Selection, new Listener() {
 

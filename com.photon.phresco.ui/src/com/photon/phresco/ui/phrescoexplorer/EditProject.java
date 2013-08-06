@@ -277,6 +277,16 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 			Button cancelButton = new Button(updateComposite, SWT.PUSH);
 			cancelButton.setText(Messages.CANCEL);
 			
+			cancelButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					buildDialog.close();
+					serverComponents.clear();
+					dbComponents.clear();
+					super.widgetSelected(e);
+				}
+			});
+			
 		} catch (PhrescoException e) {
 			PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e.getLocalizedMessage());
 		}
