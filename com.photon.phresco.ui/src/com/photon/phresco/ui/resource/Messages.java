@@ -156,6 +156,8 @@ public class Messages extends NLS {
 	public static String MESSAGE = "*Message";
 	public static String EMPTY_STRING_WARNING = "should not be empty";
 	public static String INFORMATION = "information";
+	public static String ENVIRONMENT = "Environment";
+	public static String COLAN = ":";
 	
 	//Add Project
 	public static String PROJECT_CREATION_NAME="Phresco Project";
@@ -179,6 +181,14 @@ public class Messages extends NLS {
 	
 	//Quality
 	public static String UNIT_TEST_LABEL = "Unit";
+	public static String REPORT_NOT_AVAILABLE = "Report Not Available";
+	//testsuite 
+	public static String TEST_SUITE = "Test Suite";
+	public static String TOTAL  = "Total";
+	public static String SUCCESS = "Success";
+	public static String FAILURE = "Failure";
+	public static String TEST = "Test";
+	
 	
 /*	
 	static {

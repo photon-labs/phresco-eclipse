@@ -3,6 +3,7 @@ package com.photon.phresco.ui.phrescoexplorer;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.Commandline;
@@ -33,16 +33,19 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
+import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
@@ -55,6 +58,8 @@ import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.util.Constants;
+import com.phresco.pom.exception.PhrescoPomException;
 
 
 public class Unit  extends AbstractHandler implements PhrescoConstants {
@@ -69,41 +74,75 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
-	private Combo listLogs;
-	Map<String, String> typeMaps = new HashedMap();
-	
-	private static Map<String, Object> map = new HashedMap();
+	private Table testReport;
+	Map<String, String> typeMaps = new HashMap<String, String>();
+
+	private static Map<String, Object> map = new HashMap<String, Object>();
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
-		
+
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
 			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return null;
 		}
-		
-		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 
-		Shell createCodeDialog = createCodeDialog(dialog);
-		createCodeDialog.open();
-
-		unitButton.addListener(SWT.Selection, new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
-				saveCongfiguration();
-				BusyIndicator.showWhile(null, new Runnable() {
+		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+		dialog.setLayout(new GridLayout(1, false));
+		try {
+			Composite composite = new Composite(dialog, SWT.NONE);
+			composite.setLayout(new GridLayout(3, false));
+			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			final QualityUtil qualityUtil = new QualityUtil();
+			Button testButon = new Button(composite, SWT.PUSH);
+			testButon.setText(Messages.TEST);
+			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+			List<String> unitReportOptions = getUnitReportOptions(appInfo.getAppDirName());
+			String techReport = "";
+			if(CollectionUtils.isNotEmpty(unitReportOptions)) {
+				Label techLabel = new Label(composite, SWT.NONE);
+				techLabel.setText(Messages.TECHNOLOGY);
+				String[] optionArray = unitReportOptions.toArray(new String[unitReportOptions.size()]);
+				final Combo techCombo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
+				techCombo.setItems(optionArray);
+				techCombo.select(0);
+				techReport = techCombo.getText();
+				techCombo.addSelectionListener(new SelectionAdapter() {
 					@Override
-					public void run() {
-						UnitTest();		
+					public void widgetSelected(SelectionEvent e) {
+						try {
+							if(testReport != null && !testReport.isDisposed()) {
+								testReport.dispose();
+							}
+							testReport = qualityUtil.getTestReport(dialog, UNIT, techCombo.getText(), "");
+							dialog.setSize(600, 400);
+						} catch (PhrescoException e1) {
+							PhrescoDialog.exceptionDialog(dialog, e1);
+						}
+						super.widgetSelected(e);
 					}
 				});
 			}
-		});
-		return null;
+
+			testButon.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					Shell unitDialog = unitDialog(dialog);
+					unitDialog.open();
+					super.widgetSelected(e);
+				}
+			});
+			testReport = qualityUtil.getTestReport(dialog,UNIT, techReport, "");
+		} catch (PhrescoException e1) {
+			e1.printErrorStack();
+			PhrescoDialog.exceptionDialog(dialog, e1);
+		}
+		dialog.setSize(600, 400);
+		dialog.open();
+		return dialog;
 	}
 
 	public void UnitTest() {
@@ -123,7 +162,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			manager.getApplicationProcessor().preBuild(applicationInfo);
 			BufferedReader performAction = performAction(info, ActionType.UNIT_TEST, buildArgCmds, workingDirectory);
-			
+
 			ConsoleViewManager.getDefault(UNIT_LOGS).println(performAction);
 
 		} catch (PhrescoException e) {
@@ -235,7 +274,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 
 
-	public Shell createCodeDialog(Shell dialog) {
+	public Shell unitDialog(Shell dialog) {
 
 		unitTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
 		unitTestDialog.setText(Messages.UNIT_TEST_LABEL);
@@ -311,7 +350,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					data = new GridData(GridData.FILL_BOTH);
 					passwordText.setLayoutData(data);
 					map.put(parameter.getKey(), passwordText);
-					
+
 				} else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(unitTestDialog, SWT.LEFT);
 					Logs.setText(parameter.getKey());
@@ -319,7 +358,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 					Combo listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN);
-					
+
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
@@ -330,15 +369,15 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					listLogs.setLayoutData(data);
 					map.put(parameter.getKey(), listLogs); 
 
-				} else if (type.equalsIgnoreCase("DynamicParameter")) {
+				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					int yaxis = 0;
 					String key = null;
 					Label Logs = new Label(unitTestDialog, SWT.LEFT);
-					Logs.setText("Environment:");
+					Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
 					Logs.setBounds(24, 40, 80, 23);
 
 					Group group = new Group(unitTestDialog, SWT.SHADOW_IN);
-					group.setText("Environment");
+					group.setText(Messages.ENVIRONMENT);
 					group.setLocation(146, 26);
 
 					final List<String> buttons = new ArrayList<String>();
@@ -386,16 +425,29 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 
 			unitButton = new Button(composite, SWT.BORDER);
-			unitButton.setText(VALIDATE);
+			unitButton.setText("Test");
 			unitButton.setSize(74, 23);
 			unitButton.setLayoutData(datas);
-			
+
 			cancelButton = new Button(composite, SWT.BORDER);
 			cancelButton.setText(CANCEL);
 			cancelButton.setSize(74, 23);
 			cancelButton.setLayoutData(datas);
-			
-//			unitTestDialog.pack();
+
+			unitButton.addListener(SWT.Selection, new Listener() {
+
+				@Override
+				public void handleEvent(Event event) {
+					saveCongfiguration();
+					BusyIndicator.showWhile(null, new Runnable() {
+						@Override
+						public void run() {
+							UnitTest();		
+						}
+					});
+				}
+			});
+			//			unitTestDialog.pack();
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();
@@ -403,6 +455,37 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		return unitTestDialog;
 	}
 
+	/**
+	 * Gets the unit report options.
+	 *
+	 * @param appDirName the app dir name
+	 * @return the unit report options
+	 * @throws PhrescoException the phresco exception
+	 */
+	private List<String> getUnitReportOptions(String appDirName) throws PhrescoException {
+		try {
+			String unitTestReportOptions = getUnitTestReportOptions(appDirName);
+			if (StringUtils.isNotEmpty(unitTestReportOptions)) {
+				return Arrays.asList(unitTestReportOptions.split(Constants.COMMA));
+			}
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return null;
+	}
 
-
+	/**
+	 * Gets the unit test report options.
+	 *
+	 * @param appDirName the app dir name
+	 * @return the unit test report options
+	 * @throws PhrescoException the phresco exception
+	 */
+	private String getUnitTestReportOptions(String appDirName) throws PhrescoException {
+		try {
+			return PhrescoUtil.getPomProcessor(appDirName).getProperty(Constants.PHRESCO_UNIT_TEST);
+		} catch (PhrescoPomException e) {
+			throw new PhrescoException(e);
+		}
+	}
 }

@@ -58,7 +58,7 @@ import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 
 /**
- * Class to create the wizard page to render featues
+ * Class to create the wizard page to render features
  * @author syed_ah
  *
  */

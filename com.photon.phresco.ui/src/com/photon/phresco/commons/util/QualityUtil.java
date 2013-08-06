@@ -55,6 +55,7 @@ import com.photon.phresco.ui.model.TestCase;
 import com.photon.phresco.ui.model.TestCaseError;
 import com.photon.phresco.ui.model.TestCaseFailure;
 import com.photon.phresco.ui.model.TestSuite;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
 import com.phresco.pom.exception.PhrescoPomException;
@@ -150,21 +151,24 @@ public class QualityUtil implements PhrescoConstants {
 	/**
 	 * @throws PhrescoException
 	 */
-	public void getTestReport(Shell functionalDialog, String testType, String techType, String moduleName) throws PhrescoException {
+	public Table getTestReport(Shell functionalDialog, String testType, String techType, String moduleName) throws PhrescoException {
 		QualityUtil qualityUtil = new QualityUtil();
 		List<TestSuite> testSuites = qualityUtil.getTestSuite(testType, techType, moduleName);
-		if(CollectionUtils.isEmpty(testSuites)) {
-			Label label = new Label(functionalDialog, SWT.COLOR_WHITE);
-			label.setText("Report Not Available");
-			return;
-		}
 
 		Table table = new Table(functionalDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		
-		String[] columnValues = {"Test Suite", "Total", "Success", "Failure", "Error"};
+		if(CollectionUtils.isEmpty(testSuites)) {
+			TableItem tableItem = new TableItem(table, SWT.NONE);
+			tableItem.setText(0, Messages.REPORT_NOT_AVAILABLE);
+			table.setSize(600, 400);
+			table.setHeaderVisible(false);
+			table.setLinesVisible(false);
+			functionalDialog.pack();
+			return table;
+		}
+		String[] columnValues = {Messages.TEST_SUITE, Messages.TOTAL, Messages.SUCCESS, Messages.FAILURE, Messages.ERROR};
 		for (int i = 0; i < columnValues.length; i++) {
 			TableColumn column = new TableColumn(table, SWT.FILL);
 			column.setWidth(100);
@@ -188,6 +192,9 @@ public class QualityUtil implements PhrescoConstants {
 			item.setText(3, Math.round(failures) + "");
 			item.setText(4, Math.round(errors) + "");
 		}
+		table.setSize(600, 400);
+		functionalDialog.pack();
+		return table;
 	}
 	
 	public List<TestSuite> getTestSuite(String testType, String techReport, String moduleName) throws PhrescoException {

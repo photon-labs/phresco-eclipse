@@ -53,6 +53,7 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 import com.phresco.pom.exception.PhrescoPomException;
 import com.phresco.pom.util.PomProcessor;
@@ -93,7 +94,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			final List<Parameter> parameters = configuration.getParameters().getParameter();
 
 			Button testButton = new Button(functionalDialog, SWT.PUSH);
-			testButton.setText("Test");
+			testButton.setText(Messages.TEST);
 			final QualityUtil qualityUtil = new QualityUtil();
 			testButton.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -101,7 +102,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					Shell generateDialog = createFunctionalDialog(functionalDialog, parameters, processor);
 					generateDialog.open();
 					try {
-						qualityUtil.getTestReport(functionalDialog, "functional", "", "");
+						qualityUtil.getTestReport(functionalDialog, FUNCTIONAL, "", "");
 					} catch (PhrescoException e1) {
 						PhrescoDialog.exceptionDialog(functionalDialog, e1);
 					}
@@ -109,7 +110,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 				}
 			});
 			
-			qualityUtil.getTestReport(functionalDialog,"functional", "", "");
+			qualityUtil.getTestReport(functionalDialog, FUNCTIONAL, "", "");
 		} catch (PhrescoException e1) {
 			PhrescoDialog.exceptionDialog(functionalDialog, e1);
 		} catch (PhrescoPomException e2) {
@@ -233,11 +234,11 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					int yaxis = 0;
 					String key = null;
 					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
-					Logs.setText("Environment:");
+					Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
 					Logs.setBounds(24, 40, 80, 23);
 
 					Group group = new Group(functionalTestDialog, SWT.SHADOW_IN);
-					group.setText("Environment");
+					group.setText(Messages.ENVIRONMENT);
 					group.setLocation(146, 26);
 
 					final List<String> buttons = new ArrayList<String>();
@@ -284,7 +285,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 
 			functionalButton = new Button(composite, SWT.BORDER);
-			functionalButton.setText(VALIDATE);
+			functionalButton.setText(Messages.TEST);
 			functionalButton.setSize(74, 23);
 			functionalButton.setLayoutData(datas);
 
