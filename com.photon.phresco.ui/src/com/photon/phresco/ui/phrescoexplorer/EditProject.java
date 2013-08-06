@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.ConfirmDialog;
+import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
@@ -49,7 +50,7 @@ import com.photon.phresco.ui.wizards.componets.ServerComponent;
  * @author suresh_ma
  *
  */
-public class EditProject extends AbstractHandler {
+public class EditProject extends AbstractHandler implements PhrescoConstants {
 	
 	private Text nameText;
 	private Text codeText;
@@ -102,26 +103,46 @@ public class EditProject extends AbstractHandler {
 			if(CollectionUtils.isNotEmpty(servers)) {
 				final Group serverGroup = new Group(composite, SWT.NONE);
 				serverGroup.setText(Messages.SERVERS);
-				GridLayout serverLayout = new GridLayout(5, false);
+				GridLayout serverLayout = new GridLayout(1, false);
 				serverGroup.setLayout(serverLayout);
 				serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
+				Composite serverComposite = new Composite(serverGroup, SWT.NONE);
+				GridLayout gridLayout = new GridLayout(5, false);
+				serverComposite.setLayout(gridLayout);
+				serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				
 				ServerComponent serverComponent = new ServerComponent();
-				serverComponent.getServers(serverGroup, servers, customerId, techId, platform);
+				serverComponent.getServers(serverComposite, servers, customerId, techId, platform);
 				serverComponents.add(serverComponent);
 				
-				Button serverAddButton = new Button(serverGroup, SWT.PUSH);
-				serverAddButton.setText("+");
+				Button serverAddButton = new Button(serverComposite, SWT.PUSH);
+				serverAddButton.setText(PLUS_SYMBOL);
+				
 				serverAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						try {
-							ServerComponent serverComponent = new ServerComponent();
-							serverComponent.getServers(serverGroup, servers, customerId, techId, platform);
-							serverComponents.add(serverComponent);
-							Button serverDeleteButton = new Button(serverGroup, SWT.PUSH);
-							serverDeleteButton.setText("-");
+							final ServerComponent serverComponent = new ServerComponent();
+							final Composite serverComposite = new Composite(serverGroup, SWT.NONE);
+							GridLayout gridLayout = new GridLayout(5, false);
+							serverComposite.setLayout(gridLayout);
+							serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 							
+							serverComponent.getServers(serverComposite, servers, customerId, techId, platform);
+							serverComponents.add(serverComponent);
+							Button serverDeleteButton = new Button(serverComposite, SWT.PUSH);
+							serverDeleteButton.setText(MINUS_SYMBOL);
+							
+							serverDeleteButton.addSelectionListener(new SelectionAdapter() {
+								@Override
+								public void widgetSelected(SelectionEvent e) {
+									serverComponents.remove(serverComponent);
+									serverComposite.dispose();
+									composite.pack();
+									super.widgetSelected(e);
+								}
+							});
 						} catch (PhrescoException e1) {
 							PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());
 						}
@@ -138,27 +159,47 @@ public class EditProject extends AbstractHandler {
 			if(CollectionUtils.isNotEmpty(dataBases)) {
 				final Group dbGroup = new Group(composite, SWT.NONE);
 				dbGroup.setText(Messages.DATABASES);
-				GridLayout dbLlayout = new GridLayout(5, false);
+				GridLayout dbLlayout = new GridLayout(1, false);
 				dbGroup.setLayout(dbLlayout);
 				dbGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
+				Composite dbComposite = new Composite(dbGroup, SWT.NONE);
+				GridLayout gridLayout = new GridLayout(5, false);
+				dbComposite.setLayout(gridLayout);
+				dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				
 				DatabaseComponent dbComponent = new DatabaseComponent();
-				dbComponent.getDataBases(dbGroup, dataBases, customerId, techId, platform);
+				dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform);
 				dbComponents.add(dbComponent);
 				
-				Button dbAddButton = new Button(dbGroup, SWT.PUSH);
-				dbAddButton.setText("+");
+				Button dbAddButton = new Button(dbComposite, SWT.PUSH);
+				dbAddButton.setText(PLUS_SYMBOL);
 				
 				dbAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						try {
-							DatabaseComponent dbComponent = new DatabaseComponent();
-							dbComponent.getDataBases(dbGroup, dataBases, customerId, techId, platform);
+							final Composite dbComposite = new Composite(dbGroup, SWT.NONE);
+							GridLayout gridLayout = new GridLayout(5, false);
+							dbComposite.setLayout(gridLayout);
+							dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+							
+							final DatabaseComponent dbComponent = new DatabaseComponent();
+							dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform);
 							dbComponents.add(dbComponent);
 							
-							Button dbDeleteButton = new Button(dbGroup, SWT.PUSH);
-							dbDeleteButton.setText("-");
+							Button dbDeleteButton = new Button(dbComposite, SWT.PUSH);
+							dbDeleteButton.setText(MINUS_SYMBOL);
+							
+							dbDeleteButton.addSelectionListener(new SelectionAdapter() {
+								@Override
+								public void widgetSelected(SelectionEvent e) {
+									dbComponents.remove(dbComponent);
+									dbComposite.dispose();
+									composite.pack();
+									super.widgetSelected(e);
+								}
+							});
 							
 						} catch (PhrescoException e1) {
 							PhrescoDialog.errorDialog(buildDialog, Messages.ERROR, e1.getLocalizedMessage());

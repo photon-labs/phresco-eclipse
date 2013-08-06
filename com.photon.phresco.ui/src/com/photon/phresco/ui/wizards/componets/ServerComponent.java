@@ -11,6 +11,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
@@ -35,7 +36,7 @@ public class ServerComponent {
 	 * @param platform
 	 * @throws PhrescoException
 	 */
-	public void getServers(final Group serverGroup,
+	public void getServers(final Composite serverGroup,
 			List<DownloadInfo> servers, String customerId, String techId, String platform) throws PhrescoException {
 		List<String> serverNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : servers) {

@@ -11,6 +11,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
@@ -35,7 +36,7 @@ public class DatabaseComponent {
 	 * @param platform
 	 * @throws PhrescoException
 	 */
-	public void getDataBases(final Group dbGroup,
+	public void getDataBases(final Composite dbGroup,
 			List<DownloadInfo> dataBases, String customerId, String techId, String platform) throws PhrescoException {
 		List<String> dbNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : dataBases) {
