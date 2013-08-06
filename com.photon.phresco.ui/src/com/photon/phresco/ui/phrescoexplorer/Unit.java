@@ -417,21 +417,19 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(unitTestDialog, SWT.BORDER);
+			Composite composite = new Composite(unitTestDialog, SWT.NONE);
 
 			GridLayout layout = new GridLayout(2, true);
 			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
 			composite.setLayout(layout);
 
 
-			unitButton = new Button(composite, SWT.BORDER);
-			unitButton.setText("Test");
-			unitButton.setSize(74, 23);
+			unitButton = new Button(composite, SWT.NONE);
+			unitButton.setText(Messages.TEST);
 			unitButton.setLayoutData(datas);
 
-			cancelButton = new Button(composite, SWT.BORDER);
+			cancelButton = new Button(composite, SWT.NONE);
 			cancelButton.setText(CANCEL);
-			cancelButton.setSize(74, 23);
 			cancelButton.setLayoutData(datas);
 
 			unitButton.addListener(SWT.Selection, new Listener() {

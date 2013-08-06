@@ -101,11 +101,11 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 				public void widgetSelected(SelectionEvent e) {
 					Shell generateDialog = createFunctionalDialog(functionalDialog, parameters, processor);
 					generateDialog.open();
-					try {
+					/*try {
 						qualityUtil.getTestReport(functionalDialog, FUNCTIONAL, "", "");
 					} catch (PhrescoException e1) {
 						PhrescoDialog.exceptionDialog(functionalDialog, e1);
-					}
+					}*/
 					super.widgetSelected(e);
 				}
 			});
@@ -277,21 +277,19 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(functionalTestDialog, SWT.BORDER);
+			Composite composite = new Composite(functionalTestDialog, SWT.NONE);
 
 			GridLayout layout = new GridLayout(2, true);
 			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
 			composite.setLayout(layout);
 
 
-			functionalButton = new Button(composite, SWT.BORDER);
+			functionalButton = new Button(composite, SWT.NONE);
 			functionalButton.setText(Messages.TEST);
-			functionalButton.setSize(74, 23);
 			functionalButton.setLayoutData(datas);
 
-			cancelButton = new Button(composite, SWT.BORDER);
+			cancelButton = new Button(composite, SWT.NONE);
 			cancelButton.setText(CANCEL);
-			cancelButton.setSize(74, 23);
 			cancelButton.setLayoutData(datas);
 
 			functionalButton.addListener(SWT.Selection, new Listener() {
