@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -435,50 +434,52 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			composite.setLayout(layout);
 			java.util.Properties prop = null;
 			
-			Configuration configuration = configs.get(0);
-			
-			configuration.getName().equalsIgnoreCase(item.getText());
-			prop = configuration.getProperties();
-			Label name = new  Label(composite,  SWT.LEFT);
-			name.setText("Name");
-			name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-			name.setLayoutData(new GridData(50,25));
+			for (Configuration configuration : configs) {
+				if (configuration.getName().equalsIgnoreCase(item.getText())) {
+					configuration.getName().equalsIgnoreCase(item.getText());
+					prop = configuration.getProperties();
+					Label name = new  Label(composite,  SWT.LEFT);
+					name.setText("Name");
+					name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					name.setLayoutData(new GridData(50,25));
 
-			nameText = new Text(composite, SWT.BORDER); 
-			nameText.setToolTipText("");
-			nameText.setLayoutData(new GridData(140,25));
-			nameText.setText(configuration.getName());
+					nameText = new Text(composite, SWT.BORDER); 
+					nameText.setToolTipText("");
+					nameText.setLayoutData(new GridData(140,25));
+					nameText.setText(configuration.getName());
 
-			Label desc = new  Label(composite,  SWT.LEFT);
-			desc.setText("Description");
-			desc.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-			desc.setLayoutData(new GridData(70,25));
+					Label desc = new  Label(composite,  SWT.LEFT);
+					desc.setText("Description");
+					desc.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					desc.setLayoutData(new GridData(70,25));
 
-			descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
-			descText.setToolTipText("");
-			descText.setLayoutData(new GridData(200,50));
-			descText.setText(configuration.getDesc());
+					descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
+					descText.setToolTipText("");
+					descText.setLayoutData(new GridData(200,50));
+					descText.setText(configuration.getDesc());
 
-			Label environment = new  Label(composite,  SWT.LEFT);
-			environment.setText("Environment");
-			environment.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-			environment.setLayoutData(new GridData(75,25));
+					Label environment = new  Label(composite,  SWT.LEFT);
+					environment.setText("Environment");
+					environment.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					environment.setLayoutData(new GridData(75,25));
 
-			environmentList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-			environmentList.setLayoutData(new GridData(60,25));			
-			environmentList.add(configuration.getEnvName());
-			environmentList.select(0);
+					environmentList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+					environmentList.setLayoutData(new GridData(60,25));			
+					environmentList.add(configuration.getEnvName());
+					environmentList.select(0);
 
-			Label tempType = new  Label(composite,  SWT.LEFT);
-			tempType.setText("Type");
-			tempType.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-			tempType.setLayoutData(new GridData(50,25));
+					Label tempType = new  Label(composite,  SWT.LEFT);
+					tempType.setText("Type");
+					tempType.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					tempType.setLayoutData(new GridData(50,25));
 
 
-			typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-			typeList.setLayoutData(new GridData(60,25));	
-			typeList.add(configuration.getType());
-			typeList.select(0);
+					typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+					typeList.setLayoutData(new GridData(60,25));	
+					typeList.add(configuration.getType());
+					typeList.select(0);
+				}
+			}
 			
 			//For type selection
 
