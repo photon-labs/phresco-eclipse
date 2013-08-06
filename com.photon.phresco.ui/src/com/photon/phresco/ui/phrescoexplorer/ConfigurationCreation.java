@@ -1,14 +1,12 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
-import org.bouncycastle.asn1.crmf.ProofOfPossession;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -28,7 +26,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.hibernate.validator.internal.util.privilegedactions.GetConstructor;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
@@ -43,23 +40,20 @@ import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
-import com.phresco.pom.model.Model.Properties;
 
 public class ConfigurationCreation  implements PhrescoConstants {
 
 	private static Button defaultCheckBoxButton;
-	private static Button configCancelButton;
-	private static Button configenvSaveButton;
 	private static Combo comboDropDown;
 
 	private static Text nameText;
 	private static Text numberText;
 
-	private TreeItem itemTemplate;
-	private static String name;
 	private static Map<String, Object> map = new HashedMap();
 	private static Text passwordText;
 	private Group typeGroup;
+	private Combo typeList;
+
 	private void createTemplateByTypes(Tree tree) {
 		try {
 			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.VERTICAL | SWT.V_SCROLL);
@@ -117,7 +111,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			tempType.setLayoutData(new GridData(50,25));
 
 
-			final Combo typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+			typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 			typeList.setLayoutData(new GridData(60,25));		
 			final ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 			PhrescoUtil.getApplicationInfo();
@@ -175,19 +169,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						List<PropertyTemplate> propertyTemplates  = serverTemplate.getProperties();
 						java.util.Properties properties = new java.util.Properties();
 						for (PropertyTemplate propertyTemplate : propertyTemplates) {
-
 							if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 								Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
 								if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
-										|| propertyTemplate.getName().equalsIgnoreCase("DB Type")) {
+										|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("VErsion")) {
 									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
 								else {
-									Text nameText = new Text(composite, SWT.BORDER); 
-									map.put(propertyTemplate.getKey().replaceAll("\\s", ""), nameText.getText());
+									Text nameText = (Text) map.get(propertyTemplate.getKey());
+									properties.put(propertyTemplate.getName().replaceAll("\\s", ""), nameText.getText());
 								}				
 							} 
 							else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
@@ -205,6 +198,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								properties.put(propertyTemplate.getName().replaceAll("\\s", ""), encodedString);
 							} 
 						}
+
 						String environmentName = environmentList.getText();
 
 						Configuration configuration = new Configuration();
@@ -212,14 +206,16 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						configuration.setName(nameText.getText());
 						configuration.setType(typeList.getText());
 						configuration.setProperties(properties);
-						impl.createConfiguration(environmentName, configuration);	
+						impl.createConfiguration(environmentName, configuration);
+						configDialog.setVisible(false);
 
+						ConfigurationPage page = new ConfigurationPage();
+						page.push();
 					} catch (PhrescoException e) {
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
 						e.printStackTrace();
 					}
-
 				}
 			});
 
@@ -278,10 +274,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 			SettingsTemplate serverTemplate = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), types);
 			List<PropertyTemplate> propertyTemplates  = serverTemplate.getProperties();
-
 			for (PropertyTemplate propertyTemplate : propertyTemplates) {
 				String type = propertyTemplate.getType();
-
 				if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
@@ -301,13 +295,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 					try {
-						System.out.println("Property Template name = " + propertyTemplate.getName());
 						if (propertyTemplate.getName().equalsIgnoreCase("Certificate")) {
 							String name = propertyTemplate.getName();
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown.select(0);
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase("server Type")) {
-							String name = propertyTemplate.getName();
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
@@ -317,11 +310,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
 									DownloadInfo downloads = serviceManager.getDownloadInfo(artifactGroupId);
 									comboDropDown.add(downloads.getName());
+									comboDropDown.select(0);
 								}
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase("DB Type")) {
-							String name = propertyTemplate.getName();
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
@@ -331,6 +324,28 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
 									DownloadInfo downloads = serviceManager.getDownloadInfo(artifactGroupId);
 									comboDropDown.add(downloads.getName());
+									comboDropDown.select(0);
+								}
+							}
+							map.put(propertyTemplate.getKey(), comboDropDown);
+						}  else if (propertyTemplate.getName().equalsIgnoreCase("Version")) {
+							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown.setLayoutData(data);
+							List<ArtifactGroupInfo> values = null;
+							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
+							if (typeList.getText().equalsIgnoreCase("Server")) {
+								values = projectInfo.getAppInfos().get(0).getSelectedServers();
+							} else if (typeList.getText().equalsIgnoreCase("Database")) {
+								values = projectInfo.getAppInfos().get(0).getSelectedDatabases();
+							}
+							if (CollectionUtils.isNotEmpty(values)) {
+								for (ArtifactGroupInfo artifactGroupInfo : values) {
+									for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
+										//										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
+										//										comboDropDown.add(artifactInfo.getVersion());
+										comboDropDown.add("5.5.1");
+										comboDropDown.select(0);
+									}
 								}
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
@@ -373,7 +388,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					passwordText = new Text(composite, SWT.PASSWORD); 
+					passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER); 
 					passwordText.setToolTipText(ENVIRONMENT_NAME);
 					passwordText.setLayoutData(new GridData(80,20));
 					map.put(propertyTemplate.getKey(), passwordText);
@@ -387,7 +402,189 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 
-	public void createTemplateByType(Tree tree) {
+	public void createTemplateByType(Shell configureDialogs, Tree tree) {
+		configureDialogs.close();
 		createTemplateByTypes(tree);
+	}
+
+	public void configure(TreeItem parent, TreeItem item) {
+		editConfiguration(parent, item);
+
+	}
+
+	private void editConfiguration(TreeItem parent, TreeItem item) {
+		try {
+			File configureFile = PhrescoUtil.getConfigurationFile();
+			ConfigManagerImpl impls = new ConfigManagerImpl(configureFile);
+			List<Configuration> configs= impls.getConfigurations(parent.getText());
+			for (final Configuration configuration : configs) {
+				configuration.getName().equalsIgnoreCase(item.getText());
+				final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.VERTICAL | SWT.V_SCROLL);
+				configDialog.setText("Configuration");
+				configDialog.setLocation(385,130);
+				configDialog.setSize(900, 250);
+
+				GridLayout CompositeLayout = new GridLayout(1, true);
+				configDialog.setLayout(CompositeLayout);
+				configDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+				GridLayout layout = new GridLayout(2, false);
+				layout.verticalSpacing = 6;
+				final Composite composite = new Composite(configDialog, 0);
+				composite.setLayout(layout);
+
+				Label name = new  Label(composite,  SWT.LEFT);
+				name.setText("Name");
+				name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+				name.setLayoutData(new GridData(50,25));
+
+				final Text nameText = new Text(composite, SWT.BORDER); 
+				nameText.setToolTipText("");
+				nameText.setLayoutData(new GridData(140,25));
+				nameText.setText(configuration.getName());
+
+				Label desc = new  Label(composite,  SWT.LEFT);
+				desc.setText("Description");
+				desc.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+				desc.setLayoutData(new GridData(70,25));
+
+				Text descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
+				descText.setToolTipText("");
+				descText.setLayoutData(new GridData(200,50));
+				descText.setText(configuration.getDesc());
+
+				Label environment = new  Label(composite,  SWT.LEFT);
+				environment.setText("Environment");
+				environment.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+				environment.setLayoutData(new GridData(75,25));
+
+				final Combo environmentList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+				environmentList.setLayoutData(new GridData(60,25));			
+				environmentList.add(configuration.getEnvName());
+				environmentList.select(0);
+
+				Label tempType = new  Label(composite,  SWT.LEFT);
+				tempType.setText("Type");
+				tempType.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+				tempType.setLayoutData(new GridData(50,25));
+
+
+				typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+				typeList.setLayoutData(new GridData(60,25));	
+				typeList.add(configuration.getType());
+				typeList.select(0);
+
+				//For type selection
+				typeGroup = new Group(configDialog, SWT.NONE);
+				GridLayout newLayout = new GridLayout(7, false);
+				typeGroup.setLayout(newLayout);
+				typeGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+				final Group buttonGroup = new Group(configDialog, SWT.NONE | SWT.NO | SWT.SHADOW_OUT);
+				GridLayout mainLayout = new GridLayout(2, false);
+				buttonGroup.setLayout(mainLayout);
+
+				renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+
+				typeList.addListener(SWT.Selection, new Listener() {
+
+					@Override
+					public void handleEvent(Event event) {
+
+						renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+
+						buttonGroup.pack();
+						buttonGroup.redraw();	
+
+						configDialog.pack();
+						configDialog.redraw();
+					}
+				});
+
+				final GridData leftButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
+				leftButtonData.grabExcessHorizontalSpace = true;
+				leftButtonData.horizontalIndent = IDialogConstants.HORIZONTAL_MARGIN;
+				buttonGroup.setLayoutData(leftButtonData);
+
+				Button saveButton = new Button(buttonGroup, SWT.PUSH);
+				saveButton.setText("Create");
+
+				saveButton.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent event) {
+						SettingsTemplate serverTemplate;
+						try {
+							ServiceManager serviceManager = PhrescoUtil.getServiceManager();
+							serverTemplate = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), typeList.getText());
+							List<PropertyTemplate> propertyTemplates  = serverTemplate.getProperties();
+							java.util.Properties prop = configuration.getProperties();
+							for (PropertyTemplate propertyTemplate : propertyTemplates) {
+								System.out.println("Type = " + propertyTemplate.getType());
+								if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
+									if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
+										Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
+										String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+										comboDropDown.add(value);
+										comboDropDown.select(0);
+									} else if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
+											|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("VErsion")) {
+										Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
+										String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+										comboDropDown.add(value);
+										comboDropDown.select(0);
+									} 
+									else {
+										Text nameText = (Text) map.get(propertyTemplate.getKey());
+										String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+										System.out.println("name textValue = " + value);
+										nameText.setText(value);
+									}				
+								} 
+								else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
+									Text numberText = (Text) map.get(propertyTemplate.getKey());
+									String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+									numberText.setText(value);
+									System.out.println("number textValue = " + value);
+								} else if (propertyTemplate.getType().equalsIgnoreCase(BOOLEAN)) {
+									Button checkBoxButton = (Button) map.get(propertyTemplate.getKey());
+									String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+									checkBoxButton.setText(value);
+									System.out.println("boolean textValue = " + value);
+								} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
+									Text passwordText = (Text) map.get(propertyTemplate.getKey());
+									String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+									passwordText.setText(value);
+									System.out.println("password textValue = " + value);
+								} 
+							}
+						}catch (PhrescoException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+
+				Button cancelButton = new Button(buttonGroup, SWT.PUSH);
+				cancelButton.setText("Cancel");
+				cancelButton.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent event) {
+						configDialog.close();
+					}
+				});
+
+				typeGroup.pack();
+				typeGroup.redraw();
+
+				buttonGroup.pack();
+				buttonGroup.redraw();	
+
+				configDialog.pack();
+				configDialog.redraw();
+
+				configDialog.open();
+			} 
+		}catch (PhrescoException e) {
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		}
 	}
 }
