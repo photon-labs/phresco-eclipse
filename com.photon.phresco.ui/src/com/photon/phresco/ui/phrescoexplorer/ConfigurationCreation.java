@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
+import com.photon.phresco.commons.model.ArtifactInfo;
 import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.PropertyTemplate;
@@ -344,12 +345,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							if (CollectionUtils.isNotEmpty(values)) {
 								for (ArtifactGroupInfo artifactGroupInfo : values) {
 									for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
-										//										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
-										//										comboDropDown.add(artifactInfo.getVersion());
-										comboDropDown.add("5.5.1");
-										comboDropDown.select(0);
+										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
+										comboDropDown.add(artifactInfo.getVersion());
 									}
 								}
+								comboDropDown.select(0);
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						}
@@ -532,12 +532,34 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						comboDropDown.add(value);
 						comboDropDown.select(0);
 					} else if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
-							|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("VErsion")) {
+							|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("Version")) {
 						Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-						comboDropDown.removeAll();
-						String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
-						comboDropDown.add(value);
-						comboDropDown.select(0);
+						
+						if (propertyTemplate.getKey().equalsIgnoreCase("version")) {
+							comboDropDown.removeAll();
+							List<ArtifactGroupInfo> values = null;
+							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
+							if (typeList.getText().equalsIgnoreCase("Server")) {
+								values = projectInfo.getAppInfos().get(0).getSelectedServers();
+							} else if (typeList.getText().equalsIgnoreCase("Database")) {
+								values = projectInfo.getAppInfos().get(0).getSelectedDatabases();
+							}
+							if (CollectionUtils.isNotEmpty(values)) {
+								for (ArtifactGroupInfo artifactGroupInfo : values) {
+									for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
+										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
+										comboDropDown.add(artifactInfo.getVersion());
+									}
+								}
+								comboDropDown.select(0);
+							}
+						} else {
+							comboDropDown.removeAll();
+							String value = (String) prop.get(propertyTemplate.getName().replaceAll("\\s", ""));
+							comboDropDown.add(value);
+							comboDropDown.select(0);
+						}
+						
 					} 
 					else {
 						Text text = (Text) map.get(propertyTemplate.getKey());
