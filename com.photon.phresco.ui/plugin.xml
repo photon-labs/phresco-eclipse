@@ -149,6 +149,14 @@
             name="%wizards.newproject.name"
             project="true">
       </wizard>
+      <wizard
+            category="com.photon.phresco.ui.appCategory"
+            class="com.photon.phresco.ui.wizards.PhrescoImportFromSCMWizard"
+            icon="icons/scm_import.png"
+            id="com.photon.phresco.ui.wizards.PhrescoImportSCMWizard"
+            name="%scm.phresco.project"
+            project="true">
+      </wizard>
       
    </extension>
    <extension
