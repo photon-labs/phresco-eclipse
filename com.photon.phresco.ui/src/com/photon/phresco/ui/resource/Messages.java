@@ -98,6 +98,9 @@ public class Messages extends NLS {
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME;
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME;
 	
+	//Quality
+	public static String UNIT_TEST_LABEL;
+	
 	*/
 	
 	// Needs to be localization
@@ -169,6 +172,9 @@ public class Messages extends NLS {
 	public static String PHRESCO_IMPORT_PAGE_DESC="Phresco Import Page Description Appears here";
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME="AddProjectPage";
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME="Technology Page";
+	
+	//Quality
+	public static String UNIT_TEST_LABEL = "Unit";
 	
 /*	
 	static {

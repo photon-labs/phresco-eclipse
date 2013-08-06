@@ -54,6 +54,7 @@ import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.model.BaseAction;
+import com.photon.phresco.ui.resource.Messages;
 
 
 public class Unit  extends AbstractHandler implements PhrescoConstants {
@@ -237,7 +238,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	public Shell createCodeDialog(Shell dialog) {
 
 		unitTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
-		unitTestDialog.setText("Code");
+		unitTestDialog.setText(Messages.UNIT_TEST_LABEL);
 		unitTestDialog.setLocation(385, 130);
 		unitTestDialog.setSize(451,188);
 
