@@ -114,35 +114,40 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 			}
 		});
 
-
 		envSaveListener = new Listener() {
 			public void handleEvent(Event event) {
-				envDialog.setVisible(false);
-				configureDialogs.setVisible(true);
-				String environmentName = envText.getText();
-				String description = descText.getText();
-				boolean selection = defaultCheckBoxButton.getSelection();
-				List<Environment> environments = new ArrayList<Environment>();
-
-				Environment environment = new Environment();
-				environment.setDefaultEnv(selection);
-				environment.setName(environmentName);
-				environment.setDesc(description);
-
-				environments.add(environment);
 				try {
+					envDialog.setVisible(false);
+					configureDialogs.setVisible(true);
+					String environmentName = envText.getText();
+					String description = descText.getText();
+					boolean selection = defaultCheckBoxButton.getSelection();
 					ConfigManagerImpl impl = new ConfigManagerImpl(PhrescoUtil.getConfigurationFile());
+					List<Environment> environments = new ArrayList<Environment>();
+					List<Environment> envList = impl.getEnvironments();
+					for (Environment environment : envList) {
+						boolean defaultEnv = environment.isDefaultEnv();
+						if (defaultEnv) {
+							environment.setDefaultEnv(false);
+							impl.updateEnvironment(environment);
+						}
+					}
+					Environment environment = new Environment();
+					environment.setDefaultEnv(selection);
+					environment.setName(environmentName);
+					environment.setDesc(description);
+
+					environments.add(environment);
 					List<Environment> environmentList = impl.getEnvironments();
 					environmentList.add(environment);
 					impl.addEnvironments(environmentList);
-				} catch (com.photon.phresco.exception.ConfigurationException e) {
-					e.printStackTrace();
+					itemTemplate = new TreeItem(tree, SWT.FILL);
+					itemTemplate.setText(new String [] {environmentName,description,"status"});
 				} catch (PhrescoException e) {
 					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					e.printStackTrace();
 				}
-
-				itemTemplate = new TreeItem(tree, SWT.FILL);
-				itemTemplate.setText(new String [] {environmentName,description,"status"});
 			}
 
 		};
@@ -157,11 +162,12 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		GridLayout subLayout = new GridLayout(1, false);
 		configureDialogs.setLayout(subLayout);
+		
 
 		Composite composite = new Composite(configureDialogs, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		
 		tree = new Tree(composite, SWT.BORDER);
 		tree.setHeaderVisible(true);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -172,9 +178,9 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		final TreeColumn desc = new TreeColumn(tree, SWT.CENTER);
 		desc.setText("Description");
 		desc.setWidth(100);
-		TreeColumn configure = new TreeColumn(tree, SWT.RIGHT);
-		configure.setText("configure");
-		configure.setWidth(100);
+		TreeColumn status = new TreeColumn(tree, SWT.RIGHT);
+		status.setText("Status");
+		status.setWidth(100);
 
 		GridLayout tableLayout = new GridLayout(3,false);
 
@@ -188,13 +194,13 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		addEnvironmentButton = new Button(composites, SWT.PUSH);
 		addEnvironmentButton.setLocation(279, 121);
-		addEnvironmentButton.setText("Environments");
+		addEnvironmentButton.setText("Add Environment");
 		addEnvironmentButton.setSize(74, 23);
 		addEnvironmentButton.setLayoutData(data);
 		
 		Button addButton = new Button(composites, SWT.PUSH);
 		addButton.setLocation(279, 121);
-		addButton.setText("Add");
+		addButton.setText("Add Configuration");
 		addButton.setSize(74, 23);
 		addButton.setLayoutData(data);
 		
@@ -213,6 +219,8 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		});
 
 		final ConfigurationCreation creation = new ConfigurationCreation();
+		
+		
 		tree.addListener(SWT.MouseDown, new Listener() {
 			public void handleEvent(Event event) {
 				Point point = new Point(event.x, event.y);
@@ -225,9 +233,21 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 				}
 			}
 		});
+		
+		deleteButton.addListener(SWT.Selection, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				
+			}
+		});
+		
+		
 		return configureDialogs;
 	}
-
+	
+	
+	
 	private void delete(TreeItem item) {
 		try {
 			File envConfig = PhrescoUtil.getConfigurationFile();
