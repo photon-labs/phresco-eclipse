@@ -362,7 +362,7 @@
 				
 			<command
 		         commandId="Config"
-		         icon="icons/configure_icon.png"
+		         icon="icons/config_icon.png"
 		         id="%project.configuration.id"
 		         label="%project.configuration.label"
 		         style="push"
@@ -371,7 +371,7 @@
 	
 			<command
 		         commandId="Code"
-		         icon="icons/code_validation.png"
+		         icon="icons/code_validate_icon.png"
 		         id="%project.codevalidate.id "
 		         label="%project.codevalidate.label"
 		         style="push"
@@ -460,17 +460,19 @@
 			</menu>
 			
 			<menu
-		         commandId="SCM"
-		         id="scm"
-		         label="%project.scm.label"
-		         style="push"
-		         tooltip="%project.scm.tooltip">
+         commandId="SCM"
+         icon="icons/scm_import.png"
+         id="scm"
+         label="%project.scm.label"
+         style="push"
+         tooltip="%project.scm.tooltip">
 				<command
-		          commandId="addtorepo"
-		          id="%project.scm.addtorepo.id"
-		          label="%project.scm.addtorepo.name"
-		          style="push"
-		          tooltip="%project.scm.addtorepo.tooltip">
+          commandId="addtorepo"
+          icon="icons/deploy_icon.png"
+          id="%project.scm.addtorepo.id"
+          label="%project.scm.addtorepo.name"
+          style="push"
+          tooltip="%project.scm.addtorepo.tooltip">
 				</command>
 				<command
 		          commandId="commit"
