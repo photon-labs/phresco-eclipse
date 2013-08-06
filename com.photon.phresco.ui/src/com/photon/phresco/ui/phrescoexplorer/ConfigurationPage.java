@@ -51,7 +51,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 	private Listener envSaveListener;
 	TreeItem itemTemplate;
 	private Shell shell;
-	private Button deleteButton;
+	private Button cancelButton;
 	private Shell createConfigurationDialog;
 
 	@Override
@@ -204,11 +204,11 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		addButton.setSize(74, 23);
 		addButton.setLayoutData(data);
 		
-		deleteButton = new Button(composites, SWT.PUSH);
-		deleteButton.setLocation(279, 121);
-		deleteButton.setText("Delete");
-		deleteButton.setSize(74, 23);
-		deleteButton.setLayoutData(data);
+		cancelButton = new Button(composites, SWT.PUSH);
+		cancelButton.setLocation(279, 121);
+		cancelButton.setText("Cancel");
+		cancelButton.setSize(74, 23);
+		cancelButton.setLayoutData(data);
 		
 		addButton.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -234,14 +234,12 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 			}
 		});
 		
-		deleteButton.addListener(SWT.Selection, new Listener() {
-			
+		cancelButton.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				
+				shell.close();
 			}
 		});
-		
 		
 		return configureDialogs;
 	}

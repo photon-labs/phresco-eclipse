@@ -48,6 +48,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Combo comboDropDown;
 
 	private Text nameText;
+	private Text namestext;
 	private Text numberText;
 	private Text descText;
 
@@ -79,7 +80,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 			name.setLayoutData(new GridData(50,25));
 
-			nameText = new Text(composite, SWT.BORDER); 
+			final Text nameText = new Text(composite, SWT.BORDER); 
 			nameText.setToolTipText("");
 			nameText.setLayoutData(new GridData(140,25));
 
@@ -292,6 +293,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					for (String string : possibleValues) {
 						comboDropDown.add(string);
 					}
+					comboDropDown.select(0);
 					map.put(propertyTemplate.getKey(), comboDropDown);
 				} else if(type.equalsIgnoreCase(STRING) && CollectionUtils.isEmpty(propertyTemplate.getPossibleValues())){
 					Label defaults = new  Label(composite,  SWT.LEFT);
@@ -301,11 +303,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					try {
 						if (propertyTemplate.getName().equalsIgnoreCase("Certificate")) {
 							String name = propertyTemplate.getName();
-							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.select(0);
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase("server Type")) {
-							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 							List<ArtifactGroupInfo> selectedServers = projectInfo.getAppInfos().get(0).getSelectedServers();
@@ -319,7 +321,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase("DB Type")) {
-							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 							List<ArtifactGroupInfo> selectedDatabases = projectInfo.getAppInfos().get(0).getSelectedDatabases();
@@ -333,7 +335,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						}  else if (propertyTemplate.getName().equalsIgnoreCase("Version")) {
-							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							List<ArtifactGroupInfo> values = null;
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
@@ -406,7 +408,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 
 	public void createTemplateByType(Shell configureDialogs, Tree tree) {
-		configureDialogs.close();
+//		configureDialogs.close();
 		createTemplateByTypes(tree);
 	}
 
@@ -433,7 +435,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			final Composite composite = new Composite(configDialog, 0);
 			composite.setLayout(layout);
 			java.util.Properties prop = null;
-			
 			for (Configuration configuration : configs) {
 				if (configuration.getName().equalsIgnoreCase(item.getText())) {
 					configuration.getName().equalsIgnoreCase(item.getText());
@@ -443,10 +444,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					name.setLayoutData(new GridData(50,25));
 
-					nameText = new Text(composite, SWT.BORDER); 
-					nameText.setToolTipText("");
-					nameText.setLayoutData(new GridData(140,25));
-					nameText.setText(configuration.getName());
+					namestext = new Text(composite, SWT.BORDER); 
+					namestext.setToolTipText("");
+					namestext.setLayoutData(new GridData(140,25));
+					namestext.setText(configuration.getName());
 
 					Label desc = new  Label(composite,  SWT.LEFT);
 					desc.setText("Description");
@@ -518,6 +519,15 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			Button saveButton = new Button(buttonGroup, SWT.PUSH);
 			saveButton.setText("Update");
+			
+			Button cancelButton = new Button(buttonGroup, SWT.PUSH);
+			cancelButton.setText("Cancel");
+		
+			cancelButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent event) {
+					configDialog.close();
+				}
+			});
 
 			final ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 			SettingsTemplate serverTemplate = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), typeList.getText());
@@ -639,7 +649,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						Configuration configuration = new Configuration();
 						configuration.setEnvName(environmentName);
 						configuration.setName(item.getText());
-						configuration.setType(typeList.getText());
+						configuration.setType(namestext.getText());
 						configuration.setProperties(properties);
 						impl.updateConfiguration(environmentName, item.getText(), configuration);
 						configDialog.setVisible(false);
@@ -653,13 +663,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				}
 			});
 
-			Button cancelButton = new Button(buttonGroup, SWT.PUSH);
-			cancelButton.setText("Cancel");
-			cancelButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent event) {
-					configDialog.close();
-				}
-			});
 
 		} catch (Exception e) {
 			e.printStackTrace();
