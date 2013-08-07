@@ -134,6 +134,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 			if(wizardPage instanceof TechnologyPage) {
 				TechnologyPage technologyPage = (TechnologyPage) wizardPage;
 				List<AppLayerComponent> appLayerComponents = technologyPage.appLayerComponents;
+				String appVersion = projectInfo.getVersion();
 				if(CollectionUtils.isNotEmpty(appLayerComponents)) {
 					for (AppLayerComponent appLayerComponent : appLayerComponents) {
 						String appCode = appLayerComponent.appCodeText.getText();
@@ -148,6 +149,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
 						appInfo.setName(appCode);
+						appInfo.setVersion(appVersion);
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(appLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
@@ -173,6 +175,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
 						appInfo.setName(appCode);
+						appInfo.setVersion(appVersion);
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(webLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
@@ -200,6 +203,7 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						appInfo.setAppDirName(appCode);
 						appInfo.setCode(appCode);
 						appInfo.setName(appCode);
+						appInfo.setVersion(appVersion);
 						TechnologyInfo techInfo = new TechnologyInfo();
 						techInfo.setAppTypeId(mobLayerComponent.getAppTypeId());
 						techInfo.setId(techId);

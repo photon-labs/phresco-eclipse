@@ -56,6 +56,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 	private Text codeText;
 	private Text descText;
 	private Text appDirText;
+	private Text versionText;
 	
 	private List<ServerComponent> serverComponents = new ArrayList<ServerComponent>();
 	private List<DatabaseComponent> dbComponents = new ArrayList<DatabaseComponent>();
@@ -235,6 +236,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 					appInfo.setAppDirName(appDirText.getText());
 					appInfo.setCode(codeText.getText());
 					appInfo.setName(nameText.getText());
+					appInfo.setVersion(versionText.getText());
 					if(StringUtils.isNotEmpty(descText.getText())) {
 						appInfo.setDescription(descText.getText());
 					}
@@ -269,7 +271,9 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 						ProjectManager.deleteProjectIntoWorkspace(oldAppDirName);
 						ProjectManager.updateProjectIntoWorkspace(appInfo.getAppDirName());
 					}
-					buildDialog.setVisible(false);
+					serverComponents.clear();
+					dbComponents.clear();
+					buildDialog.close();
 				}
 			};
 			
@@ -355,9 +359,9 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 		Label versionLabel = new Label(composite, SWT.NONE);
 		versionLabel.setText(Messages.VERSION);
 
-		Text versionText = new Text(composite, SWT.BORDER | SWT.READ_ONLY);
+		versionText = new Text(composite, SWT.BORDER);
 		versionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		versionText.setText(projectInfo.getVersion());
+		versionText.setText(appInfo.getVersion());
 
 		Label techLabel = new Label(composite, SWT.NONE);
 		techLabel.setText(Messages.TECHNOLOGY);
@@ -415,6 +419,9 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 			return false;
 		} if(StringUtils.isEmpty(appDirText.getText())) {
 			PhrescoDialog.errorDialog(shell, Messages.ERROR, "App Directory should no be empty");
+			return false;
+		}  if(StringUtils.isEmpty(versionText.getText())) {
+			PhrescoDialog.errorDialog(shell, Messages.ERROR, "Version should no be empty");
 			return false;
 		} 
 		return true;
