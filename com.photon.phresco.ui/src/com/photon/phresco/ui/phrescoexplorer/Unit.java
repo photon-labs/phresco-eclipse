@@ -140,15 +140,15 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			e1.printErrorStack();
 			PhrescoDialog.exceptionDialog(dialog, e1);
 		}
-		
+
 		Composite buttonComposite = new Composite(dialog, SWT.RIGHT);
 		GridLayout buttonLayout = new GridLayout(2, false);
 		buttonComposite.setLayout(buttonLayout);
 		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
-		
+
 		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
 		cancelButton.setText(Messages.CANCEL);
-		
+
 		cancelButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -156,17 +156,21 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 				super.widgetSelected(e);
 			}
 		});
-		
+
 		dialog.setSize(600, 400);
 		dialog.open();
 		return dialog;
 	}
 
 	public void UnitTest() {
+		List<String> buildArgCmds = null;
 		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
-			List<Parameter> parameters = processor.getConfiguration(UNIT_TEST_GOAL).getParameters().getParameter();
-			List<String> buildArgCmds = getMavenArgCommands(parameters);
+			if (PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
+				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
+				List<Parameter> parameters = processor.getConfiguration(UNIT_TEST_GOAL).getParameters().getParameter();
+				buildArgCmds = getMavenArgCommands(parameters);
+			}
+
 			ProjectManager manager = new ProjectManager();
 			ProjectInfo info = PhrescoUtil.getProjectInfo();
 
@@ -241,6 +245,9 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 	public void saveCongfiguration()  {
 		try {
+			if (!PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
+				return;
+			}
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
 			List<Parameter> parameters = processor.getConfiguration(UNIT_TEST_GOAL).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
@@ -304,156 +311,149 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		unitTestDialog.setLayoutData(data);
 
 		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
-			Configuration configuration = processor.getConfiguration(UNIT_TEST_GOAL);
-			List<Parameter> parameters = configuration.getParameters().getParameter();
+			if (PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
 
-			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
-			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
-			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
-			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, UNIT_TEST_GOAL);
+				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
+				Configuration configuration = processor.getConfiguration(UNIT_TEST_GOAL);
+				List<Parameter> parameters = configuration.getParameters().getParameter();
 
-			for (Parameter parameter : parameters) {
-				String type = parameter.getType();
+				ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
+				DynamicPossibleValues possibleValues = new DynamicPossibleValues();
+				Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
+				Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, UNIT_TEST_GOAL);
 
-				if (type.equalsIgnoreCase(STRING)) {
-					Label buildNameLabel = new Label(unitTestDialog, SWT.NONE);
-					buildNameLabel.setText(parameter.getKey());
-					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+				for (Parameter parameter : parameters) {
+					String type = parameter.getType();
 
-					nameText = new Text(unitTestDialog, SWT.BORDER);
-					nameText.setToolTipText(parameter.getKey());
-					data = new GridData(GridData.FILL_BOTH);
-					nameText.setLayoutData(data);
-					map.put(parameter.getKey(), nameText);
+					if (type.equalsIgnoreCase(STRING)) {
+						Label buildNameLabel = new Label(unitTestDialog, SWT.NONE);
+						buildNameLabel.setText(parameter.getKey());
+						buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-				} else if (type.equalsIgnoreCase(NUMBER)) {
-					Label buildNumberLabel = new Label(unitTestDialog, SWT.NONE);
-					buildNumberLabel.setText(parameter.getKey());
-					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
+						nameText = new Text(unitTestDialog, SWT.BORDER);
+						nameText.setToolTipText(parameter.getKey());
+						data = new GridData(GridData.FILL_BOTH);
+						nameText.setLayoutData(data);
+						map.put(parameter.getKey(), nameText);
 
-					numberText = new Text(unitTestDialog, SWT.BORDER);
-					numberText.setToolTipText(parameter.getKey());
-					numberText.setMessage(parameter.getKey());
-					data = new GridData(GridData.FILL_BOTH);
-					numberText.setLayoutData(data);
-					map.put(parameter.getKey(), numberText);
+					} else if (type.equalsIgnoreCase(NUMBER)) {
+						Label buildNumberLabel = new Label(unitTestDialog, SWT.NONE);
+						buildNumberLabel.setText(parameter.getKey());
+						buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-				} else if (type.equalsIgnoreCase(BOOLEAN)) {
-					Label defaults = new Label(unitTestDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+						numberText = new Text(unitTestDialog, SWT.BORDER);
+						numberText.setToolTipText(parameter.getKey());
+						numberText.setMessage(parameter.getKey());
+						data = new GridData(GridData.FILL_BOTH);
+						numberText.setLayoutData(data);
+						map.put(parameter.getKey(), numberText);
 
-					checkBoxButton = new Button(unitTestDialog, SWT.CHECK);
-					checkBoxButton.setLayoutData(new GridData(75, 20));
-					data = new GridData(GridData.FILL_BOTH);
-					checkBoxButton.setLayoutData(data);
+					} else if (type.equalsIgnoreCase(BOOLEAN)) {
+						Label defaults = new Label(unitTestDialog, SWT.LEFT);
+						defaults.setText(parameter.getKey());
+						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					map.put(parameter.getKey(), checkBoxButton);
-				}
-				else if (type.equalsIgnoreCase(PASSWORD)) {
-					Label defaults = new Label(unitTestDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+						checkBoxButton = new Button(unitTestDialog, SWT.CHECK);
+						checkBoxButton.setLayoutData(new GridData(75, 20));
+						data = new GridData(GridData.FILL_BOTH);
+						checkBoxButton.setLayoutData(data);
 
-					passwordText = new Text(unitTestDialog, SWT.PASSWORD | SWT.BORDER);
-					passwordText.setToolTipText(PASSWORD);
-					passwordText.setMessage(parameter.getKey());
-					passwordText.setLayoutData(new GridData(100, 13));
-					data = new GridData(GridData.FILL_BOTH);
-					passwordText.setLayoutData(data);
-					map.put(parameter.getKey(), passwordText);
-
-				} else if (type.equalsIgnoreCase(LIST)) {
-					Label Logs = new Label(unitTestDialog, SWT.LEFT);
-					Logs.setText(parameter.getKey());
-					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
-
-					Combo listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-					List<Value> values = parameter.getPossibleValues().getValue();
-					for (Value value : values) {
-						listLogs.add(value.getValue());
-						typeMaps.put(value.getValue(), value.getKey());
+						map.put(parameter.getKey(), checkBoxButton);
 					}
-					data = new GridData(GridData.FILL_BOTH);
-					listLogs.select(0);
-					listLogs.setLayoutData(data);
-					map.put(parameter.getKey(), listLogs); 
+					else if (type.equalsIgnoreCase(PASSWORD)) {
+						Label defaults = new Label(unitTestDialog, SWT.LEFT);
+						defaults.setText(parameter.getKey());
+						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-					int yaxis = 0;
-					String key = null;
-					Label Logs = new Label(unitTestDialog, SWT.LEFT);
-					Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
-					Logs.setBounds(24, 40, 80, 23);
+						passwordText = new Text(unitTestDialog, SWT.PASSWORD | SWT.BORDER);
+						passwordText.setToolTipText(PASSWORD);
+						passwordText.setMessage(parameter.getKey());
+						passwordText.setLayoutData(new GridData(100, 13));
+						data = new GridData(GridData.FILL_BOTH);
+						passwordText.setLayoutData(data);
+						map.put(parameter.getKey(), passwordText);
 
-					Group group = new Group(unitTestDialog, SWT.SHADOW_IN);
-					group.setText(Messages.ENVIRONMENT);
-					group.setLocation(146, 26);
+					} else if (type.equalsIgnoreCase(LIST)) {
+						Label Logs = new Label(unitTestDialog, SWT.LEFT);
+						Logs.setText(parameter.getKey());
+						Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					final List<String> buttons = new ArrayList<String>();
-					Set<Entry<String,Object>> entrySet = maps.entrySet();
+						Combo listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
 
-					for (Entry<String, Object> entry : entrySet) {
-						key = entry.getKey();
-						if (key.equalsIgnoreCase(WATCHER_MAP)) {
-							continue;
-						}
-						List<Value> values = (List<Value>) entry.getValue();
+						List<Value> values = parameter.getPossibleValues().getValue();
 						for (Value value : values) {
-							envSelectionButton = new Button(group, SWT.CHECK);
-							envSelectionButton.setText(value.getValue());
-							envSelectionButton.setLocation(20, 20+yaxis);
-							data = new GridData(GridData.FILL_BOTH);
-							envSelectionButton.setLayoutData(data);
-							yaxis+=15;
-							envSelectionButton.addSelectionListener(new SelectionAdapter() {
-								@Override
-								public void widgetSelected(SelectionEvent e) {
-									Button button = (Button) e.widget;
-									boolean enabled = button.getSelection();
-									if (enabled) {
-										buttons.add(button.getText());
-									} else {
-										buttons.remove(button.getText());
-									}
-								}
-							});
-							envSelectionButton.pack();
+							listLogs.add(value.getValue());
+							typeMaps.put(value.getValue(), value.getKey());
 						}
-					}
-					map.put(key, buttons);
-					group.pack();
-				} 
-			}
+						data = new GridData(GridData.FILL_BOTH);
+						listLogs.select(0);
+						listLogs.setLayoutData(data);
+						map.put(parameter.getKey(), listLogs); 
 
+					} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
+						int yaxis = 0;
+						String key = null;
+						Label Logs = new Label(unitTestDialog, SWT.LEFT);
+						Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
+						Logs.setBounds(24, 40, 80, 23);
+
+						Group group = new Group(unitTestDialog, SWT.SHADOW_IN);
+						group.setText(Messages.ENVIRONMENT);
+						group.setLocation(146, 26);
+
+						final List<String> buttons = new ArrayList<String>();
+						Set<Entry<String,Object>> entrySet = maps.entrySet();
+
+						for (Entry<String, Object> entry : entrySet) {
+							key = entry.getKey();
+							if (key.equalsIgnoreCase(WATCHER_MAP)) {
+								continue;
+							}
+							List<Value> values = (List<Value>) entry.getValue();
+							for (Value value : values) {
+								envSelectionButton = new Button(group, SWT.CHECK);
+								envSelectionButton.setText(value.getValue());
+								envSelectionButton.setLocation(20, 20+yaxis);
+								data = new GridData(GridData.FILL_BOTH);
+								envSelectionButton.setLayoutData(data);
+								yaxis+=15;
+								envSelectionButton.addSelectionListener(new SelectionAdapter() {
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										Button button = (Button) e.widget;
+										boolean enabled = button.getSelection();
+										if (enabled) {
+											buttons.add(button.getText());
+										} else {
+											buttons.remove(button.getText());
+										}
+									}
+								});
+								envSelectionButton.pack();
+							}
+						}
+						map.put(key, buttons);
+						group.pack();
+					} 
+				}
+			}
 
 			Composite buttonComposite = new Composite(unitTestDialog, SWT.RIGHT);
 			GridLayout buttonLayout = new GridLayout(2, false);
 			buttonComposite.setLayout(buttonLayout);
 			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
-			
-/*			Composite composite = new Composite(unitTestDialog, SWT.NONE);
-
-			GridLayout layout = new GridLayout(2, true);
-			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
-			composite.setLayout(layout);
-*/
 
 			unitButton = new Button(buttonComposite, SWT.NONE);
 			unitButton.setText(Messages.TEST);
-//			unitButton.setLayoutData(datas);
 
 			cancelButton = new Button(buttonComposite, SWT.NONE);
 			cancelButton.setText(Messages.CANCEL);
-//			cancelButton.setLayoutData(datas);
-			
+
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -471,11 +471,11 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						@Override
 						public void run() {
 							UnitTest();		
+							unitTestDialog.close();
 						}
 					});
 				}
 			});
-			//			unitTestDialog.pack();
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();

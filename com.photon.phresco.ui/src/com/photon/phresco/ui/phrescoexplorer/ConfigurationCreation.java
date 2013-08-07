@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.photon.phresco.commons.PhrescoConstants;
@@ -59,7 +58,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Combo environmentList;
 	private String configName;
 
-	private void createTemplateByTypes(Tree tree) {
+	private void createTemplateByTypes(final Shell configureDialogs) {
 		try {
 			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.VERTICAL | SWT.V_SCROLL);
 			configDialog.setText("Configuration");
@@ -233,6 +232,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			cancelButton.setText("Cancel");
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
+					configureDialogs.setVisible(true);
 					configDialog.close();
 				}
 			});
@@ -413,9 +413,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 
-	public void createTemplateByType(Shell configureDialogs, Tree tree) {
-//		configureDialogs.close();
-		createTemplateByTypes(tree);
+	public void createTemplateByType(Shell configureDialogs) {
+		createTemplateByTypes(configureDialogs);
 	}
 
 	public void configure(TreeItem parent, TreeItem item) {
@@ -551,13 +550,13 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("Version")) {
 						Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 						
-						if (propertyTemplate.getKey().equalsIgnoreCase("version")) {
+						if (propertyTemplate.getKey().equalsIgnoreCase(VERSION)) {
 							comboDropDown.removeAll();
 							List<ArtifactGroupInfo> values = null;
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
-							if (typeList.getText().equalsIgnoreCase("Server")) {
+							if (typeList.getText().equalsIgnoreCase(SERVER)) {
 								values = projectInfo.getAppInfos().get(0).getSelectedServers();
-							} else if (typeList.getText().equalsIgnoreCase("Database")) {
+							} else if (typeList.getText().equalsIgnoreCase(DATABASE)) {
 								values = projectInfo.getAppInfos().get(0).getSelectedDatabases();
 							}
 							if (CollectionUtils.isNotEmpty(values)) {
@@ -621,8 +620,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
-								if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
-										|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("Version")) {
+								if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE) || propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)
+										|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 

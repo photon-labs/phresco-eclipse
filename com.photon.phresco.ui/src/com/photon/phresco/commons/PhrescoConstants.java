@@ -255,4 +255,16 @@ public interface PhrescoConstants {
 	String MOBILE_LAYER = "mob-layer";
 	String PLUS_SYMBOL = "+";
 	String MINUS_SYMBOL = "-";
+	
+	// Configuration constants
+	
+	String PARENT_TREE  = "parentTree";
+	String PARENT       = "parent";
+	String CHILD        =  "child";
+	String DATABASE     = "Database";
+	String VERSION      = "version";
+	String SERVER_TYPE  = "server Type";
+	String DB_TYPE		= "DB Type";
+	String CERTIFICATE  = "Certificate";
+	
 }
