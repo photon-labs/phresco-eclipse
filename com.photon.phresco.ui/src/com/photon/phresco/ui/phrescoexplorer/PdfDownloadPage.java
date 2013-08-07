@@ -59,6 +59,7 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 		}
 		
 		final Shell downloadDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE | SWT.RESIZE);
+		downloadDialog.setText(Messages.PDF_REPORT_DOWNLOAD_DIALOG_TITLE);
 		GridLayout layout = new GridLayout(1, false);
 		downloadDialog.setLocation(downloadDialog.getLocation());
 		downloadDialog.setLayout(layout);

@@ -140,6 +140,23 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			e1.printErrorStack();
 			PhrescoDialog.exceptionDialog(dialog, e1);
 		}
+		
+		Composite buttonComposite = new Composite(dialog, SWT.RIGHT);
+		GridLayout buttonLayout = new GridLayout(2, false);
+		buttonComposite.setLayout(buttonLayout);
+		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+		
+		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+		cancelButton.setText(Messages.CANCEL);
+		
+		cancelButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dialog.close();
+				super.widgetSelected(e);
+			}
+		});
+		
 		dialog.setSize(600, 400);
 		dialog.open();
 		return dialog;

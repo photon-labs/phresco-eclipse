@@ -116,6 +116,23 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoPomException e2) {
 			PhrescoDialog.exceptionDialog(functionalDialog, e2);
 		}
+		
+		Composite buttonComposite = new Composite(functionalDialog, SWT.RIGHT);
+		GridLayout buttonLayout = new GridLayout(2, false);
+		buttonComposite.setLayout(buttonLayout);
+		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+		
+		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
+		cancelButton.setText(Messages.CANCEL);
+		
+		cancelButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				functionalDialog.close();
+				super.widgetSelected(e);
+			}
+		});
+		
 		functionalDialog.setSize(600, 400);
 		functionalDialog.open();
 		return null;
@@ -277,20 +294,16 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(functionalTestDialog, SWT.NONE);
-
-			GridLayout layout = new GridLayout(2, true);
-			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
-			composite.setLayout(layout);
-
-
-			functionalButton = new Button(composite, SWT.NONE);
+			Composite buttonComposite = new Composite(functionalTestDialog, SWT.RIGHT);
+			GridLayout buttonLayout = new GridLayout(2, false);
+			buttonComposite.setLayout(buttonLayout);
+			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+			
+			functionalButton = new Button(buttonComposite, SWT.NONE);
 			functionalButton.setText(Messages.TEST);
-			functionalButton.setLayoutData(datas);
 
-			cancelButton = new Button(composite, SWT.NONE);
+			cancelButton = new Button(buttonComposite, SWT.NONE);
 			cancelButton.setText(Messages.CANCEL);
-			cancelButton.setLayoutData(datas);
 			
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				@Override

@@ -119,6 +119,7 @@ public class Messages extends NLS {
 	public static String PDF_REPORT_OVERALL;
 	public static String PDF_REPORT_TYPE_LBL;
 	public static String PDF_REPORT_DIALOG_TITLE;
+	public static String PDF_REPORT_DOWNLOAD_DIALOG_TITLE;
 	
 	*/
 	
@@ -223,6 +224,7 @@ public class Messages extends NLS {
 	public static String PDF_REPORT_OVERALL =  "Overall";
 	public static String PDF_REPORT_TYPE_LBL = "Report Type";
 	public static String PDF_REPORT_DIALOG_TITLE = "Generate PDF";
+	public static String PDF_REPORT_DOWNLOAD_DIALOG_TITLE = "Download PDF";
 	
 /*	
 	static {
