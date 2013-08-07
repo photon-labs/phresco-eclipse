@@ -3,8 +3,11 @@ package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -54,6 +57,8 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 	private Shell shell;
 	private Button cancelButton;
 	private Shell createConfigurationDialog;
+	private Map<String, Object> treeMap = new HashMap<String, Object>();
+	
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -155,21 +160,23 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		return createConfigurationDialog;
 	}
 
+	/**
+	 * @wbp.parser.entryPoint
+	 */
 	private Shell createConfigurationDialog(final Shell shell) {
 		configureDialogs = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		configureDialogs.setText("Environment");
 		configureDialogs.setLocation(385,130);
-		configureDialogs.setSize(400, 230);
+		configureDialogs.setSize(416, 230);
 
 		GridLayout subLayout = new GridLayout(1, false);
 		configureDialogs.setLayout(subLayout);
-		
 
 		Composite composite = new Composite(configureDialogs, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		tree = new Tree(composite, SWT.BORDER);
+		tree = new Tree(composite,  SWT.BORDER);
 		tree.setHeaderVisible(true);
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -183,33 +190,28 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		status.setText("Status");
 		status.setWidth(100);
 
-		GridLayout tableLayout = new GridLayout(3,false);
+		GridLayout tableLayout = new GridLayout(5,false);
 
 		Composite composites = new Composite(configureDialogs, SWT.NONE);
 		composites.setLayout(tableLayout);
-		GridData tablecolumndata = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-		composites.setLayoutData(tablecolumndata);
-
-		GridData data = new GridData();
-		data.horizontalAlignment = SWT.RIGHT;
+		composites.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		addEnvironmentButton = new Button(composites, SWT.PUSH);
-		addEnvironmentButton.setLocation(279, 121);
 		addEnvironmentButton.setText("Add Environment");
-		addEnvironmentButton.setSize(74, 23);
-		addEnvironmentButton.setLayoutData(data);
 		
 		Button addButton = new Button(composites, SWT.PUSH);
-		addButton.setLocation(279, 121);
 		addButton.setText("Add Configuration");
-		addButton.setSize(74, 23);
-		addButton.setLayoutData(data);
+		
+		final Button configureButton = new Button(composites, SWT.PUSH);
+		configureButton.setText("Configure");
+		configureButton.setEnabled(false);
+		
+		final Button deleteButton = new Button(composites, SWT.PUSH);
+		deleteButton.setText("Delete");
+		deleteButton.setEnabled(false);
 		
 		cancelButton = new Button(composites, SWT.PUSH);
-		cancelButton.setLocation(279, 121);
 		cancelButton.setText("Cancel");
-		cancelButton.setSize(74, 23);
-		cancelButton.setLayoutData(data);
 		
 		addButton.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -224,16 +226,58 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		
 		tree.addListener(SWT.MouseDown, new Listener() {
 			public void handleEvent(Event event) {
+				configureButton.setEnabled(true);
+				deleteButton.setEnabled(true);
+				treeMap.clear();
 				Point point = new Point(event.x, event.y);
-				final TreeItem item = tree.getItem(point);
-				if (item != null) {
-				TreeItem parent = item.getParentItem();
+				final TreeItem child = tree.getItem(point);
+				if (child != null) {
+				TreeItem parent = child.getParentItem();
 					if (parent != null) {
-						creation.configure(parent, item);
+						treeMap.put("parent", parent);
+						treeMap.put("child", child);
+					} else {
+						treeMap.put("parentTree", child);
 					}
 				}
 			}
+		});	
+		
+		configureButton.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				TreeItem parentTree = (TreeItem) treeMap.get("parentTree");
+				if (parentTree == null) {
+					TreeItem parent = (TreeItem) treeMap.get("parent");
+					TreeItem child =  (TreeItem) treeMap.get("child");
+					System.out.println("Parent Text = " + parent.getText());
+					System.out.println("child Text = " + child.getText());
+					creation.configure(parent, child);
+				} else {
+//					envDialog.close();
+//					configureEnvironment(parentTree);
+				}
+			}
 		});
+		
+		
+		deleteButton.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				TreeItem parentTree = (TreeItem) treeMap.get("parentTree");
+				if (parentTree != null) {
+					creation.deleteParent(parentTree);
+					refreshconfigureDialog(shell);
+				} else {
+					TreeItem parent = (TreeItem) treeMap.get("parent");
+					TreeItem child =  (TreeItem) treeMap.get("child");
+					creation.delete(parent, child);
+					refreshconfigureDialog(shell);
+				}
+			}
+
+		});
+		
 		
 		cancelButton.addListener(SWT.Selection, new Listener() {
 			@Override
@@ -244,32 +288,16 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		
 		return configureDialogs;
 	}
-	
-	
-	
-	private void delete(TreeItem item) {
-		try {
-			File envConfig = PhrescoUtil.getConfigurationFile();
-			ConfigManagerImpl impl = new ConfigManagerImpl(envConfig);
-			TreeItem parentItem = item.getParentItem();
-			if (parentItem != null) {
-				impl.deleteEnvironment(parentItem.getText());
-				parentItem.removeAll();
-			} else {
-				Configuration configuration = new Configuration();
-				configuration.setEnvName(parentItem.getText());
-				configuration.setName(item.getText());
-				impl.deleteConfiguration(parentItem.getText(), configuration);
-				item.dispose();
-			}
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-		}
-		
-	}
 
+	private void refreshconfigureDialog(final Shell shell) {
+		configureDialogs.close();
+		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL| SWT.DIALOG_TRIM | SWT.TITLE | SWT.MAX | SWT.MIN | SWT.RESIZE);
+		GridLayout layout = new GridLayout(2,false);
+		layout.verticalSpacing = 6;
+		Shell configDialog = CreateEnvironmentConfigureDialog(dialog);
+		configDialog.open();
+	}
+	
 	public Shell createEnvironmentDialog(Shell dialog) {
 		envDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 		envDialog.setText("Environment");
@@ -323,13 +351,80 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		return envDialog;
 	}
+	
+	public Shell configureEnvironment(TreeItem parentTree) {
+
+		final Shell envDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+		try {
+			File envConfig = PhrescoUtil.getConfigurationFile();
+			ConfigManagerImpl impl = new ConfigManagerImpl(envConfig);
+			List<Environment> environments = impl.getEnvironments();
+			if (CollectionUtils.isNotEmpty(environments)) {
+				for (Environment environment : environments) {
+					if (environment.getName().equalsIgnoreCase(parentTree.getText())) {
+						envDialog.setText("Environment");
+						envDialog.setLocation(385,130);
+						envDialog.setSize(400, 230);
+
+						GridLayout subLayout = new GridLayout(2, false);
+						subLayout.verticalSpacing = 20;
+						subLayout.horizontalSpacing = 60;
+						envDialog.setLayout(subLayout);
+
+						Label envLabel = new  Label(envDialog,  SWT.LEFT);
+						envLabel.setText(ENVIRONMENT_NAME);
+						envLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						Text envText = new Text(envDialog, SWT.BORDER); 
+						envText.setToolTipText(ENVIRONMENT_NAME);
+						envText.setLayoutData(new GridData(80,13));
+						envText.setText(environment.getName());
+
+						Label descLabel = new  Label(envDialog,  SWT.LEFT);
+						descLabel.setText(DESCRITPTION);
+						descLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						Text descText = new Text(envDialog, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL); 
+						descText.setToolTipText(DESCRITPTION);
+						descText.setLayoutData(new GridData(80,13));
+						descText.setText(environment.getDesc());
+
+						Label defaults = new  Label(envDialog,  SWT.LEFT);
+						defaults.setText(DEFAULT);
+						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						defaultCheckBoxButton = new Button(envDialog, SWT.CHECK);
+						defaultCheckBoxButton.setLayoutData(new GridData(75,20));
+						defaultCheckBoxButton.setText(String.valueOf(environment.isDefaultEnv()));					}
+				}
+			}
+
+			envSaveButton = new Button(envDialog, SWT.PUSH);
+			envSaveButton.setText(SAVE);
+			envSaveButton.setLayoutData(new GridData(75,20));
+			envSaveButton.setLocation(500,505);
+
+			envCancelButton = new Button(envDialog, SWT.PUSH);
+			envCancelButton.setText(Messages.CANCEL);
+			envCancelButton.setLayoutData(new GridData(75,20));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return envDialog;
+	}
+
 
 	public void push() {
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL| SWT.DIALOG_TRIM | SWT.TITLE | SWT.MAX | SWT.MIN | SWT.RESIZE);
 		GridLayout layout = new GridLayout(2,false);
 		layout.verticalSpacing = 6;
-		Shell envdialog = CreateEnvironmentConfigureDialog(dialog);
-		envdialog.open();
+		Shell configDialog = CreateEnvironmentConfigureDialog(dialog);
+		configDialog.open();
 		
 	}
 }

@@ -1,6 +1,7 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.resource.Messages;
 
 public class ConfigurationCreation  implements PhrescoConstants {
 
@@ -278,6 +280,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 			SettingsTemplate serverTemplate = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), types);
+			
 			List<PropertyTemplate> propertyTemplates  = serverTemplate.getProperties();
 			for (PropertyTemplate propertyTemplate : propertyTemplates) {
 				String type = propertyTemplate.getType();
@@ -668,5 +671,50 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			e.printStackTrace();
 		}
 
+	}
+
+	public void delete(TreeItem parent, TreeItem child) {
+		try {
+			File envConfig = PhrescoUtil.getConfigurationFile();
+			ConfigManagerImpl impl = new ConfigManagerImpl(envConfig);
+			List<Environment> environments = impl.getEnvironments();
+			if (CollectionUtils.isNotEmpty(environments)) {
+				for (Environment environment : environments) {
+					if (environment.getName().equalsIgnoreCase(parent.getText())) {
+						List<Configuration> configurations = environment.getConfigurations();
+						if (CollectionUtils.isNotEmpty(configurations)) {
+							for (Configuration configuration : configurations) {
+								if (configuration.getName().equalsIgnoreCase(child.getText())) {
+									impl.deleteConfiguration(parent.getText(), configuration);
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void deleteParent(TreeItem parentTree) {
+		try {
+			File envConfig = PhrescoUtil.getConfigurationFile();
+			ConfigManagerImpl impl = new ConfigManagerImpl(envConfig);
+			List<Environment> environments = impl.getEnvironments();
+			if (CollectionUtils.isNotEmpty(environments)) {
+				for (Environment environment : environments) {
+					if (environment.getName().equalsIgnoreCase(parentTree.getText())) {
+						impl.deleteEnvironment(parentTree.getText());
+					}
+				}
+			}
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		}
 	}
 }
