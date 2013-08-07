@@ -102,8 +102,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public boolean canFinish() {
-		
-		return super.canFinish();
+		if(getContainer().getCurrentPage() == appInfoPage) {
+			return false;
+		}
+		return true;
 	}
 	
 	@Override

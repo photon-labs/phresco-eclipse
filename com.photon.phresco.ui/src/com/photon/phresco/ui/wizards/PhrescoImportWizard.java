@@ -34,8 +34,12 @@ import org.eclipse.m2e.core.ui.internal.wizards.AbstactCreateMavenProjectJob;
 import org.eclipse.m2e.core.ui.internal.wizards.LifecycleMappingPage;
 import org.eclipse.m2e.core.ui.internal.wizards.MavenImportWizard;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 
+import com.photon.phresco.commons.ConfirmDialog;
+import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
 
 /**
@@ -63,7 +67,6 @@ public class PhrescoImportWizard extends MavenImportWizard {
 
 	  public void init(IWorkbench workbench, IStructuredSelection selection) {
 	    super.init(workbench, selection);
-
 	    if(locations == null || locations.isEmpty()) {
 	      IPath location = SelectionUtil.getSelectedLocation(selection);
 	      if(location != null) {
@@ -73,6 +76,12 @@ public class PhrescoImportWizard extends MavenImportWizard {
 	  }
 
 	  public void addPages() {
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
+		if(serviceManager == null) {
+			Shell shell = new Shell();
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return;
+		}
 	    page = new ImportWizardPage(importConfiguration, workingSets);
 	    page.setLocations(locations);
 	    page.setShowLocation(showLocation);

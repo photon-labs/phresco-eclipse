@@ -3,6 +3,7 @@ package com.photon.phresco.ui.wizards.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -61,16 +62,17 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 	
 	@Override
 	public IWizardPage getPreviousPage() {
-		
+		appLayerComponents.clear();
+		webLayerComponents.clear();
+		mobLayerComponents.clear();
 		return super.getPreviousPage();
 	}
 	int x = 20;
 	public void renderLayer(List<Button> selectedLayers) {
 		final Composite parentComposite = (Composite) getControl();
 		clearExistingControls(parentComposite);
-		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.Resize | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.Resize | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		scrolledComposite.setAlwaysShowScrollBars(true);
 		
 		final Composite composite = new Composite(scrolledComposite, SWT.NONE);
 		GridLayout CompositeLayout = new GridLayout(1, true);
