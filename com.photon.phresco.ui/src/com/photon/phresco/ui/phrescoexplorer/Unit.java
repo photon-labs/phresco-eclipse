@@ -68,7 +68,6 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	private Button cancelButton;
 	private Button checkBoxButton;	
 
-	private Shell unitTestDialog;	
 	private Button envSelectionButton;
 
 	private Text nameText;
@@ -91,6 +90,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		}
 
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
+		dialog.setText(Messages.UNIT_TEST_TITLE);
 		dialog.setLayout(new GridLayout(1, false));
 		try {
 			Composite composite = new Composite(dialog, SWT.NONE);
@@ -293,8 +293,8 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 	public Shell unitDialog(Shell dialog) {
 
-		unitTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
-		unitTestDialog.setText(Messages.UNIT_TEST_LABEL);
+		final Shell unitTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+		unitTestDialog.setText(Messages.UNIT_TEST_TITLE);
 		unitTestDialog.setLocation(385, 130);
 		unitTestDialog.setSize(451,188);
 
@@ -434,20 +434,25 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(unitTestDialog, SWT.NONE);
+			Composite buttonComposite = new Composite(unitTestDialog, SWT.RIGHT);
+			GridLayout buttonLayout = new GridLayout(2, false);
+			buttonComposite.setLayout(buttonLayout);
+			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+			
+/*			Composite composite = new Composite(unitTestDialog, SWT.NONE);
 
 			GridLayout layout = new GridLayout(2, true);
 			GridData datas = new GridData(GridData.FILL_HORIZONTAL);
 			composite.setLayout(layout);
+*/
 
-
-			unitButton = new Button(composite, SWT.NONE);
+			unitButton = new Button(buttonComposite, SWT.NONE);
 			unitButton.setText(Messages.TEST);
-			unitButton.setLayoutData(datas);
+//			unitButton.setLayoutData(datas);
 
-			cancelButton = new Button(composite, SWT.NONE);
+			cancelButton = new Button(buttonComposite, SWT.NONE);
 			cancelButton.setText(Messages.CANCEL);
-			cancelButton.setLayoutData(datas);
+//			cancelButton.setLayoutData(datas);
 			
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				@Override

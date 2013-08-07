@@ -110,6 +110,7 @@ public class Messages extends NLS {
 	
 	//Quality
 	public static String UNIT_TEST_LABEL;
+	public static String UNIT_TEST_TITLE;
 	
 	//PDF Report
 	public static String PDF_REPORT_MSG;
@@ -206,6 +207,7 @@ public class Messages extends NLS {
 	public static String DEPLOY_TITLE = "Deploy";
 	
 	//Quality
+	public static String UNIT_TEST_TITLE = "Unit";
 	public static String UNIT_TEST_LABEL = "Unit";
 	public static String REPORT_NOT_AVAILABLE = "Report Not Available";
 	
