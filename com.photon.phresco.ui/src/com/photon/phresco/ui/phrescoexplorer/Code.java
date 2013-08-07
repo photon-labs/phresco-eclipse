@@ -61,6 +61,7 @@ import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.model.CodeValidationReportType;
+import com.photon.phresco.ui.resource.Messages;
 import com.phresco.pom.exception.PhrescoPomException;
 import com.phresco.pom.model.Model;
 import com.phresco.pom.model.Profile;
@@ -211,7 +212,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		});
 		
 		cancelButton = new Button(cancelComposite, SWT.PUSH);
-		cancelButton.setText(CANCEL);
+		cancelButton.setText(Messages.CANCEL);
 		cancelButton.setSize(74, 23);
 		
 		Listener cancelListener = new Listener() {
@@ -582,7 +583,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			codeButton.setSize(74, 23);
 
 			cancelButton = new Button(composite, SWT.BORDER);
-			cancelButton.setText(CANCEL);
+			cancelButton.setText(Messages.CANCEL);
 			cancelButton.setSize(74, 23);
 			
 			

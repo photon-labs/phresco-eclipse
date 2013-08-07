@@ -66,6 +66,7 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.ui.model.ActionType;
+import com.photon.phresco.ui.resource.Messages;
 
 public class Deploy extends AbstractHandler implements PhrescoConstants {
 
@@ -195,7 +196,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 	public Shell createDeployDialog(Shell dialog) {
 		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
-		deployDialog.setText("Deploy");
+		deployDialog.setText(Messages.DEPLOY_DIALOG_TITLE);
 		deployDialog.setLocation(385, 130);
 		deployDialog.setSize(451,188);
 
@@ -372,12 +373,16 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			}
 			
 
+			Composite buttonComposite = new Composite(deployDialog, SWT.RIGHT);
+			GridLayout buttonLayout = new GridLayout(2, false);
+			buttonComposite.setLayout(buttonLayout);
+			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
 			
-			deployButton = new Button(deployDialog, SWT.RIGHT | SWT.PUSH);
-			deployButton.setText(DEPLOY);
+			deployButton = new Button(buttonComposite, SWT.RIGHT | SWT.PUSH);
+			deployButton.setText(Messages.DEPLOY_BTN);
 
-			cancelButton = new Button(deployDialog, SWT.RIGHT | SWT.PUSH);
-			cancelButton.setText(CANCEL);
+			cancelButton = new Button(buttonComposite, SWT.RIGHT | SWT.PUSH);
+			cancelButton.setText(Messages.CANCEL);
 
 		} catch (PhrescoException e) {
 			e.printStackTrace();

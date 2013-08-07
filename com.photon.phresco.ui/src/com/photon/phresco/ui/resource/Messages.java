@@ -93,12 +93,20 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_VERSION;
 	public static String PROJECT_VERSION_TEXT;
 	
+	//Edit Project
+	public static String EDIT_PROJECT_DIALOG_TITLE;
+	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE;
 	public static String PHRESCO_IMPORT_PAGE_TITLE;
 	public static String PHRESCO_IMPORT_PAGE_DESC;
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME;
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME;
+	
+	//Deploy
+	public static String DEPLOY_DIALOG_TITLE;
+	public static String DEPLOY_BTN;
+	public static String DEPLOY_TITLE;
 	
 	//Quality
 	public static String UNIT_TEST_LABEL;
@@ -181,12 +189,20 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_VERSION="Version";
 	public static String PROJECT_VERSION_TEXT="1.0.0";
 	
+	//Edit Project
+	public static String EDIT_PROJECT_DIALOG_TITLE = "Edit Project"; 
+	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE="Phresco";
 	public static String PHRESCO_IMPORT_PAGE_TITLE="Import Phresco Project to WorkSpace";
 	public static String PHRESCO_IMPORT_PAGE_DESC="Phresco Import Page Description Appears here";
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME="AddProjectPage";
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME="Technology Page";
+	
+	//Deploy
+	public static String DEPLOY_DIALOG_TITLE = "Deploy";
+	public static String DEPLOY_BTN = "Deploy";
+	public static String DEPLOY_TITLE = "Deploy";
 	
 	//Quality
 	public static String UNIT_TEST_LABEL = "Unit";

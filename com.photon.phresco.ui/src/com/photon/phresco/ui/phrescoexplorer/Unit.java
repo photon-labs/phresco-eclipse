@@ -429,7 +429,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			unitButton.setLayoutData(datas);
 
 			cancelButton = new Button(composite, SWT.NONE);
-			cancelButton.setText(CANCEL);
+			cancelButton.setText(Messages.CANCEL);
 			cancelButton.setLayoutData(datas);
 			
 			cancelButton.addSelectionListener(new SelectionAdapter() {

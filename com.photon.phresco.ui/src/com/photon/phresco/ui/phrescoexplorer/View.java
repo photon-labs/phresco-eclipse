@@ -38,6 +38,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.BuildInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.ui.resource.Messages;
 
 public class View extends AbstractHandler implements PhrescoConstants {
 
@@ -119,7 +120,7 @@ public class View extends AbstractHandler implements PhrescoConstants {
 		no.setText(BUILD_NO);
 		name.setText(BUILD_NAME);
 		download.setText(DOWNLOAD);
-		delete.setText(DEPLOY);
+		delete.setText(Messages.DEPLOY_TITLE);
 
 		no.setWidth(40);
 		name.setWidth(183);
@@ -148,7 +149,7 @@ public class View extends AbstractHandler implements PhrescoConstants {
 			GridData gd_cancelButton = new GridData(SWT.RIGHT, SWT.BOTTOM, true, true, 0, 0);
 			gd_cancelButton.widthHint = 82;
 			cancelButton = new Button(viewDialog, SWT.PUSH);
-			cancelButton.setText(CANCEL);
+			cancelButton.setText(Messages.CANCEL);
 			gd_cancelButton.heightHint = 23;
 			cancelButton.setLayoutData(gd_cancelButton);
 			
@@ -175,7 +176,7 @@ public class View extends AbstractHandler implements PhrescoConstants {
 			GridData gd_cancelButton = new GridData(SWT.RIGHT, SWT.BOTTOM, true, true, 0, 0);
 			gd_cancelButton.widthHint = 82;
 			cancelButton = new Button(viewDialog, SWT.PUSH);
-			cancelButton.setText(CANCEL);
+			cancelButton.setText(Messages.CANCEL);
 			gd_cancelButton.heightHint = 23;
 			cancelButton.setLayoutData(gd_cancelButton);
 		}

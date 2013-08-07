@@ -69,6 +69,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell buildDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.MAX | SWT.TITLE | SWT.RESIZE);
+		buildDialog.setText(Messages.EDIT_PROJECT_DIALOG_TITLE);
 		GridLayout layout = new GridLayout(1, false);
 		buildDialog.setLocation(385, 130);
 		buildDialog.setLayout(layout);
@@ -217,7 +218,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 			Composite updateComposite = new Composite(buildDialog, SWT.NONE);
 			GridLayout gridLayout = new GridLayout(2, false);
 			updateComposite.setLayout(gridLayout);
-			updateComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			updateComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
 			
 			final Button updateButton = new Button(updateComposite, SWT.PUSH);
 			updateButton.setText(Messages.UPDATE);

@@ -35,6 +35,7 @@ import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
+import com.photon.phresco.ui.resource.Messages;
 
 public class ConfigurationPage extends AbstractHandler implements  PhrescoConstants {
 	private Button envSaveButton;
@@ -317,7 +318,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 
 		envCancelButton = new Button(envDialog, SWT.PUSH);
-		envCancelButton.setText(CANCEL);
+		envCancelButton.setText(Messages.CANCEL);
 		envCancelButton.setLayoutData(new GridData(75,20));
 
 		return envDialog;

@@ -153,7 +153,6 @@ public interface PhrescoConstants {
 	String DESCRITPTION      = "Description";
 	String CONFIGURE         = "Configure";
 	String CLONE		     = "Clone";
-	String CANCEL 		     = "Cancel";
 	String SAVE				 = "Save";
 	String STRING		     = "String";
 	String BOOLEAN		     = "Boolean";
@@ -171,7 +170,6 @@ public interface PhrescoConstants {
 	String BUILD_NO          = "No";
 	String BUILD_NAME		 = "BuildName";
 	String DOWNLOAD 		 = "Download";
-	String DEPLOY 		     = "Deploy";
 	String DYNAMIC_PARAMETER = "DynamicParameter";
 	String TYPE_PACKAGE_FILE_BROWSE = "packageFileBrowse";
 	String TYPE_PASSWORD = "password";
