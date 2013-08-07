@@ -108,8 +108,8 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 						GridLayout newLayout = new GridLayout(7, false);
 						newGroup.setLayout(newLayout);
 						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-						newGroup.setBounds(x, 5, 275, 100);
-						x = x + 20;
+//						newGroup.setBounds(x, 5, 275, 100);
+//						x = x + 20;
 						
 						final AppLayerComponent appLayerComponent = new AppLayerComponent(newGroup, SWT.NONE);
 						appLayerComponents.add(appLayerComponent);
@@ -123,6 +123,22 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 							public void widgetSelected(SelectionEvent e) {
 								appLayerComponents.remove(appLayerComponent);
 								newGroup.dispose();
+								reSize(composite, scrolledComposite);
+								
+								parentComposite.pack();
+								parentComposite.redraw();
+
+								composite.pack();
+								composite.redraw();
+								
+								mainApplayerGroup.pack();
+								mainApplayerGroup.redraw();
+								
+								newGroup.pack();
+								newGroup.redraw();
+								
+								scrolledComposite.pack();
+								scrolledComposite.redraw();
 							}
 						});
 						
@@ -181,11 +197,11 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 					public void widgetSelected(SelectionEvent e) {
 						
 						final Group newGroup = new Group(mainWebLayerGroup, SWT.NONE);
-						GridLayout newLayout = new GridLayout(7, false);
+						GridLayout newLayout = new GridLayout(9, false);
 						newGroup.setLayout(newLayout);
 						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-						newGroup.setBounds(x, 5, 250, 100);
-						x = x + 20;
+//						newGroup.setBounds(x, 5, 250, 100);
+//						x = x + 20;
 						
 						final WebLayerComponent webLayerComponent = new WebLayerComponent(newGroup, SWT.NONE);
 						webLayerComponents.add(webLayerComponent);
@@ -198,6 +214,22 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 							public void widgetSelected(SelectionEvent e) {
 								webLayerComponents.remove(webLayerComponent);
 								newGroup.dispose();
+								reSize(composite, scrolledComposite);
+								
+								parentComposite.pack();
+								parentComposite.redraw();
+
+								composite.pack();
+								composite.redraw();
+								
+								mainWebLayerGroup.pack();
+								mainWebLayerGroup.redraw();
+								
+								newGroup.pack();
+								newGroup.redraw();
+								
+								scrolledComposite.pack();
+								scrolledComposite.redraw();
 							}
 						});
 						
@@ -253,11 +285,11 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 					public void widgetSelected(SelectionEvent e) {
 						
 						final Group newGroup = new Group(mainMobileLayerGroup, SWT.NONE);
-						GridLayout newLayout = new GridLayout(7, false);
+						GridLayout newLayout = new GridLayout(9, false);
 						newGroup.setLayout(newLayout);
 						newGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-						newGroup.setBounds(x, 5, 350, 100);
-						x = x + 20;
+//						newGroup.setBounds(x, 5, 350, 100);
+//						x = x + 20;
 						
 						final MobLayerComponent mobLayerComponent = new MobLayerComponent(newGroup, SWT.NONE);
 						mobLayerComponents.add(mobLayerComponent);
@@ -271,6 +303,22 @@ public class TechnologyPage extends WizardPage implements IWizardPage, PhrescoCo
 							public void widgetSelected(SelectionEvent e) {
 								mobLayerComponents.remove(mobLayerComponent);
 								newGroup.dispose();
+								reSize(composite, scrolledComposite);
+								
+								parentComposite.pack();
+								parentComposite.redraw();
+
+								composite.pack();
+								composite.redraw();
+								
+								mainMobileLayerGroup.pack();
+								mainMobileLayerGroup.redraw();
+								
+								newGroup.pack();
+								newGroup.redraw();
+								
+								scrolledComposite.pack();
+								scrolledComposite.redraw();
 							}
 						});
 						
