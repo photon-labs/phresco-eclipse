@@ -34,6 +34,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -89,13 +90,17 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 
 		if (wizardPage instanceof TechnologyPage) {
 			
-			TechnologyPage technologyPage = (TechnologyPage) wizardPage;
+			final TechnologyPage technologyPage = (TechnologyPage) wizardPage;
 			
 			IWizardPage firstPage = getContainer().getCurrentPage().getPreviousPage();
 
 			AddProjectPage addProjectPage = (AddProjectPage) firstPage;
-			List<Button> layersList = addProjectPage.getLayersList();
-			technologyPage.renderLayer(layersList);
+			final List<Button> layersList = addProjectPage.getLayersList();
+			BusyIndicator.showWhile(null, new Runnable() {
+	            public void run() {
+	            	technologyPage.renderLayer(layersList);
+	            }
+	        });
 		}
 		return super.getNextPage(page);
 	}
