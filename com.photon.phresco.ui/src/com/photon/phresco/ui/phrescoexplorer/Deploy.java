@@ -208,7 +208,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 		deployDialog.setLayoutData(data);
 
 		try {
-			if (!PhrescoUtil.getDeployInfoConfigurationPath().exists()) {
+			if (PhrescoUtil.getDeployInfoConfigurationPath().exists()) {
 				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
 				Configuration configuration = processor.getConfiguration(DEPLOY_GOAL);
 				List<Parameter> parameters = configuration.getParameters().getParameter();
