@@ -1,7 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,6 @@ import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
-import com.photon.phresco.ui.resource.Messages;
 
 public class ConfigurationCreation  implements PhrescoConstants {
 
@@ -137,9 +135,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			typeGroup.setLayout(newLayout);
 			typeGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			final Group buttonGroup = new Group(configDialog, SWT.NONE | SWT.NO | SWT.SHADOW_OUT);
+			final Composite buttonGroup = new Composite(configDialog, SWT.RIGHT);
+			GridLayout buttonLayout = new GridLayout(2, false);
+			buttonGroup.setLayout(buttonLayout);
+			buttonGroup.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+			
+/*			final Group buttonGroup = new Group(configDialog, SWT.NONE | SWT.NO | SWT.SHADOW_OUT);
 			GridLayout mainLayout = new GridLayout(2, false);
-			buttonGroup.setLayout(mainLayout);
+			buttonGroup.setLayout(mainLayout);*/
 
 			renderConfigTypes(configDialog, composite, typeList,
 					buttonGroup);
@@ -159,10 +162,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				}
 			});
 
-			final GridData leftButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
+/*			final GridData leftButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 			leftButtonData.grabExcessHorizontalSpace = true;
 			leftButtonData.horizontalIndent = IDialogConstants.HORIZONTAL_MARGIN;
-			buttonGroup.setLayoutData(leftButtonData);
+			buttonGroup.setLayoutData(leftButtonData);*/
 
 			Button saveButton = new Button(buttonGroup, SWT.PUSH);
 			saveButton.setText("Create");
@@ -253,7 +256,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 	private void renderConfigTypes(final Shell configDialog,
 			final Composite composite, final Combo typeList,
-			final Group buttonGroup) {
+			final Composite buttonGroup) {
 
 		typeGroup.setText(typeList.getText());
 		typeGroup.setLocation(250, 5);
