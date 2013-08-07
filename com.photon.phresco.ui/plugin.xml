@@ -484,18 +484,19 @@
 				</command>
 				<command
 		          commandId="commit"
-		          icon=""
+		          icon="icons/deploy_icon.png"
 		          id="%project.scm.commit.id"
 		          label="%project.scm.commit.name"
 		          style="push"
 		          tooltip="%project.scm.commit.tooltip">
 				</command>
 				<command
-		          commandId="update"
-		          id="%project.scm.update.id"
-		          label="%project.scm.update.name"
-		          style="push"
-		          tooltip="%project.scm.update.tooltip">
+          commandId="update"
+          icon="icons/update_icon.png"
+          id="%project.scm.update.id"
+          label="%project.scm.update.name"
+          style="push"
+          tooltip="%project.scm.update.tooltip">
 				</command>
 				
 			</menu>
