@@ -103,6 +103,15 @@ public class Messages extends NLS {
 	//Quality
 	public static String UNIT_TEST_LABEL;
 	
+	//PDF Report
+	public static String PDF_REPORT_MSG;
+	public static String GENERATE;
+	public static String PDF_REPORT_NAME;
+	public static String PDF_REPORT_DETAILED;
+	public static String PDF_REPORT_OVERALL;
+	public static String PDF_REPORT_TYPE_LBL;
+	public static String PDF_REPORT_DIALOG_TITLE;
+	
 	*/
 	
 	// Needs to be localization
@@ -182,6 +191,7 @@ public class Messages extends NLS {
 	//Quality
 	public static String UNIT_TEST_LABEL = "Unit";
 	public static String REPORT_NOT_AVAILABLE = "Report Not Available";
+	
 	//testsuite 
 	public static String TEST_SUITE = "Test Suite";
 	public static String TOTAL  = "Total";
@@ -189,6 +199,14 @@ public class Messages extends NLS {
 	public static String FAILURE = "Failure";
 	public static String TEST = "Test";
 	
+	//PDF Report
+	public static String PDF_REPORT_MSG = "Atleast one Test Report should be available Or Sonar report should be available";
+	public static String GENERATE = "Generate";
+	public static String PDF_REPORT_NAME = "Pdf Report Name";
+	public static String PDF_REPORT_DETAILED = "Detailed";
+	public static String PDF_REPORT_OVERALL =  "Overall";
+	public static String PDF_REPORT_TYPE_LBL = "Report Type";
+	public static String PDF_REPORT_DIALOG_TITLE = "Generate PDF";
 	
 /*	
 	static {

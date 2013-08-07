@@ -67,7 +67,8 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		Shell shell = HandlerUtil.getActiveShell(event);
-		final Shell reportDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE | SWT.RESIZE);
+		final Shell reportDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE);
+		reportDialog.setText(Messages.PDF_REPORT_DIALOG_TITLE);
 		GridLayout layout = new GridLayout(1, false);
 		reportDialog.setLocation(reportDialog.getLocation());
 		reportDialog.setLayout(layout);
@@ -80,26 +81,26 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		
 		Label reportTypeLable = new Label(composite, SWT.NONE);
 		reportTypeLable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		reportTypeLable.setText("Report Type");
+		reportTypeLable.setText(Messages.PDF_REPORT_TYPE_LBL);
 		
 		reportTypeCombo = new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
-		String[] reportItems = {"Detailed", "Overall"};
+		String[] reportItems = {Messages.PDF_REPORT_DETAILED, Messages.PDF_REPORT_OVERALL};
 		reportTypeCombo.setItems(reportItems);
 		reportTypeCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		reportTypeCombo.select(0);
 		
 		Label pdfReportNameLabel = new Label(composite, SWT.NONE);
-		pdfReportNameLabel.setText("Pdf Report Name");
+		pdfReportNameLabel.setText(Messages.PDF_REPORT_NAME);
 		pdfReportNameLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		pdfReportNameText = new Text(composite, SWT.BORDER);
-		pdfReportNameText.setMessage("Pdf Report Name");
+		pdfReportNameText.setMessage(Messages.PDF_REPORT_NAME);
 		pdfReportNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Composite buttonComposite = new Composite(reportDialog, SWT.RIGHT);
 		GridLayout buttonLayout = new GridLayout(2, false);
 		buttonComposite.setLayout(buttonLayout);
-		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
 		
 		Listener generateListener = new Listener() {
 			
@@ -126,12 +127,12 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 			}
 		};
 		Button generate = new Button(buttonComposite, SWT.PUSH | SWT.CENTER);
-		generate.setText("Generate");
+		generate.setText(Messages.GENERATE);
 		
 		generate.addListener(SWT.Selection, generateListener);
 		
 		Button close = new Button(buttonComposite, SWT.PUSH | SWT.CENTER);
-		close.setText("Close");
+		close.setText(Messages.CANCEL);
 		
 		close.addListener(SWT.Selection, closeListener);
 		
@@ -163,7 +164,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
     	} if(isTestReportAvailable(appInfo)) {
     		isReportAvailable = true;
     	} else {
-    		PhrescoDialog.errorDialog(shell, Messages.ERROR, "Atleast one Test Report should be available Or Sonar report should be available");
+    		PhrescoDialog.errorDialog(shell, Messages.ERROR, Messages.PDF_REPORT_MSG);
     		isReportAvailable = false;
     	}
     	return isReportAvailable;
