@@ -1,6 +1,7 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,90 +163,10 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		return dialog;
 	}
 
-	public void UnitTest() {
-		List<String> buildArgCmds = null;
-		try {
-			if (PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
-				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
-				List<Parameter> parameters = processor.getConfiguration(UNIT_TEST_GOAL).getParameters().getParameter();
-				buildArgCmds = getMavenArgCommands(parameters);
-			}
-
-			ProjectManager manager = new ProjectManager();
-			ProjectInfo info = PhrescoUtil.getProjectInfo();
-
-			ApplicationInfo applicationInfo = info.getAppInfos().get(0);
-			String pomFileName = PhrescoUtil.getPomFileName(applicationInfo);
-
-			if(!POM_FILENAME.equals(pomFileName)) {
-				buildArgCmds.add(pomFileName);
-			}
-			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
-			manager.getApplicationProcessor().preBuild(applicationInfo);
-			BufferedReader performAction = performAction(info, ActionType.UNIT_TEST, buildArgCmds, workingDirectory);
-
-			ConsoleViewManager.getDefault(UNIT_LOGS).println(performAction);
-
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-	}
-
-	protected List<String> getMavenArgCommands(List<Parameter> parameters) {
-		List<String> buildArgCmds = new ArrayList<String>();	
-		if(CollectionUtils.isEmpty(parameters)) {
-			return buildArgCmds;
-		}
-		for (Parameter parameter : parameters) {
-			if (parameter.getPluginParameter()!= null && FRAMEWORK.equalsIgnoreCase(parameter.getPluginParameter())) {
-				List<MavenCommand> mavenCommand = parameter.getMavenCommands().getMavenCommand();
-				for (MavenCommand mavenCmd : mavenCommand) {
-					if (StringUtils.isNotEmpty(parameter.getValue()) && parameter.getValue().equalsIgnoreCase(mavenCmd.getKey())) {
-						buildArgCmds.add(mavenCmd.getValue());
-					}
-				}
-			}
-		}
-		return buildArgCmds;
-	}
-	public BufferedReader performAction(ProjectInfo projectInfo, ActionType build, List<String> mavenArgCommands, String workingDirectory) throws PhrescoException {
-
-		StringBuilder command = buildMavenCommand(build, mavenArgCommands);
-		return executeMavenCommand(projectInfo, build, command, workingDirectory);
-	}
-
-
-	public StringBuilder buildMavenCommand(ActionType actionType, List<String> mavenArgCommands) {
-		StringBuilder builder = new StringBuilder(MAVEN_COMMAND);
-		builder.append(STR_SPACE);
-		builder.append(actionType.getActionType());
-
-		if (CollectionUtils.isNotEmpty(mavenArgCommands)) {
-			for (String mavenArgCommand : mavenArgCommands) {
-				builder.append(STR_SPACE);
-				builder.append(mavenArgCommand);
-			}
-		}
-		return builder;
-	}
-
-	private BufferedReader executeMavenCommand(ProjectInfo projectInfo, ActionType action, StringBuilder command, String workingDirectory) throws PhrescoException {
-		Commandline cl = new Commandline(command.toString());
-		if (StringUtils.isNotEmpty(workingDirectory)) {
-			cl.setWorkingDirectory(workingDirectory);
-		} 
-		try {
-			Process process = cl.execute();
-			return new BufferedReader(new InputStreamReader(process.getInputStream()));
-		} catch (CommandLineException e) {
-			throw new PhrescoException(e);
-		}
-	}
-
-
 	public void saveCongfiguration()  {
 		try {
-			if (!PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
+			File unitTestInfoConfigurationPath = PhrescoUtil.getUnitTestInfoConfigurationPath();
+			if (!unitTestInfoConfigurationPath.exists() || unitTestInfoConfigurationPath.length() < 0) {
 				return;
 			}
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
@@ -311,8 +232,8 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		unitTestDialog.setLayoutData(data);
 
 		try {
-			if (PhrescoUtil.getUnitTestInfoConfigurationPath().exists()) {
-
+			File unitTestInfoConfigurationPath = PhrescoUtil.getUnitTestInfoConfigurationPath();
+			if (unitTestInfoConfigurationPath.exists() && unitTestInfoConfigurationPath.length() > 0) {
 				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getUnitTestInfoConfigurationPath());
 				Configuration configuration = processor.getConfiguration(UNIT_TEST_GOAL);
 				List<Parameter> parameters = configuration.getParameters().getParameter();
@@ -468,7 +389,9 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					BusyIndicator.showWhile(null, new Runnable() {
 						@Override
 						public void run() {
-							UnitTest();		
+							ExecuteAction action = new ExecuteAction(PhrescoUtil.getUnitTestInfoConfigurationPath(),
+									UNIT_TEST_GOAL, ActionType.UNIT_TEST, "UnitLogs");
+							action.execute();	
 							unitTestDialog.close();
 						}
 					});

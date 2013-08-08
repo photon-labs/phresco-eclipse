@@ -178,7 +178,9 @@ public interface PhrescoConstants {
 	
 	String 	DEPLOY_INFO_FILE = "phresco-deploy-info.xml";
 	String DEPLOY_GOAL 		 = "deploy";
+	String DEPLOY 		 = "deploy";
 	String WATCHER_MAP       = "watchermap";
+	String DEPLOY_LOGS	= "Deploy Logs";
 	
 	// Code Validate
 	
@@ -271,5 +273,12 @@ public interface PhrescoConstants {
 	String ADD_CONGIFURATION = "Add Configuration";
 	String CONFIGURE   = "Configure";
 	String CANCEL      = "Cancel";
+	
+	
+	// Dynamic constants
+	
+	String GOAL 	= "goal";
+	String MOJO     = "mojo";
+	
 	
 }

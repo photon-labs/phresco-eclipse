@@ -1,11 +1,9 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -22,15 +20,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,18 +48,16 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.BuildInfo;
-import com.photon.phresco.commons.model.ProjectInfo;
-import com.photon.phresco.commons.util.ConsoleViewManager;
+import com.photon.phresco.commons.model.Technology;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
@@ -90,18 +84,29 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		Shell shell = HandlerUtil.getActiveShell(event);
-		
+
 		BaseAction baseAction = new BaseAction();
-		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
+		final ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
 			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return null;
 		}
 		
-		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
-		if (!PhrescoUtil.getDeployInfoConfigurationPath().exists()) {
-			return null;
+		try {
+			Technology technology = serviceManager.getTechnology(PhrescoUtil.getTechId());
+			List<String> options = technology.getOptions();
+			if (CollectionUtils.isNotEmpty(options)) {
+				if(!options.contains("Deploy")) {
+					PhrescoDialog.errorDialog(shell, "Deploy", "Deploy is not Applicable");
+					return null;
+				}
+			}
+		} catch (PhrescoException e1) {
+			e1.printStackTrace();
 		}
+
+		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+
 		final Shell createDeployDialog = createDeployDialog(dialog);
 
 		deployButton.addListener(SWT.Selection, new Listener() {
@@ -113,7 +118,13 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				deploy();
+				BusyIndicator.showWhile(null, new Runnable() {
+					public void run() {
+						ExecuteAction action = new ExecuteAction(PhrescoUtil.getDeployInfoConfigurationPath(),
+								DEPLOY_GOAL, ActionType.DEPLOY, DEPLOY_LOGS);
+						action.execute();
+					}
+				});
 				dialog.close();
 			}
 		});
@@ -130,82 +141,6 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 		return null;
 	}
-
-	public void deploy() {
-		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
-			List<Parameter> parameters = processor.getConfiguration("deploy").getParameters().getParameter();
-			List<String> buildArgCmds = getMavenArgCommands(parameters);
-			ProjectManager manager = new ProjectManager();
-			ProjectInfo info = PhrescoUtil.getProjectInfo();
-
-			ApplicationInfo applicationInfo = info.getAppInfos().get(0);
-			String pomFileName = PhrescoUtil.getPomFileName(applicationInfo);
-
-			if(!POM_FILENAME.equals(pomFileName)) {
-				buildArgCmds.add(pomFileName);
-			}
-			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
-			manager.getApplicationProcessor().preBuild(applicationInfo);
-			BufferedReader performAction = performAction(info, ActionType.DEPLOY, buildArgCmds, workingDirectory);
-
-			ConsoleViewManager.getDefault("Deploy Logs").println(performAction);
-
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-	}
-
-
-	protected List<String> getMavenArgCommands(List<Parameter> parameters) {
-		List<String> buildArgCmds = new ArrayList<String>();	
-		if(CollectionUtils.isEmpty(parameters)) {
-			return buildArgCmds;
-		}
-		for (Parameter parameter : parameters) {
-			if (parameter.getPluginParameter()!= null && FRAMEWORK.equalsIgnoreCase(parameter.getPluginParameter())) {
-				List<MavenCommand> mavenCommand = parameter.getMavenCommands().getMavenCommand();
-				for (MavenCommand mavenCmd : mavenCommand) {
-					if (StringUtils.isNotEmpty(parameter.getValue()) && parameter.getValue().equalsIgnoreCase(mavenCmd.getKey())) {
-						buildArgCmds.add(mavenCmd.getValue());
-					}
-				}
-			}
-		}
-		return buildArgCmds;
-	}
-
-	public BufferedReader performAction(ProjectInfo projectInfo, ActionType build, List<String> mavenArgCommands, String workingDirectory) throws PhrescoException {
-		StringBuilder command = buildMavenCommand(build, mavenArgCommands);
-		return executeMavenCommand(projectInfo, build, command, workingDirectory);
-	}
-
-	public StringBuilder buildMavenCommand(ActionType actionType, List<String> mavenArgCommands) {
-		StringBuilder builder = new StringBuilder(MAVEN_COMMAND);
-		builder.append(STR_SPACE);
-		builder.append(actionType.getActionType());
-		if (CollectionUtils.isNotEmpty(mavenArgCommands)) {
-			for (String mavenArgCommand : mavenArgCommands) {
-				builder.append(STR_SPACE);
-				builder.append(mavenArgCommand);
-			}
-		}
-		return builder;
-	}
-
-	private BufferedReader executeMavenCommand(ProjectInfo projectInfo, ActionType action, StringBuilder command, String workingDirectory) throws PhrescoException {
-		Commandline cl = new Commandline(command.toString());
-		if (StringUtils.isNotEmpty(workingDirectory)) {
-			cl.setWorkingDirectory(workingDirectory);
-		} 
-		try {
-			Process process = cl.execute();
-			return new BufferedReader(new InputStreamReader(process.getInputStream()));
-		} catch (CommandLineException e) {
-			throw new PhrescoException(e);
-		}
-	}
-
 
 	public Shell createDeployDialog(Shell dialog) {
 		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
@@ -306,7 +241,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						Logs.setBounds(24, 40, 80, 23);
 						final List<String> buttons = new ArrayList<String>();
 
-						String isMultiple = checkMultiple(processor, "deploy");
+						String isMultiple = checkMultiple(processor, DEPLOY);
 
 						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {						
 							Group group = new Group(deployDialog, SWT.SHADOW_IN);
@@ -417,17 +352,17 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
 			MojoProcessor mojo = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
 
-			List<Parameter> parameters = mojo.getParameters("deploy");
+			List<Parameter> parameters = mojo.getParameters(DEPLOY);
 			for (Parameter parameter : parameters) {
 				if (dependency != null) {
 					// Get the values from the dynamic parameter class
-					Parameter dependentParameter = mojo.getParameter("deploy", dependency);
+					Parameter dependentParameter = mojo.getParameter(DEPLOY, dependency);
 					if (dependentParameter.getDynamicParameter() != null) {
 						DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 
 						Map<String, Object> constructMapForDynVals = possibleValues.constructMapForDynVals(applicationInfo, watcherMaps, dependency);
-						constructMapForDynVals.put("mojo", mojo);
-						constructMapForDynVals.put("goal", "deploy");
+						constructMapForDynVals.put(MOJO, mojo);
+						constructMapForDynVals.put(GOAL, DEPLOY);
 						dependentPossibleValues = possibleValues.getDynamicPossibleValues(constructMapForDynVals, dependentParameter);
 
 						if (CollectionUtils.isNotEmpty(dependentPossibleValues) && watcherMaps.containsKey(dependency)) {
@@ -473,6 +408,10 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			String databaseName = null;
 			JSONObject jsonObject = new JSONObject();
 
+			File deployFileConfigurationPath = PhrescoUtil.getDeployInfoConfigurationPath();
+			if (!deployFileConfigurationPath.exists() && deployFileConfigurationPath.length() > 0) {
+				return;
+			}
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
 			List<Parameter> parameters = processor.getConfiguration(DEPLOY_GOAL).getParameters().getParameter();
 			if (CollectionUtils.isNotEmpty(parameters)) {
@@ -503,7 +442,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 							}
 						}
 					} else if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-						String isMultiple = checkMultiple(processor, "deploy");
+						String isMultiple = checkMultiple(processor, DEPLOY);
 						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {				
 							List<String> list =  (List<String>) deploymap.get(parameter.getKey());
 							StringBuilder env = new StringBuilder();

@@ -1,8 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +12,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -43,17 +39,13 @@ import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
-import com.photon.phresco.commons.model.ProjectInfo;
-import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.SonarUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
@@ -78,7 +70,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
-//	private Combo listLogs;
+	//	private Combo listLogs;
 	private static Map<String, Object> map = new HashedMap();
 	private static Map<String, String> techValues = new HashedMap();
 	Map<String, String> typeMaps = new HashedMap();
@@ -91,14 +83,14 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
-		
+
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
 			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return null;
 		}
-		
+
 		Shell createSonarDialog = createSonarDialog(shell);
 		createSonarDialog.open();
 		return null;
@@ -119,8 +111,8 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		Label reportTypeLabel = new Label(codeDialog, SWT.NONE);
 		reportTypeLabel.setText("Report Type");
 
-		
-		
+
+
 		reportType =  new Combo(codeDialog, SWT.READ_ONLY | SWT.BORDER);
 		List<CodeValidationReportType> codeValidationReportTypes = SonarUtil.getCodeValidationReportTypes();
 		if (CollectionUtils.isNotEmpty(codeValidationReportTypes)) {
@@ -146,7 +138,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		data.horizontalSpan = 1;
 		data.grabExcessHorizontalSpace = true;
 		reportType.setLayoutData(data);
-		
+
 		try {
 			browser = new Browser(codeDialog, SWT.NONE);
 		} catch (SWTError e) {
@@ -158,21 +150,21 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		browser.setLayoutData(data);
 		setBrowserUrl();
 		reportType.addListener(SWT.Selection, new Listener() {
-			
+
 			@Override
 			public void handleEvent(Event event) {
 				setBrowserUrl();
 			}
 		});
-		
-		
+
+
 
 		Composite cancelComposite = new Composite(codeDialog, SWT.NONE);
 		GridLayout subLayout = new GridLayout(1, false);
 		codeDialog.setLayout(subLayout);
 		cancelComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
 		testButton.addListener(SWT.Selection, new Listener() {
-			
+
 			@Override
 			public void handleEvent(Event event) {
 				codeDialog.setVisible(false);
@@ -189,19 +181,21 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				} catch (PhrescoException e) {
 					e.printStackTrace();
 				}
-		
+
 				codeButton.addListener(SWT.Selection, new Listener() {
-		
+
 					@Override
 					public void handleEvent(Event event) {
 						saveCongfiguration();
 						BusyIndicator.showWhile(null, new Runnable() {
 							@Override
 							public void run() {
-								ValidateCode();
+								ExecuteAction action = new ExecuteAction(PhrescoUtil.getValidateCodeInfoConfigurationPath(),
+										VALIDATE_CODE_GOAL, ActionType.CODE_VALIDATE, "CodeLogs");
+								action.execute();
 							}
 						});
-						
+
 						dialog.setVisible(false);
 						codeDialog.setVisible(true);
 						setBrowserUrl();
@@ -209,18 +203,18 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				});
 			}
 		});
-		
+
 		cancelButton = new Button(cancelComposite, SWT.PUSH);
 		cancelButton.setText(Messages.CANCEL);
 		cancelButton.setSize(74, 23);
-		
+
 		Listener cancelListener = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
 				codeDialog.close();				
 			}
 		};
-		
+
 		cancelButton.addListener(SWT.Selection, cancelListener);
 
 		return codeDialog;
@@ -239,7 +233,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String getReportUrl() {
 		try {
 			String appDirName = PhrescoUtil.getApplicationInfo().getAppDirName();
@@ -249,7 +243,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			String sourceType = "";
 			String functionalDir = processor.getProperty("phresco.functionalTest.dir");
 			boolean startsWith = functionalDir.startsWith("/");
-			
+
 			if (StringUtils.isNotEmpty(functionalDir) && !startsWith) {
 				functionalDir = File.separator + functionalDir;
 			}
@@ -296,87 +290,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		return null;
 
 	}
-	
-	public void ValidateCode() {
-		try {
-			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
-			List<Parameter> parameters = processor.getConfiguration(VALIDATE_CODE_GOAL).getParameters().getParameter();
-			List<String> buildArgCmds = getMavenArgCommands(parameters);
-			ProjectManager manager = new ProjectManager();
-			ProjectInfo info = PhrescoUtil.getProjectInfo();
-
-			ApplicationInfo applicationInfo = info.getAppInfos().get(0);
-			String pomFileName = PhrescoUtil.getPomFileName(applicationInfo);
-
-			if(!POM_FILENAME.equals(pomFileName)) {
-				buildArgCmds.add(pomFileName);
-			}
-			String workingDirectory = PhrescoUtil.getApplicationHome().toString();
-
-			manager.getApplicationProcessor().preBuild(applicationInfo);
-			BufferedReader performAction = performAction(info, ActionType.CODE_VALIDATE, buildArgCmds, workingDirectory);
-			
-			ConsoleViewManager.getDefault(SONAR_LOGS).println(performAction);
-			
-			createConfigureDialog.setVisible(false);
-			codeDialog.setVisible(true);
-			
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-	}
-
-	protected List<String> getMavenArgCommands(List<Parameter> parameters) {
-		List<String> buildArgCmds = new ArrayList<String>();	
-		if(CollectionUtils.isEmpty(parameters)) {
-			return buildArgCmds;
-		}
-		for (Parameter parameter : parameters) {
-			if (parameter.getPluginParameter()!= null && FRAMEWORK.equalsIgnoreCase(parameter.getPluginParameter())) {
-				List<MavenCommand> mavenCommand = parameter.getMavenCommands().getMavenCommand();
-				for (MavenCommand mavenCmd : mavenCommand) {
-					if (StringUtils.isNotEmpty(parameter.getValue()) && parameter.getValue().equalsIgnoreCase(mavenCmd.getKey())) {
-						buildArgCmds.add(mavenCmd.getValue());
-					}
-				}
-			}
-		}
-		return buildArgCmds;
-	}
-
-	public BufferedReader performAction(ProjectInfo projectInfo, ActionType build, List<String> mavenArgCommands, String workingDirectory) throws PhrescoException {
-		StringBuilder command = buildMavenCommand(build, mavenArgCommands);
-		return executeMavenCommand(projectInfo, build, command, workingDirectory);
-	}
-
-
-	public StringBuilder buildMavenCommand(ActionType actionType, List<String> mavenArgCommands) {
-		StringBuilder builder = new StringBuilder(MAVEN_COMMAND);
-		builder.append(STR_SPACE);
-		builder.append(actionType.getActionType());
-
-		if (CollectionUtils.isNotEmpty(mavenArgCommands)) {
-			for (String mavenArgCommand : mavenArgCommands) {
-				builder.append(STR_SPACE);
-				builder.append(mavenArgCommand);
-			}
-		}
-		return builder;
-	}
-
-	private BufferedReader executeMavenCommand(ProjectInfo projectInfo, ActionType action, StringBuilder command, String workingDirectory) throws PhrescoException {
-		Commandline cl = new Commandline(command.toString());
-		if (StringUtils.isNotEmpty(workingDirectory)) {
-			cl.setWorkingDirectory(workingDirectory);
-		} 
-		try {
-			Process process = cl.execute();
-			return new BufferedReader(new InputStreamReader(process.getInputStream()));
-		} catch (CommandLineException e) {
-			throw new PhrescoException(e);
-		}
-	}
-
 
 	public void saveCongfiguration()  {
 		try {
@@ -508,7 +421,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 					Combo listLogs = new Combo(createConfigureDialog, SWT.DROP_DOWN);
-					
+
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
 						listLogs.add(value.getValue());
@@ -582,10 +495,10 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			cancelButton = new Button(composite, SWT.PUSH);
 			cancelButton.setText(Messages.CANCEL);
 			cancelButton.setSize(74, 23);
-			
-			
+
+
 			Listener cancelListener = new Listener() {
-				
+
 				@Override
 				public void handleEvent(Event event) {
 					createConfigureDialog.close();
