@@ -249,7 +249,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					int yaxis = 0;
 					String key = null;
 					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
-					Logs.setText(Messages.ENVIRONMENT);
+					Logs.setText(parameter.getName().getValue().get(0).getValue());
 					Logs.setBounds(24, 40, 80, 23);
 
 					Group group = new Group(functionalTestDialog, SWT.SHADOW_IN);
