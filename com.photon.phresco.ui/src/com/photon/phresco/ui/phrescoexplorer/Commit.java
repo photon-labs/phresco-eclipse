@@ -97,6 +97,8 @@ public class Commit extends AbstractHandler implements PhrescoConstants {
 					usernameText = scmPage.usernameText;
 					passwordText = scmPage.passwordText;
 					messageText = scmPage.messageText;
+					connectionUrl = scmPage.connectionUrl;
+					filesTobeCommit = scmPage.filesTobeCommit;
 					return commit(scmPage);
 				}
 			}

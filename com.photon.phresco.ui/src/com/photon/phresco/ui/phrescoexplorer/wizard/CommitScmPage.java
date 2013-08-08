@@ -54,8 +54,8 @@ public class CommitScmPage extends WizardPage implements PhrescoConstants {
 	private Label usernameLabel;
 	private Label passwordLabel;
 	private Label messageLabel;
-	private String connectionUrl;
-	private List<File> filesTobeCommit = new ArrayList<File>();
+	public String connectionUrl;
+	public List<File> filesTobeCommit = new ArrayList<File>();
 
 	@Override
 	public void createControl(Composite parent) {
