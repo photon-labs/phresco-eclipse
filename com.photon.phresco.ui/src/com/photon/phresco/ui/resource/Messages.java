@@ -231,6 +231,7 @@ public class Messages extends NLS {
 	//Title messages
 	public static String TITLE_COMMIT_TO_REPO = "Commit to Repo";
 	public static String TITLE_ADD_TO_REPO = "Add To Repo";
+	public static String TITLE_UPDATE = "Update";
 /*	
 	static {
 		// initialize resource bundle
