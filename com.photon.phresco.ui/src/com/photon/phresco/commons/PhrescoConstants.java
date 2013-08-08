@@ -201,6 +201,7 @@ public interface PhrescoConstants {
 	String TEST				  = "Test";
 	String UNIT_LOGS 		  = "Unit logs";
 	String UNIT				  = "unit";
+	String SHOW_SETTINGS      = "showSettings";
 	
 
 	String FAILED = "FAILED";

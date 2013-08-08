@@ -349,6 +349,9 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						map.put(parameter.getKey(), numberText);
 
 					} else if (type.equalsIgnoreCase(BOOLEAN)) {
+						if (parameter.getKey().equalsIgnoreCase(SHOW_SETTINGS)) {
+							continue;
+						}
 						Label defaults = new Label(unitTestDialog, SWT.LEFT);
 						defaults.setText(parameter.getName().getValue().get(0).getValue());
 						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
