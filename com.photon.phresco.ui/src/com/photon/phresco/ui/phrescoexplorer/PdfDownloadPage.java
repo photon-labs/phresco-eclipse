@@ -20,12 +20,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -58,11 +61,12 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 			return null;
 		}
 		
-		final Shell downloadDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE | SWT.RESIZE);
+		final Shell downloadDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE);
 		downloadDialog.setText(Messages.PDF_REPORT_DOWNLOAD_DIALOG_TITLE);
 		GridLayout layout = new GridLayout(1, false);
 		downloadDialog.setLocation(downloadDialog.getLocation());
 		downloadDialog.setLayout(layout);
+		downloadDialog.setSize(450, 300);
 		downloadDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		final Composite composite = new Composite(downloadDialog, SWT.NONE);
@@ -79,14 +83,16 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 				PhrescoDialog.errorDialog(downloadDialog, Messages.ERROR, "Pdf report Not Available");
 				return null;
 			}
-			Table table = new Table(downloadDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+			final Table table = new Table(downloadDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 			table.setLayoutData(new GridData(GridData.FILL_BOTH));
 			table.setHeaderVisible(true);
-
+			table.setLinesVisible(true);
+			
 			String[] columnValues = {"Existing Reports", "Type", "Download"};
 			for (int i = 0; i < columnValues.length; i++) {
 				TableColumn column = new TableColumn(table, SWT.FILL);
 				column.setText(columnValues[i]);
+				column.setWidth(120);
 			}
 
 			for (Map<String,String> pdfMap : existingPDFs) {
@@ -97,14 +103,16 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 				item.setText(0, time);
 				item.setText(1, type);
 
+				int item_height = 18;
+				Image fake = new Image(table.getDisplay(), 1, item_height);
+				item.setImage(0, fake); 
+				
 				Composite configureButtonPan = new Composite(table, SWT.NONE);
 				configureButtonPan.setLayout(new FillLayout());
-
 				final Button downloadButton = new Button(configureButtonPan, SWT.PUSH);
 				downloadButton.setText("download");
 				downloadButton.setData(time, reportFileName);
-				downloadButton.pack();
-
+				
 				downloadButton.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -121,20 +129,10 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 				});
 
 				TableEditor editor = new TableEditor(table);
-				editor.minimumWidth = downloadButton.getSize().x +10;
 				editor.horizontalAlignment = SWT.CENTER;
 				editor.grabHorizontal = true;
 				editor.setEditor(configureButtonPan, item, 2);
 			}
-			for (int i=0; i<columnValues.length; i++) {
-				table.getColumn (i).pack ();
-			}  
-
-			int x = table.getSize().x + 250;
-			int y = table.getSize().y + 150;
-
-			downloadDialog.setSize(x, y);
-			downloadDialog.setLocation(x, y);
 			downloadDialog.open();
 		} catch (PhrescoException e) {
 			PhrescoDialog.exceptionDialog(downloadDialog, e);
