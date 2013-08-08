@@ -267,5 +267,6 @@ public interface PhrescoConstants {
 	String SERVER_TYPE  = "server Type";
 	String DB_TYPE		= "DB Type";
 	String CERTIFICATE  = "Certificate";
+	String CREATE       = "Create";
 	
 }

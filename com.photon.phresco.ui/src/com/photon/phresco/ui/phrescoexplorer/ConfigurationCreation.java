@@ -11,7 +11,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -163,7 +162,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			buttonGroup.setLayoutData(leftButtonData);*/
 
 			Button saveButton = new Button(buttonGroup, SWT.PUSH);
-			saveButton.setText("Create");
+			saveButton.setText(CREATE);
 			saveButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
 					SettingsTemplate serverTemplate;
@@ -178,8 +177,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
-								if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
-										|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("VErsion")) {
+								if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE) || propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)
+										|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
@@ -408,11 +407,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		createTemplateByTypes(configureDialogs);
 	}
 
-	public void configure(TreeItem parent, TreeItem item) {
-		editConfiguration(parent, item);
+	public void configure(Shell configureDialogs, TreeItem parent, TreeItem item) {
+		editConfiguration(configureDialogs, parent, item);
 	}
 
-	private void editConfiguration(final TreeItem parent, final TreeItem item) {
+	private void editConfiguration(final Shell configureDialogs, final TreeItem parent, final TreeItem item) {
 		try {
 			File configureFile = PhrescoUtil.getConfigurationFile();
 			ConfigManagerImpl impls = new ConfigManagerImpl(configureFile);
@@ -466,7 +465,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					tempType.setText("Type");
 					tempType.setLayoutData(new GridData(50,25));
 
-
 					typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 					typeList.setLayoutData(new GridData(60,25));	
 					typeList.add(configuration.getType());
@@ -517,6 +515,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
+					configureDialogs.setVisible(false);
 					configDialog.close();
 				}
 			});
@@ -640,8 +639,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						String environmentName = parent.getText();
 						Configuration configuration = new Configuration();
 						configuration.setEnvName(environmentName);
-						configuration.setName(item.getText());
-						configuration.setType(namestext.getText());
+						configuration.setName(namestext.getText());
+						configuration.setType(typeList.getText());
 						configuration.setProperties(properties);
 						impl.updateConfiguration(environmentName, item.getText(), configuration);
 						configDialog.setVisible(false);

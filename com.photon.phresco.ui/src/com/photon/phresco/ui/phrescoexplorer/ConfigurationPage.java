@@ -248,9 +248,10 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 			public void handleEvent(Event event) {
 				TreeItem parentTree = (TreeItem) treeMap.get(PARENT_TREE);
 				if (parentTree == null) {
+					configureDialogs.setVisible(false);
 					TreeItem parent = (TreeItem) treeMap.get(PARENT);
 					TreeItem child =  (TreeItem) treeMap.get(CHILD);
-					creation.configure(parent, child);
+					creation.configure(configureDialogs, parent, child);
 				} 
 			}
 		});
