@@ -31,7 +31,7 @@ public class AddToRepoWizardPage extends WizardPage {
 
 	public AddToRepoWizardPage(String pageName) {
 		super(pageName);
-		setTitle("Add To Repo");
+		setTitle(Messages.TITLE_ADD_TO_REPO);
 	}
 
 	@Override

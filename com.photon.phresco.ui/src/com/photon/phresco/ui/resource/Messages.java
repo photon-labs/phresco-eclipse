@@ -228,6 +228,9 @@ public class Messages extends NLS {
 	public static String PDF_REPORT_DIALOG_TITLE = "Generate PDF";
 	public static String PDF_REPORT_DOWNLOAD_DIALOG_TITLE = "Download PDF";
 	
+	//Title messages
+	public static String TITLE_COMMIT_TO_REPO = "Commit to Repo";
+	public static String TITLE_ADD_TO_REPO = "Add To Repo";
 /*	
 	static {
 		// initialize resource bundle
