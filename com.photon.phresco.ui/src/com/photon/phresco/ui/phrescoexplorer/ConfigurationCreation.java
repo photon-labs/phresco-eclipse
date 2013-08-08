@@ -1,12 +1,14 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,6 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.photon.phresco.commons.PhrescoConstants;
@@ -55,7 +58,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Group typeGroup;
 	private Combo typeList;
 	private Combo environmentList;
-	private String configName;
 
 	private void createTemplateByTypes(final Shell configureDialogs) {
 		try {
@@ -407,11 +409,133 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		createTemplateByTypes(configureDialogs);
 	}
 
-	public void configure(Shell configureDialogs, TreeItem parent, TreeItem item) {
-		editConfiguration(configureDialogs, parent, item);
+	
+	public void editEnvironment(final Shell configureDialogs, TreeItem parentTree) {
+		try {
+			File configurationFile = PhrescoUtil.getConfigurationFile();
+			ConfigManagerImpl impl = new ConfigManagerImpl(configurationFile);
+
+			List<Environment> environments = impl.getEnvironments();
+			if (CollectionUtils.isNotEmpty(environments)) {
+				for (final Environment environment : environments) {
+					if (environment.getName().equalsIgnoreCase(parentTree.getText())) {
+						System.out.println("NAme header = " + environment.getName());
+						final Shell envDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+						envDialog.setText(ENVIROMENT);
+						envDialog.setLocation(385,130);
+						envDialog.setSize(416, 230);
+
+						GridLayout subLayout = new GridLayout(2, false);
+						subLayout.verticalSpacing = 20;
+						subLayout.horizontalSpacing = 60;
+						envDialog.setLayout(subLayout);
+
+						Label envLabel = new  Label(envDialog,  SWT.LEFT);
+						envLabel.setText(ENVIRONMENT_NAME);
+						envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						final Text envText = new Text(envDialog, SWT.BORDER); 
+						envText.setToolTipText(ENVIRONMENT_NAME);
+						envText.setMessage(ENVIRONMENT_NAME);
+						envText.setLayoutData(new GridData(80,13));
+						if (StringUtils.isNotEmpty(environment.getName())) {
+							System.out.println("NAme = " + environment.getName());
+							envText.setText(environment.getName());
+						}
+
+						Label descLabel = new  Label(envDialog,  SWT.LEFT);
+						descLabel.setText(DESCRITPTION);
+						envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						final Text descText = new Text(envDialog, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL); 
+						descText.setToolTipText(DESCRITPTION);
+						descText.setLayoutData(new GridData(80,13));
+						descText.setMessage(DESCRITPTION);
+						if (StringUtils.isNotEmpty(environment.getDesc())) {
+							descText.setText(environment.getDesc());
+						}
+
+						Label defaults = new  Label(envDialog,  SWT.LEFT);
+						defaults.setText(DEFAULT);
+						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+						defaultCheckBoxButton = new Button(envDialog, SWT.CHECK);
+						defaultCheckBoxButton.setLayoutData(new GridData(75,20));
+						if (StringUtils.isNotEmpty(String.valueOf(environment.isDefaultEnv()))) {
+							defaultCheckBoxButton.setSelection(environment.isDefaultEnv());
+						}
+						Button envSaveButton = new Button(envDialog, SWT.PUSH);
+						envSaveButton.setText("Update");
+						envSaveButton.setLayoutData(new GridData(75,20));
+						envSaveButton.setLocation(500,505);
+
+
+						Button envCancelButton = new Button(envDialog, SWT.PUSH);
+						envCancelButton.setText("Cancel");
+						envCancelButton.setLayoutData(new GridData(75,20));
+						
+						Listener envSaveListener = new Listener() {
+							public void handleEvent(Event event) {
+								try {
+									String description = descText.getText();
+									boolean selection = defaultCheckBoxButton.getSelection();
+									ConfigManagerImpl impl = new ConfigManagerImpl(PhrescoUtil.getConfigurationFile());
+								
+									if (StringUtils.isNotEmpty(envText.getText())) {
+										environment.setName(envText.getText());
+									}
+									
+									if (StringUtils.isNotEmpty(description)) {
+										environment.setDesc(description);
+									}
+									if (StringUtils.isNotEmpty(String.valueOf(selection))) {
+										environment.setDefaultEnv(selection);
+									}
+
+									if (environment != null) {
+										List<Environment> envList = impl.getEnvironments();
+										if (selection) { 
+											for (Environment environment : envList) {
+												boolean defaultEnv = environment.isDefaultEnv();
+												if (defaultEnv) {
+													environment.setDefaultEnv(false);
+													impl.updateEnvironment(environment);
+												}
+											}
+										}
+										impl.updateEnvironment(environment);
+									}
+									envDialog.setVisible(false);
+									ConfigurationPage configPage = new ConfigurationPage();
+									configPage.push();
+								} catch (PhrescoException e) {
+									e.printStackTrace();
+								} catch (ConfigurationException e) {
+									e.printStackTrace();
+								}
+							}
+
+						};
+						
+						envCancelButton.addListener(SWT.Selection, new Listener() {
+							@Override
+							public void handleEvent(Event event) {
+								envDialog.close();
+								configureDialogs.setVisible(true);
+							}
+						});
+						envSaveButton.addListener(SWT.Selection, envSaveListener);
+						envDialog.open();
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
-	private void editConfiguration(final Shell configureDialogs, final TreeItem parent, final TreeItem item) {
+	public void editConfiguration(final Shell configureDialogs, final TreeItem parent, final TreeItem item) {
 		try {
 			File configureFile = PhrescoUtil.getConfigurationFile();
 			ConfigManagerImpl impls = new ConfigManagerImpl(configureFile);
@@ -515,7 +639,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					configureDialogs.setVisible(false);
+					configureDialogs.setVisible(true);
 					configDialog.close();
 				}
 			});
@@ -614,7 +738,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								else {
 									if (propertyTemplate.getKey().equalsIgnoreCase("Name")) {
 										Text nameText = (Text) map.get(propertyTemplate.getKey());
-										configName = nameText.getText();
 									}
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), nameText.getText());
@@ -705,4 +828,5 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			e.printStackTrace();
 		}
 	}
+
 }

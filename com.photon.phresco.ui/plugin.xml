@@ -508,7 +508,7 @@
 		   id="%project.phresco.menu.id"
 		   label="%project.phresco.menu.label"
 		   tooltip="%project.phresco.menu.tooltip">
-		   </menu>
+		 </menu>
 	</menuContribution>
    </extension>
    

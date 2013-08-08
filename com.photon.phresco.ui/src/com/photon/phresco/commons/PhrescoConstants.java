@@ -151,7 +151,6 @@ public interface PhrescoConstants {
 	String DELETE            = "Delete";
 	String NAME		         = "Name"; 
 	String DESCRITPTION      = "Description";
-	String CONFIGURE         = "Configure";
 	String CLONE		     = "Clone";
 	String SAVE				 = "Save";
 	String STRING		     = "String";
@@ -268,5 +267,9 @@ public interface PhrescoConstants {
 	String DB_TYPE		= "DB Type";
 	String CERTIFICATE  = "Certificate";
 	String CREATE       = "Create";
+	String ADD_ENVIRONMENT = "Add Environment";
+	String ADD_CONGIFURATION = "Add Configuration";
+	String CONFIGURE   = "Configure";
+	String CANCEL      = "Cancel";
 	
 }
