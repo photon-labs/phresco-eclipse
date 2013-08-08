@@ -223,8 +223,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 					if (type.equalsIgnoreCase(STRING)) {
 						Label buildNameLabel = new Label(deployDialog, SWT.NONE);
-						buildNameLabel.setText(parameter.getKey());
-						buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
 						buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 						nameText = new Text(deployDialog, SWT.BORDER);
@@ -235,8 +234,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 					} else if (type.equalsIgnoreCase(NUMBER)) {
 						Label buildNumberLabel = new Label(deployDialog, SWT.NONE);
-						buildNumberLabel.setText(parameter.getKey());
-						buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
 						buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 						numberText = new Text(deployDialog, SWT.BORDER);
@@ -248,8 +246,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 					} else if (type.equalsIgnoreCase(BOOLEAN)) {
 						Label defaults = new Label(deployDialog, SWT.LEFT);
-						defaults.setText(parameter.getKey());
-						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setText(parameter.getName().getValue().get(0).getValue());
 						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 						checkBoxButton = new Button(deployDialog, SWT.CHECK);
@@ -261,8 +258,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 					}
 					else if (type.equalsIgnoreCase(PASSWORD)) {
 						Label defaults = new Label(deployDialog, SWT.LEFT);
-						defaults.setText(parameter.getKey());
-						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setText(parameter.getName().getValue().get(0).getValue());
 						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 						passwordText = new Text(deployDialog, SWT.PASSWORD | SWT.BORDER);
@@ -276,8 +272,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 					} else if (type.equalsIgnoreCase(LIST)) {
 
 						Label Logs = new Label(deployDialog, SWT.LEFT);
-						Logs.setText(parameter.getKey());
-						Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						Logs.setText(parameter.getName().getValue().get(0).getValue());
 						Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 						Combo listLogs = new Combo(deployDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -296,7 +291,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						int yaxis = 0;
 						String key = null;
 						Label Logs = new Label(deployDialog, SWT.LEFT);
-						Logs.setText(parameter.getKey() + ":");
+						Logs.setText(Messages.ENVIRONMENT);
 						Logs.setBounds(24, 40, 80, 23);
 						final List<String> buttons = new ArrayList<String>();
 
@@ -304,7 +299,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 
 						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {						
 							Group group = new Group(deployDialog, SWT.SHADOW_IN);
-							group.setText(parameter.getKey());
+							group.setText(parameter.getName().getValue().get(0).getValue());
 							group.setLocation(146, 26);
 							List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());		
 							for (Value value : dynParamPossibleValues) {

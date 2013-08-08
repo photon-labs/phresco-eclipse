@@ -208,8 +208,8 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		}
 		return buildArgCmds;
 	}
-
 	public BufferedReader performAction(ProjectInfo projectInfo, ActionType build, List<String> mavenArgCommands, String workingDirectory) throws PhrescoException {
+
 		StringBuilder command = buildMavenCommand(build, mavenArgCommands);
 		return executeMavenCommand(projectInfo, build, command, workingDirectory);
 	}
@@ -327,8 +327,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 					if (type.equalsIgnoreCase(STRING)) {
 						Label buildNameLabel = new Label(unitTestDialog, SWT.NONE);
-						buildNameLabel.setText(parameter.getKey());
-						buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
 						buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 						nameText = new Text(unitTestDialog, SWT.BORDER);
@@ -339,8 +338,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 					} else if (type.equalsIgnoreCase(NUMBER)) {
 						Label buildNumberLabel = new Label(unitTestDialog, SWT.NONE);
-						buildNumberLabel.setText(parameter.getKey());
-						buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
 						buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 						numberText = new Text(unitTestDialog, SWT.BORDER);
@@ -352,8 +350,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 					} else if (type.equalsIgnoreCase(BOOLEAN)) {
 						Label defaults = new Label(unitTestDialog, SWT.LEFT);
-						defaults.setText(parameter.getKey());
-						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setText(parameter.getName().getValue().get(0).getValue());
 						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 						checkBoxButton = new Button(unitTestDialog, SWT.CHECK);
@@ -365,8 +362,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					}
 					else if (type.equalsIgnoreCase(PASSWORD)) {
 						Label defaults = new Label(unitTestDialog, SWT.LEFT);
-						defaults.setText(parameter.getKey());
-						defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						defaults.setText(parameter.getName().getValue().get(0).getValue());
 						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 						passwordText = new Text(unitTestDialog, SWT.PASSWORD | SWT.BORDER);
@@ -379,8 +375,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 					} else if (type.equalsIgnoreCase(LIST)) {
 						Label Logs = new Label(unitTestDialog, SWT.LEFT);
-						Logs.setText(parameter.getKey());
-						Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+						Logs.setText(parameter.getName().getValue().get(0).getValue());
 						Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 						Combo listLogs = new Combo(unitTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -399,7 +394,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						int yaxis = 0;
 						String key = null;
 						Label Logs = new Label(unitTestDialog, SWT.LEFT);
-						Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
+						Logs.setText(Messages.ENVIRONMENT);
 						Logs.setBounds(24, 40, 80, 23);
 
 						Group group = new Group(unitTestDialog, SWT.SHADOW_IN);

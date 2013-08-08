@@ -180,8 +180,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 				if (type.equalsIgnoreCase(STRING)) {
 					Label buildNameLabel = new Label(functionalTestDialog, SWT.NONE);
-					buildNameLabel.setText(parameter.getKey());
-					buildNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
 					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 					nameText = new Text(functionalTestDialog, SWT.BORDER);
@@ -192,8 +191,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 				} else if (type.equalsIgnoreCase(NUMBER)) {
 					Label buildNumberLabel = new Label(functionalTestDialog, SWT.NONE);
-					buildNumberLabel.setText(parameter.getKey());
-					buildNumberLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
 					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
 					numberText = new Text(functionalTestDialog, SWT.BORDER);
@@ -205,8 +203,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 				} else if (type.equalsIgnoreCase(BOOLEAN)) {
 					Label defaults = new Label(functionalTestDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					defaults.setText(parameter.getName().getValue().get(0).getValue());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					checkBoxButton = new Button(functionalTestDialog, SWT.CHECK);
@@ -218,8 +215,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 				}
 				else if (type.equalsIgnoreCase(PASSWORD)) {
 					Label defaults = new Label(functionalTestDialog, SWT.LEFT);
-					defaults.setText(parameter.getKey());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					defaults.setText(parameter.getName().getValue().get(0).getValue());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					passwordText = new Text(functionalTestDialog, SWT.PASSWORD | SWT.BORDER);
@@ -231,8 +227,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					map.put(parameter.getKey(), passwordText);
 				}	else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
-					Logs.setText(parameter.getKey());
-					Logs.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+					Logs.setText(parameter.getName().getValue().get(0).getValue());
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
 					Combo listLogs = new Combo(functionalTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -251,7 +246,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					int yaxis = 0;
 					String key = null;
 					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
-					Logs.setText(Messages.ENVIRONMENT + Messages.COLAN);
+					Logs.setText(Messages.ENVIRONMENT);
 					Logs.setBounds(24, 40, 80, 23);
 
 					Group group = new Group(functionalTestDialog, SWT.SHADOW_IN);
