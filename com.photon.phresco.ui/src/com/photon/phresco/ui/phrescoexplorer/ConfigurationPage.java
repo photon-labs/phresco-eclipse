@@ -306,7 +306,6 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		Label envLabel = new  Label(envDialog,  SWT.LEFT);
 		envLabel.setText(ENVIRONMENT_NAME);
-		envLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 		envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 		envText = new Text(envDialog, SWT.BORDER); 
@@ -317,7 +316,6 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		Label descLabel = new  Label(envDialog,  SWT.LEFT);
 		descLabel.setText(DESCRITPTION);
-		descLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 		envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 		descText = new Text(envDialog, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL); 
@@ -327,7 +325,6 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		Label defaults = new  Label(envDialog,  SWT.LEFT);
 		defaults.setText(DEFAULT);
-		defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 		defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 		defaultCheckBoxButton = new Button(envDialog, SWT.CHECK);

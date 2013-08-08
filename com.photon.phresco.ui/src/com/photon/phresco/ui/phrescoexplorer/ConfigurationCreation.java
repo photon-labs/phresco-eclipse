@@ -76,7 +76,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			Label name = new  Label(composite,  SWT.LEFT);
 			name.setText("Name");
-			name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 			name.setLayoutData(new GridData(50,25));
 
 			final Text nameText = new Text(composite, SWT.BORDER); 
@@ -85,7 +84,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			Label desc = new  Label(composite,  SWT.LEFT);
 			desc.setText("Description");
-			desc.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 			desc.setLayoutData(new GridData(70,25));
 
 			descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
@@ -94,7 +92,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			Label environment = new  Label(composite,  SWT.LEFT);
 			environment.setText("Environment");
-			environment.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 			environment.setLayoutData(new GridData(75,25));
 
 			File configurationFile = PhrescoUtil.getConfigurationFile();
@@ -111,7 +108,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 			Label tempType = new  Label(composite,  SWT.LEFT);
 			tempType.setText("Type");
-			tempType.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 			tempType.setLayoutData(new GridData(50,25));
 
 
@@ -290,7 +286,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
@@ -304,7 +299,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				} else if(type.equalsIgnoreCase(STRING) && CollectionUtils.isEmpty(propertyTemplate.getPossibleValues())){
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 					try {
 						if (propertyTemplate.getName().equalsIgnoreCase("Certificate")) {
@@ -375,7 +369,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				}	else if (type.equalsIgnoreCase(NUMBER)) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					numberText = new Text(composite, SWT.BORDER); 
@@ -385,7 +378,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				}	else if (type.equalsIgnoreCase(BOOLEAN)) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					defaultCheckBoxButton = new Button(composite, SWT.CHECK);
@@ -396,7 +388,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
-					defaults.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 					passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER); 
@@ -446,7 +437,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					prop = configuration.getProperties();
 					Label name = new  Label(composite,  SWT.LEFT);
 					name.setText("Name");
-					name.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					name.setLayoutData(new GridData(50,25));
 
 					namestext = new Text(composite, SWT.BORDER); 
@@ -456,7 +446,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 					Label desc = new  Label(composite,  SWT.LEFT);
 					desc.setText("Description");
-					desc.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					desc.setLayoutData(new GridData(70,25));
 
 					descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
@@ -466,7 +455,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 					Label environment = new  Label(composite,  SWT.LEFT);
 					environment.setText("Environment");
-					environment.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					environment.setLayoutData(new GridData(75,25));
 
 					environmentList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -476,7 +464,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 					Label tempType = new  Label(composite,  SWT.LEFT);
 					tempType.setText("Type");
-					tempType.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
 					tempType.setLayoutData(new GridData(50,25));
 
 
