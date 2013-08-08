@@ -38,7 +38,6 @@ import com.photon.phresco.commons.model.ArtifactGroup;
 
 public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 	public static final String PAGE_NAME = "JS Libraries";
-	private Table jsLibTable;
 	private List<ArtifactGroup> features = null;
 	private boolean isFirstPage;
 	private boolean isRendered;

@@ -569,7 +569,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			}
 
 
-			Composite composite = new Composite(createConfigureDialog, SWT.BORDER);
+			Composite composite = new Composite(createConfigureDialog, SWT.NONE);
 
 			GridLayout layout = new GridLayout(2, true);
 			GridData datas = new GridData();
@@ -578,11 +578,11 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			composite.setLayoutData(datas);
 
 
-			codeButton = new Button(composite, SWT.BORDER);
+			codeButton = new Button(composite, SWT.PUSH);
 			codeButton.setText(VALIDATE);
 			codeButton.setSize(74, 23);
 
-			cancelButton = new Button(composite, SWT.BORDER);
+			cancelButton = new Button(composite, SWT.PUSH);
 			cancelButton.setText(Messages.CANCEL);
 			cancelButton.setSize(74, 23);
 			
