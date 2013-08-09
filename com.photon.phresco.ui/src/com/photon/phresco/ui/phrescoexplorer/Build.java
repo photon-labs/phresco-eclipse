@@ -16,7 +16,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -38,6 +41,7 @@ import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.model.BaseAction;
+import com.photon.phresco.ui.resource.Messages;
 
 public class Build extends AbstractHandler implements PhrescoConstants {
 
@@ -100,111 +104,118 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	/**
 	 * @wbp.parser.entryPoint
 	 */
-	 public Shell createBuildDialog(Shell dialog) {
-		 buildDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+	public Shell createBuildDialog(Shell dialog) {
+		buildDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE);
 
-		 buildDialog.setText(BUILD);
-		 buildDialog.setLocation(385, 130);
-		 buildDialog.setSize(451,188);
+		int dialog_height = 130;
+		int comp_height = 17;
 
-		 try {
-			 MojoProcessor processor = new MojoProcessor(PhrescoUtil.getPackageInfoConfigurationPath());
-			 Configuration configuration = processor.getConfiguration(PACKAGE_GOAL);
-			 List<Parameter> parameters = configuration.getParameters().getParameter();
+		buildDialog.setText(BUILD);
+		buildDialog.setLayout(new GridLayout(1, false));
+		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			 ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
-			 DynamicPossibleValues possibleValues = new DynamicPossibleValues();
-			 Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
-			 Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, PACKAGE_GOAL);
+		Composite composite = new Composite(buildDialog, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			 for (Parameter parameter : parameters) {
-				 if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-					 int yaxis = 0;
-					 String key = null;
-					 Label Logs = new Label(buildDialog, SWT.LEFT);
-					 Logs.setText(parameter.getName().getValue().get(0).getValue());
-					 Logs.setBounds(24, 40, 80, 23);
+		try {
+			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getPackageInfoConfigurationPath());
+			Configuration configuration = processor.getConfiguration(PACKAGE_GOAL);
+			List<Parameter> parameters = configuration.getParameters().getParameter();
 
-					 Group group = new Group(buildDialog, SWT.SHADOW_IN);
-					 group.setText(parameter.getName().getValue().get(0).getValue());
-					 group.setLocation(146, 26);
+			ApplicationInfo applicationInfo = PhrescoUtil.getProjectInfo().getAppInfos().get(0);
+			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
+			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
+			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, PACKAGE_GOAL);
 
-					 final List<String> buttons = new ArrayList<String>();
-					 Set<Entry<String,Object>> entrySet = maps.entrySet();
+			for (Parameter parameter : parameters) {
+				if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
+					String key = null;
+					Label Logs = new Label(composite, SWT.LEFT);
+					Logs.setText(parameter.getName().getValue().get(0).getValue());
 
-					 for (Entry<String, Object> entry : entrySet) {
-						 key = entry.getKey();
-						 if (key.equalsIgnoreCase(WATCHER_MAP)) {
-							 continue;
-						 }
-						 @SuppressWarnings("unchecked")
+					Group group = new Group(composite, SWT.SHADOW_IN);
+					group.setText(parameter.getName().getValue().get(0).getValue());
+					group.setLayout(new GridLayout(1, false));
+					group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+					final List<String> buttons = new ArrayList<String>();
+					Set<Entry<String,Object>> entrySet = maps.entrySet();
+
+					for (Entry<String, Object> entry : entrySet) {
+						key = entry.getKey();
+						if (key.equalsIgnoreCase(WATCHER_MAP)) {
+							continue;
+						}
+						@SuppressWarnings("unchecked")
 						List<Value> values = (List<Value>) entry.getValue();
-						 if (CollectionUtils.isNotEmpty(values)) {
-							 for (Value value : values) {
-								 envSelectionButton = new Button(group, SWT.CHECK);
-								 envSelectionButton.setText(value.getValue());
-								 envSelectionButton.setLocation(20, 20+yaxis);
-								 yaxis+=15;
-								 envSelectionButton.addSelectionListener(new SelectionAdapter() {
-									 @Override
-									 public void widgetSelected(SelectionEvent e) {
-										 Button button = (Button) e.widget;
-										 boolean enabled = button.getSelection();
-										 if (enabled) {
-											 buttons.add(button.getText());
-										 } else {
-											 buttons.remove(button.getText());
-										 }
-									 }
-								 });
-								 envSelectionButton.pack();
-							 }
-						 }
-					 }
-					 map.put(key, buttons);
-					 group.pack();
-				 } 
-			 }
+						if (CollectionUtils.isNotEmpty(values)) {
+							for (Value value : values) {
+								envSelectionButton = new Button(group, SWT.CHECK);
+								envSelectionButton.setText(value.getValue());
+								envSelectionButton.addSelectionListener(new SelectionAdapter() {
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										Button button = (Button) e.widget;
+										boolean enabled = button.getSelection();
+										if (enabled) {
+											buttons.add(button.getText());
+										} else {
+											buttons.remove(button.getText());
+										}
+									}
+								});
+								dialog_height = dialog_height + comp_height;
+								envSelectionButton.pack();
+							}
+						}
+					}
+					map.put(key, buttons);
+					group.pack();
+				} 
+			}
 
-			 buildButton = new Button(buildDialog, SWT.PUSH);
-			 buildButton.setLocation(279, 121);
-			 buildButton.setText("Build");
-			 buildButton.setSize(74, 23);
+			Composite buttonComposite = new Composite(buildDialog, SWT.NONE);
+			buttonComposite.setLayout(new GridLayout(2, false));
+			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
 
-			 cancelButton = new Button(buildDialog, SWT.NONE);
-			 cancelButton.setBounds(359, 121, 74, 23);
-			 cancelButton.setText("Cancel");
+			buildButton = new Button(buttonComposite, SWT.PUSH);
+			buildButton.setText(Messages.BUILD);
 
-		 } catch (PhrescoException e) {
-			 e.printStackTrace();
-		 }
-		 return buildDialog;
-	 }
-	 
-	 private void saveCongfiguration()  {
-		 try {
-			 MojoProcessor processor = new MojoProcessor(PhrescoUtil.getPackageInfoConfigurationPath());
-			 List<Parameter> parameters = processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
-			 if (CollectionUtils.isNotEmpty(parameters)) {
-				 for (Parameter parameter : parameters) {
-					 if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-						 List<String> list =  (List<String>) map.get(parameter.getKey());
-						 StringBuilder env = new StringBuilder();
-						 if (CollectionUtils.isNotEmpty(list)) {
-							 for (String string: list) {
-								 env.append(string);
-								 env.append(",");
-							 }
-							 String envValue = env.toString();
-							 envValue = envValue.substring(0, envValue.lastIndexOf(","));
-							 parameter.setValue(envValue); 
-						 }
-					 }
-				 }
-			 }
-			 processor.save();
-		 } catch (PhrescoException e) {
-			 e.printStackTrace();
-		 }
-	 }
+			cancelButton = new Button(buttonComposite, SWT.NONE);
+			cancelButton.setText(Messages.CANCEL);
+
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+		buildDialog.setSize(400,dialog_height);
+		return buildDialog;
+	}
+
+	private void saveCongfiguration()  {
+		try {
+			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getPackageInfoConfigurationPath());
+			List<Parameter> parameters = processor.getConfiguration(PACKAGE_GOAL).getParameters().getParameter();
+			if (CollectionUtils.isNotEmpty(parameters)) {
+				for (Parameter parameter : parameters) {
+					if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
+						List<String> list =  (List<String>) map.get(parameter.getKey());
+						StringBuilder env = new StringBuilder();
+						if (CollectionUtils.isNotEmpty(list)) {
+							for (String string: list) {
+								env.append(string);
+								env.append(",");
+							}
+							String envValue = env.toString();
+							envValue = envValue.substring(0, envValue.lastIndexOf(","));
+							parameter.setValue(envValue); 
+						}
+					}
+				}
+			}
+			processor.save();
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+	}
 }

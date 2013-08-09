@@ -1,8 +1,10 @@
 package com.photon.phresco.commons.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +25,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.BuildInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.User;
 import com.photon.phresco.exception.PhrescoException;
@@ -148,6 +153,26 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static File getBuildInfoPath() {
 		File buildInfoPath = new File(getApplicationHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + BUILD + File.separator + BUILD_INFO);
 		return buildInfoPath;
+	}
+	
+	public static List<BuildInfo> getBuildInfos() throws PhrescoException {
+		try {
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(getBuildInfoPath()));
+			Gson gson = new Gson();
+			Type type = new TypeToken<List<BuildInfo>>(){}.getType();
+
+			List<BuildInfo> buildInfos = gson.fromJson(bufferedReader, type);
+			bufferedReader.close();
+			return buildInfos;
+		} catch (JsonIOException e) {
+			throw new PhrescoException(e);
+		} catch (JsonSyntaxException e) {
+			throw new PhrescoException(e);
+		} catch (FileNotFoundException e) {
+			throw new PhrescoException(e);
+		} catch (IOException e) {
+			throw new PhrescoException(e);
+		}
 	}
 
 	public static File getPackageInfoConfigurationPath() {

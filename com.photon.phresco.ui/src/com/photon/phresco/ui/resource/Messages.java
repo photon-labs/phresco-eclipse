@@ -151,7 +151,7 @@ public class Messages extends NLS {
 	public static String LOGIN_FAILED_MSG="Login Failed \n\n\nInvalid credentials";
 	public static String PROJ_ALREADY_IMPORTED="Project already imported";
 	public static String PROJ_IMPORT_FAILED="Failed to import project";
-	public static String BUILD="Build";
+	public static String BUILD ="Build";
 	public static String OK="Ok";
 	public static String CANCEL="Cancel";
 	public static String ERROR="Error";
@@ -177,6 +177,8 @@ public class Messages extends NLS {
 	public static String INFORMATION = "information";
 	public static String ENVIRONMENT = "Environment";
 	public static String COLAN = ":";
+	public static String MODULES = "Modules";
+	public static String BUILD_NOT_AVAILABLE = "Build not Available";
 	
 	//Add Project
 	public static String PROJECT_CREATION_NAME="Phresco Project";

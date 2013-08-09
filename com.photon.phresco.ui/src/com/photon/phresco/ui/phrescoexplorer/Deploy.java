@@ -143,16 +143,36 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	}
 
 	public Shell createDeployDialog(Shell dialog) {
-		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE);
 		deployDialog.setText(Messages.DEPLOY_DIALOG_TITLE);
-		deployDialog.setLocation(385, 130);
-		deployDialog.setSize(451,188);
-
-		GridLayout gridLayout = new GridLayout(2, false);
+		
+		try {
+			File buildInfoPath = PhrescoUtil.getBuildInfoPath();
+			if(!buildInfoPath.exists()) {
+				PhrescoDialog.errorDialog(dialog, Messages.WARNING, Messages.BUILD_NOT_AVAILABLE);
+				return null;
+			}
+			List<BuildInfo> buildInfos = PhrescoUtil.getBuildInfos();
+			if(CollectionUtils.isEmpty(buildInfos)) {
+				PhrescoDialog.errorDialog(dialog, Messages.WARNING, Messages.BUILD_NOT_AVAILABLE);
+				return null;
+			}
+		} catch (PhrescoException e1) {
+			PhrescoDialog.exceptionDialog(dialog, e1);
+			return null;
+		}
+		int dialog_height = 130;
+		int comp_height = 17;
+		
+		GridLayout gridLayout = new GridLayout(1, false);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		deployDialog.setLayout(gridLayout);
 		deployDialog.setLayoutData(data);
-
+		
+		Composite composite = new Composite(deployDialog, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
 		try {
 			if (PhrescoUtil.getDeployInfoConfigurationPath().exists()) {
 				MojoProcessor processor = new MojoProcessor(PhrescoUtil.getDeployInfoConfigurationPath());
@@ -168,60 +188,56 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 					String type = parameter.getType();
 
 					if (type.equalsIgnoreCase(STRING)) {
-						Label buildNameLabel = new Label(deployDialog, SWT.NONE);
+						Label buildNameLabel = new Label(composite, SWT.NONE);
 						buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
-						buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-						nameText = new Text(deployDialog, SWT.BORDER);
+						nameText = new Text(composite, SWT.BORDER);
 						nameText.setToolTipText(parameter.getKey());
 						data = new GridData(GridData.FILL_BOTH);
 						nameText.setLayoutData(data);
+						dialog_height = dialog_height + comp_height;
 						deploymap.put(parameter.getKey(), nameText);
 
 					} else if (type.equalsIgnoreCase(NUMBER)) {
-						Label buildNumberLabel = new Label(deployDialog, SWT.NONE);
+						Label buildNumberLabel = new Label(composite, SWT.NONE);
 						buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
-						buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-						numberText = new Text(deployDialog, SWT.BORDER);
+						numberText = new Text(composite, SWT.BORDER);
 						numberText.setToolTipText(parameter.getKey());
 						numberText.setMessage(parameter.getKey());
 						data = new GridData(GridData.FILL_BOTH);
 						numberText.setLayoutData(data);
+						dialog_height = dialog_height + comp_height;
 						deploymap.put(parameter.getKey(), numberText);
 
 					} else if (type.equalsIgnoreCase(BOOLEAN)) {
-						Label defaults = new Label(deployDialog, SWT.LEFT);
+						Label defaults = new Label(composite, SWT.LEFT);
 						defaults.setText(parameter.getName().getValue().get(0).getValue());
-						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-						checkBoxButton = new Button(deployDialog, SWT.CHECK);
-						checkBoxButton.setLayoutData(new GridData(75, 20));
+						checkBoxButton = new Button(composite, SWT.CHECK);
 						data = new GridData(GridData.FILL_BOTH);
 						checkBoxButton.setLayoutData(data);
-
+						dialog_height = dialog_height + comp_height;
 						deploymap.put(parameter.getKey(), checkBoxButton);
 					}
 					else if (type.equalsIgnoreCase(PASSWORD)) {
-						Label defaults = new Label(deployDialog, SWT.LEFT);
+						Label defaults = new Label(composite, SWT.LEFT);
 						defaults.setText(parameter.getName().getValue().get(0).getValue());
-						defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-						passwordText = new Text(deployDialog, SWT.PASSWORD | SWT.BORDER);
+						passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
 						passwordText.setToolTipText(PASSWORD);
 						passwordText.setMessage(parameter.getKey());
-						passwordText.setLayoutData(new GridData(100, 13));
 						data = new GridData(GridData.FILL_BOTH);
 						passwordText.setLayoutData(data);
+						dialog_height = dialog_height + comp_height;
 						deploymap.put(parameter.getKey(), passwordText);
 
 					} else if (type.equalsIgnoreCase(LIST)) {
 
-						Label Logs = new Label(deployDialog, SWT.LEFT);
+						Label Logs = new Label(composite, SWT.LEFT);
 						Logs.setText(parameter.getName().getValue().get(0).getValue());
-						Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-						Combo listLogs = new Combo(deployDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
+						Combo listLogs = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 
 						List<Value> values = parameter.getPossibleValues().getValue();
 						for (Value value : values) {
@@ -231,30 +247,26 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						data = new GridData(GridData.FILL_BOTH);
 						listLogs.select(0);
 						listLogs.setLayoutData(data);
+						dialog_height = dialog_height + comp_height;
 						deploymap.put(parameter.getKey(), listLogs); 
 
-					} else if (type.equalsIgnoreCase("DynamicParameter")) {
-						int yaxis = 0;
-						String key = null;
-						Label Logs = new Label(deployDialog, SWT.LEFT);
+					} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
+						Label Logs = new Label(composite, SWT.LEFT);
 						Logs.setText(parameter.getName().getValue().get(0).getValue());
-						Logs.setBounds(24, 40, 80, 23);
 						final List<String> buttons = new ArrayList<String>();
 
 						String isMultiple = checkMultiple(processor, DEPLOY);
 
 						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {						
-							Group group = new Group(deployDialog, SWT.SHADOW_IN);
+							Group group = new Group(composite, SWT.SHADOW_IN);
 							group.setText(parameter.getName().getValue().get(0).getValue());
-							group.setLocation(146, 26);
 							List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());		
 							for (Value value : dynParamPossibleValues) {
+								dialog_height = dialog_height + comp_height;
 								Button envSelectionButton = new Button(group, SWT.CHECK);
 								envSelectionButton.setText(value.getValue());
-								envSelectionButton.setLocation(20, 20+yaxis);
 								data = new GridData(GridData.FILL_BOTH);
 								envSelectionButton.setLayoutData(data);
-								yaxis+=15;
 								envSelectionButton.addSelectionListener(new SelectionAdapter() {
 									@Override
 									public void widgetSelected(SelectionEvent e) {
@@ -273,7 +285,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 							group.pack();
 
 						} else {
-							Combo listLogs = new Combo(deployDialog,SWT.DROP_DOWN | SWT.READ_ONLY);
+							Combo listLogs = new Combo(composite,SWT.DROP_DOWN | SWT.READ_ONLY);
 							final List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());
 							if (CollectionUtils.isNotEmpty(dynParamPossibleValues)) {
 								for (Value value : dynParamPossibleValues) {
@@ -312,6 +324,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 									}
 								}
 							});
+							dialog_height = dialog_height + comp_height;
 						}
 					} 
 				}
@@ -331,6 +344,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+		deployDialog.setSize(381,dialog_height);
 		return deployDialog;
 	}
 
