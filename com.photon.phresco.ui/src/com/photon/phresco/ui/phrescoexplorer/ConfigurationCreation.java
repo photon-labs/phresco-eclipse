@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -58,7 +59,13 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Group typeGroup;
 	private Combo typeList;
 	private Combo environmentList;
-
+	private Label browserlabel;
+	private Button browserButton;
+	private Label protocolLabel;
+	private Combo protocolList;
+	private Label certifacteLabel;
+	private Combo certifacteList;
+	
 	private void createTemplateByTypes(final Shell configureDialogs) {
 		try {
 			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.VERTICAL | SWT.V_SCROLL);
@@ -193,6 +200,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									Boolean required = validate(propertyTemplate);
 									if (required && StringUtils.isEmpty(nameText.getText())) {
+										if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+												protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+											continue;
+										}
 										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName()+ " " + Messages.EMPTY_STRING_WARNING);
 										return;
 									}
@@ -280,8 +291,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 	private Boolean validate(PropertyTemplate propertyTemplate) {
 		if (propertyTemplate != null) {
-			if (propertyTemplate.isRequired()) {
+			if (propertyTemplate.isRequired()){
 				return true;
+			} else {
+				if (!protocolList.isDisposed() && protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)){
+					if (propertyTemplate.getKey().equalsIgnoreCase(ADMIN_USERNAME) || propertyTemplate.getKey().equalsIgnoreCase(ADMIN_PASSWORD)) {
+						return true;
+					}
+				}
 			}
 		} 
 		return false;
@@ -306,7 +323,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 	private Composite createDynamicDialog(final Group configDialog, String types) {
-
 		Composite composite = new Composite(configDialog, SWT.NONE);
 		try {
 			GridLayout subLayout = new GridLayout(2, false);
@@ -321,29 +337,37 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			for (PropertyTemplate propertyTemplate : propertyTemplates) {
 				String type = propertyTemplate.getType();
 				if ( CollectionUtils.isNotEmpty(propertyTemplate.getPossibleValues())) {
-					Label defaults = new  Label(composite,  SWT.LEFT);
-					defaults.setText(propertyTemplate.getName());
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-					comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
-					comboDropDown.setLayoutData(data);
+					
+					protocolLabel = new  Label(composite,  SWT.LEFT);
+					protocolLabel.setText(propertyTemplate.getName());
+					protocolLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+					
+					protocolList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER);
+					protocolList.setLayoutData(data);
 					List<String> possibleValues = propertyTemplate.getPossibleValues();
 					for (String string : possibleValues) {
-						comboDropDown.add(string);
+						protocolList.add(string);
 					}
-					comboDropDown.select(0);
-					map.put(propertyTemplate.getKey(), comboDropDown);
+					protocolList.select(0);
+					map.put(propertyTemplate.getKey(), protocolList);
 				} else if(type.equalsIgnoreCase(STRING) && CollectionUtils.isEmpty(propertyTemplate.getPossibleValues())){
-					Label defaults = new  Label(composite,  SWT.LEFT);
-					defaults.setText(propertyTemplate.getName());
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 					try {
 						if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE)) {
-							String name = propertyTemplate.getName();
-							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-							comboDropDown.select(0);
-							map.put(propertyTemplate.getKey(), comboDropDown);
+							
+							certifacteLabel = new  Label(composite,  SWT.LEFT);
+							certifacteLabel.setText(propertyTemplate.getName());
+							certifacteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							certifacteLabel.setVisible(false);
+							
+							certifacteList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY | SWT.MULTI);
+							certifacteList.select(0);
+							certifacteList.setVisible(false);
+							map.put(propertyTemplate.getKey(), certifacteList);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)) {
+							Label defaults = new  Label(composite,  SWT.LEFT);
+							defaults.setText(propertyTemplate.getName());
+							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
@@ -358,6 +382,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(DB_TYPE)) {
+							
+							Label defaults = new  Label(composite,  SWT.LEFT);
+							defaults.setText(propertyTemplate.getName());
+							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
@@ -372,6 +401,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						}  else if (propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
+							
+							Label defaults = new  Label(composite,  SWT.LEFT);
+							defaults.setText(propertyTemplate.getName());
+							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 							comboDropDown.setLayoutData(data);
 							List<ArtifactGroupInfo> values = null;
@@ -393,11 +427,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						}
 						else {
-							String name = propertyTemplate.getName();
+							Label defaults = new  Label(composite,  SWT.LEFT);
+							defaults.setText(propertyTemplate.getName());
+							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							
 							nameText = new Text(composite, SWT.BORDER); 
 							nameText.setToolTipText("");
 							nameText.setLayoutData(new GridData(80,13));
 							nameText.setLayoutData(data);
+							
+							if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir")) {
+								map.put("deployLabel", defaults);
+							}
 							map.put(propertyTemplate.getKey(), nameText);
 						}					
 					} catch (PhrescoException e) {
@@ -413,6 +454,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					numberText.setLayoutData(new GridData(80,13));
 					numberValidation();
 					map.put(propertyTemplate.getKey(), numberText);
+					
 				}	else if (type.equalsIgnoreCase(BOOLEAN)) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
@@ -421,9 +463,16 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					defaultCheckBoxButton = new Button(composite, SWT.CHECK);
 					defaultCheckBoxButton.setLayoutData(new GridData(75,20));
 					map.put(propertyTemplate.getKey(), defaultCheckBoxButton);
-
+				
+					browserlabel = new  Label(composite,  SWT.LEFT);
+					browserlabel.setText("Authenticate");
+					browserlabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+					browserlabel.setVisible(false);
+					
+					browserButton = new Button(composite, SWT.PUSH);
+					browserButton.setVisible(false);
+					
 				} else if (type.equalsIgnoreCase(PASSWORD)) {
-
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -434,12 +483,73 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					map.put(propertyTemplate.getKey(), passwordText);
 				}
 			}
+			
 			composite.layout();
+			
+			if (defaultCheckBoxButton != null && !defaultCheckBoxButton.isDisposed()) {
+				defaultCheckBoxButton.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						Button button = (Button) event.widget;
+						Label deployLabel = (Label) map.get("deployLabel");
+						Text deployDirectory = (Text) map.get("deploy_dir");
+						boolean selection = button.getSelection();
+						if (selection) {
+							browserlabel.setVisible(true);
+							browserButton.setVisible(true);
+							deployLabel.setVisible(false);
+							deployDirectory.setVisible(false);
+							
+							browserButton.addListener(SWT.Selection, new Listener() {
+								@Override
+								public void handleEvent(Event event) {
+									FileDialog fd = new FileDialog(new Shell(), SWT.OPEN);
+									fd.setFilterPath(PhrescoUtil.getApplicationHome());
+									fd.setText("Browse");
+									String path = fd.open();
+									Combo certificateCombo = (Combo) map.get("certificate");
+									if (certificateCombo != null) {
+										certificateCombo.add(path);
+									}
+									certificateCombo.select(0);
+									
+								}
+							});
+						} else {
+							browserlabel.setVisible(false);
+							browserButton.setVisible(false);
+							certifacteLabel.setVisible(false);
+							certifacteList.setVisible(false);
+							deployLabel.setVisible(true);
+							deployDirectory.setVisible(true);
+						}
+					}
+				});
+			}
+			if (!protocolList.isDisposed()) {
+				protocolList.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						if (protocolList != null && !protocolList.isDisposed()) {
+							String protocol = protocolList.getText();
+							if (protocol.equalsIgnoreCase(HTTPS_PROTOCOL)) {
+								certifacteLabel.setVisible(true);
+								certifacteList.setVisible(true);
+							} else {
+								certifacteLabel.setVisible(false);
+								certifacteList.setVisible(false);
+							}
+						}
+					}
+				});
+			}
+			
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
 		return composite;
 	}
+
 
 	private void numberValidation() {
 		numberText.addListener(SWT.Verify, new Listener() {
@@ -590,7 +700,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			ConfigManagerImpl impls = new ConfigManagerImpl(configureFile);
 			List<Configuration> configs = impls.getConfigurations(parent.getText());
 			final Shell configDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.VERTICAL | SWT.V_SCROLL);
-			configDialog.setText("Configuration");
+			configDialog.setText(CONFIGURATION);
 			configDialog.setLocation(385,130);
 			configDialog.setSize(900, 250);
 
@@ -608,7 +718,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					configuration.getName().equalsIgnoreCase(item.getText());
 					prop = configuration.getProperties();
 					Label name = new  Label(composite,  SWT.LEFT);
-					name.setText("Name");
+					name.setText(NAME);
 					name.setLayoutData(new GridData(50,25));
 
 					confignameText = new Text(composite, SWT.BORDER); 
@@ -617,7 +727,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					confignameText.setText(configuration.getName());
 
 					Label desc = new  Label(composite,  SWT.LEFT);
-					desc.setText("Description");
+					desc.setText(DESCRITPTION);
 					desc.setLayoutData(new GridData(70,25));
 
 					descText = new Text(composite, SWT.WRAP | SWT.BORDER); 
@@ -626,7 +736,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					descText.setText(configuration.getDesc());
 
 					Label environment = new  Label(composite,  SWT.LEFT);
-					environment.setText("Environment");
+					environment.setText(ENVIROMENT);
 					environment.setLayoutData(new GridData(75,25));
 
 					environmentList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -635,7 +745,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					environmentList.select(0);
 
 					Label tempType = new  Label(composite,  SWT.LEFT);
-					tempType.setText("Type");
+					tempType.setText(TYPE);
 					tempType.setLayoutData(new GridData(50,25));
 
 					typeList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -736,6 +846,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						
 					} 
 					else {
+						System.out.println("Key = " + propertyTemplate.getKey());
+						if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+							Text text = (Text) map.get(propertyTemplate.getKey());
+							text.setVisible(false);
+							continue;
+						}
+						
 						Text text = (Text) map.get(propertyTemplate.getKey());
 						String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						text.setText(value);
@@ -748,7 +866,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				} else if (propertyTemplate.getType().equalsIgnoreCase(BOOLEAN)) {
 					Button checkBoxButton = (Button) map.get(propertyTemplate.getKey());
 					String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
-					checkBoxButton.setText(value);
+					checkBoxButton.setSelection(Boolean.parseBoolean(value));
 				} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 					Text passwordText = (Text) map.get(propertyTemplate.getKey());
 					String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
@@ -776,7 +894,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						java.util.Properties properties = new java.util.Properties();
 
 						if (StringUtils.isEmpty(confignameText.getText())) {
-							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, "Name"+ " " + Messages.EMPTY_STRING_WARNING);
+							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, "Name" + " " + Messages.EMPTY_STRING_WARNING);
 							return;
 						}
 						
@@ -807,6 +925,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									Boolean required = validate(propertyTemplate);
 									if (required && StringUtils.isEmpty(nameText.getText())) {
+										if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+												protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+											continue;
+										}
 										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName()+ " " + Messages.EMPTY_STRING_WARNING);
 										return;
 									}

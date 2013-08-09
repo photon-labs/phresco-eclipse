@@ -65,6 +65,7 @@ public interface PhrescoConstants {
     String GITHUB_SCM_FILE_NAME = "gitHubScm.xml";
     String COLON = ":";
     String HTTP_PROTOCOL = "http";
+    String HTTPS_PROTOCOL = "https";
     String PROTOCOL_POSTFIX = "://";
     String SPLIT_DOT = "\\.";
     String FORWARD_SLASH = "/";
@@ -72,6 +73,8 @@ public interface PhrescoConstants {
     String GITIGNORE_FILE = "/.gitignore";
     String SUCCESSFUL = "Successful";
     String URL = "url";
+    String ADMIN_USERNAME = "admin_username";
+    String ADMIN_PASSWORD = "admin_password";
     
     /*
      * Common constants
