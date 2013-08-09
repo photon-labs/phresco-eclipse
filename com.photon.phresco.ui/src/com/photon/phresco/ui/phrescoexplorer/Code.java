@@ -71,9 +71,9 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Text numberText;
 	private Text passwordText;
 	//	private Combo listLogs;
-	private static Map<String, Object> map = new HashedMap();
-	private static Map<String, String> techValues = new HashedMap();
-	Map<String, String> typeMaps = new HashedMap();
+	private static Map<String, Object> map = new HashMap<String, Object>();
+	private static Map<String, String> techValues = new HashMap<String, String>();
+	Map<String, String> typeMaps = new HashMap<String, String>();
 	private Shell dialog;
 	private Shell codeDialog;
 	private Shell createConfigureDialog;
@@ -99,21 +99,25 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Shell createSonarDialog(final Shell shell) {
 		codeDialog = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		codeDialog.setText(SONAR_DIALOG_NAME);
-		codeDialog.setLocation(385,130);
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 3;
+//		codeDialog.setLocation(385,130);
+		
+		GridLayout gridLayout = new GridLayout(1, false);
 		codeDialog.setLayout(gridLayout);
+		codeDialog.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+		Button validateButton = new Button(codeDialog, SWT.PUSH);
+		validateButton.setText(VALIDATE);
+		
+		Composite composite = new Composite(codeDialog, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Button testButton = new Button(codeDialog, SWT.PUSH);
-		testButton.setText("Test");
-
-		Label reportTypeLabel = new Label(codeDialog, SWT.NONE);
+		Label reportTypeLabel = new Label(composite, SWT.NONE);
 		reportTypeLabel.setText("Report Type");
 
 
 
-		reportType =  new Combo(codeDialog, SWT.READ_ONLY | SWT.BORDER);
+		reportType =  new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
 		List<CodeValidationReportType> codeValidationReportTypes = SonarUtil.getCodeValidationReportTypes();
 		if (CollectionUtils.isNotEmpty(codeValidationReportTypes)) {
 			for (CodeValidationReportType codeValidationReportType : codeValidationReportTypes) {
@@ -158,12 +162,11 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		});
 
 
-
 		Composite cancelComposite = new Composite(codeDialog, SWT.NONE);
 		GridLayout subLayout = new GridLayout(1, false);
-		codeDialog.setLayout(subLayout);
-		cancelComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
-		testButton.addListener(SWT.Selection, new Listener() {
+		cancelComposite.setLayout(subLayout);
+		cancelComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, false, false, 1, 1));
+		validateButton.addListener(SWT.Selection, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
@@ -206,7 +209,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 		cancelButton = new Button(cancelComposite, SWT.PUSH);
 		cancelButton.setText(Messages.CANCEL);
-		cancelButton.setSize(74, 23);
 
 		Listener cancelListener = new Listener() {
 			@Override
@@ -344,14 +346,19 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 	public Shell createCodeDialog(Shell dialog) {
 
-		createConfigureDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+		createConfigureDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.RESIZE);
 		createConfigureDialog.setText("Code");
-		createConfigureDialog.setLocation(385, 130);
-
-		GridLayout gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(1, false);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		createConfigureDialog.setLayout(gridLayout);
 		createConfigureDialog.setLayoutData(data);
+		
+		int dialog_height = 130;
+		int comp_height = 17;
+		
+		Composite codeComposite = new Composite(createConfigureDialog, SWT.NONE);
+		codeComposite.setLayout(new GridLayout(2, false));
+		codeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		try {
 			MojoProcessor processor = new MojoProcessor(PhrescoUtil.getValidateCodeInfoConfigurationPath());
@@ -366,61 +373,57 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			for (Parameter parameter : parameters) {
 				String type = parameter.getType();
 				if (type.equalsIgnoreCase(STRING)) {
-					Label buildNameLabel = new Label(createConfigureDialog, SWT.NONE);
+					Label buildNameLabel = new Label(codeComposite, SWT.NONE);
 					buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
-					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					nameText = new Text(createConfigureDialog, SWT.BORDER);
+					nameText = new Text(codeComposite, SWT.BORDER);
 					nameText.setToolTipText(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
 					nameText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), nameText);
 
 				} else if (type.equalsIgnoreCase(NUMBER)) {
-					Label buildNumberLabel = new Label(createConfigureDialog, SWT.NONE);
+					Label buildNumberLabel = new Label(codeComposite, SWT.NONE);
 					buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
-					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					numberText = new Text(createConfigureDialog, SWT.BORDER);
+					numberText = new Text(codeComposite, SWT.BORDER);
 					numberText.setToolTipText(parameter.getKey());
 					numberText.setMessage(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
 					numberText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), numberText);
 
 				} else if (type.equalsIgnoreCase(BOOLEAN)) {
 					if (parameter.getKey().equalsIgnoreCase(SHOW_SETTINGS)) {
 						continue;
 					}
-					Label defaults = new Label(createConfigureDialog, SWT.LEFT);
+					Label defaults = new Label(codeComposite, SWT.LEFT);
 					defaults.setText(parameter.getName().getValue().get(0).getValue());
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					checkBoxButton = new Button(createConfigureDialog, SWT.CHECK);
-					checkBoxButton.setLayoutData(new GridData(75, 20));
+					checkBoxButton = new Button(codeComposite, SWT.CHECK);
 					data = new GridData(GridData.FILL_BOTH);
 					checkBoxButton.setLayoutData(data);
-
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), checkBoxButton);
 				}
 				else if (type.equalsIgnoreCase(PASSWORD)) {
-					Label defaults = new Label(createConfigureDialog, SWT.LEFT);
+					Label defaults = new Label(codeComposite, SWT.LEFT);
 					defaults.setText(parameter.getName().getValue().get(0).getValue());
-					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					passwordText = new Text(createConfigureDialog, SWT.PASSWORD | SWT.BORDER);
+					passwordText = new Text(codeComposite, SWT.PASSWORD | SWT.BORDER);
 					passwordText.setToolTipText(PASSWORD);
 					passwordText.setMessage(parameter.getKey());
-					passwordText.setLayoutData(new GridData(100, 13));
 					data = new GridData(GridData.FILL_BOTH);
 					passwordText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), passwordText);
 				}	else if (type.equalsIgnoreCase(LIST)) {
-					Label Logs = new Label(createConfigureDialog, SWT.LEFT);
+					Label Logs = new Label(codeComposite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
-					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					Combo listLogs = new Combo(createConfigureDialog, SWT.DROP_DOWN);
+					Combo listLogs = new Combo(codeComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
 
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
@@ -430,18 +433,18 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					data = new GridData(GridData.FILL_BOTH);
 					listLogs.select(0);
 					listLogs.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), listLogs); 
 
-				} else if (type.equalsIgnoreCase("DynamicParameter")) {
-					int yaxis = 0;
+				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					String key = null;
-					Label Logs = new Label(createConfigureDialog, SWT.LEFT);
+					Label Logs = new Label(codeComposite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
-					Logs.setBounds(24, 40, 80, 23);
 
-					Group group = new Group(createConfigureDialog, SWT.SHADOW_IN);
+					Group group = new Group(codeComposite, SWT.SHADOW_IN);
 					group.setText(Messages.ENVIRONMENT);
-					group.setLocation(146, 26);
+					group.setLayout(new GridLayout(1, false));
+					group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 					final List<String> buttons = new ArrayList<String>();
 					Set<Entry<String,Object>> entrySet = maps.entrySet();
@@ -452,12 +455,11 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						}
 						List<Value> values = (List<Value>) entry.getValue();
 						for (Value value : values) {
+							dialog_height = dialog_height + comp_height;
 							envSelectionButton = new Button(group, SWT.CHECK);
 							envSelectionButton.setText(value.getValue());
-							envSelectionButton.setLocation(20, 20+yaxis);
 							data = new GridData(GridData.FILL_BOTH);
 							envSelectionButton.setLayoutData(data);
-							yaxis+=15;
 							envSelectionButton.addSelectionListener(new SelectionAdapter() {
 								@Override
 								public void widgetSelected(SelectionEvent e) {
@@ -490,12 +492,9 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 			codeButton = new Button(composite, SWT.PUSH);
 			codeButton.setText(VALIDATE);
-			codeButton.setSize(74, 23);
 
 			cancelButton = new Button(composite, SWT.PUSH);
 			cancelButton.setText(Messages.CANCEL);
-			cancelButton.setSize(74, 23);
-
 
 			Listener cancelListener = new Listener() {
 
@@ -510,6 +509,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+		createConfigureDialog.setSize(330, dialog_height);
 		return createConfigureDialog;
 	}
 
