@@ -173,6 +173,7 @@ public interface PhrescoConstants {
 	String TYPE_PACKAGE_FILE_BROWSE = "packageFileBrowse";
 	String TYPE_PASSWORD = "password";
 	String ALL 				= "All";
+	String TYPE				= "Type";
 	
 	// Deploy constants
 	

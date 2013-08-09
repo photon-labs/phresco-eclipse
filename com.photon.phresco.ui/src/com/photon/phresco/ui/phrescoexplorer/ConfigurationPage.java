@@ -2,7 +2,6 @@ package com.photon.phresco.ui.phrescoexplorer;
 
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +30,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.configuration.Configuration;
 import com.photon.phresco.configuration.Environment;
@@ -42,6 +40,8 @@ import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
+
+import fr.opensagres.xdocreport.utils.StringUtils;
 
 public class ConfigurationPage extends AbstractHandler implements  PhrescoConstants {
 	private Button envSaveButton;
@@ -132,6 +132,9 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		envSaveListener = new Listener() {
 			public void handleEvent(Event event) {
 				try {
+					if(!validate()) {
+						return;
+					}
 					envDialog.setVisible(false);
 					String environmentName = envText.getText();
 					String description = descText.getText();
@@ -161,6 +164,14 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 				} catch (ConfigurationException e) {
 					e.printStackTrace();
 				}
+			}
+
+			private boolean validate() {
+				if (StringUtils.isEmpty(envText.getText())) {
+					PhrescoDialog.errorDialog(envDialog, Messages.WARNING, "Name "+ Messages.EMPTY_STRING_WARNING);	
+					return false;
+				}
+				return true;
 			}
 
 		};
@@ -312,6 +323,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 	}
 	
 	public Shell createEnvironmentDialog(Shell dialog) {
+		
 		envDialog = new Shell(dialog, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 		envDialog.setText(ENVIROMENT);
 		envDialog.setLocation(385,130);
@@ -365,6 +377,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 				configureDialogs.setVisible(true);
 			}
 		});
+		
 		
 		FocusListener focusListener = new FocusListener() {
 			
