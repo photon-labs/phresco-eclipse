@@ -14,6 +14,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -131,19 +133,17 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 			public void handleEvent(Event event) {
 				try {
 					envDialog.setVisible(false);
-					configureDialogs.setVisible(true);
 					String environmentName = envText.getText();
 					String description = descText.getText();
 					boolean selection = defaultCheckBoxButton.getSelection();
 					ConfigManagerImpl impl = new ConfigManagerImpl(PhrescoUtil.getConfigurationFile());
-					List<Environment> environments = new ArrayList<Environment>();
 					List<Environment> envList = impl.getEnvironments();
 					if (selection) {
-						for (Environment environment : envList) {
-							boolean defaultEnv = environment.isDefaultEnv();
+						for (Environment env : envList) {
+							boolean defaultEnv = env.isDefaultEnv();
 							if (defaultEnv) {
-								environment.setDefaultEnv(false);
-								impl.updateEnvironment(environment);
+								env.setDefaultEnv(false);
+								impl.updateEnvironment(env);
 							}
 						}
 					}
@@ -152,16 +152,10 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 					environment.setName(environmentName);
 					environment.setDesc(description);
 					
-					environments.add(environment);
 					List<Environment> environmentList = impl.getEnvironments();
 					environmentList.add(environment);
 					impl.addEnvironments(environmentList);
-					itemTemplate = new TreeItem(tree, SWT.FILL);
-					if (selection) {
-						itemTemplate.setText(new String [] {environmentName,description,String.valueOf(selection)});
-					} else {
-						itemTemplate.setText(new String [] {environmentName,description,""});
-					}
+					push();
 				} catch (PhrescoException e) {
 					e.printStackTrace();
 				} catch (ConfigurationException e) {
@@ -263,16 +257,18 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 				if (parentTree == null) {
 					TreeItem parent = (TreeItem) treeMap.get(PARENT);
 					TreeItem child =  (TreeItem) treeMap.get(CHILD);
-					System.out.println("Parent = " + parent);
-					System.out.println("Child = " + child);
 					if (parent != null  && child != null) {
 						creation.editConfiguration(configureDialogs, parent, child);
+						configureButton.setEnabled(false);
+						deleteButton.setEnabled(false);
 					} else {
 						configureDialogs.setVisible(true);
 					}
 				} else if (parentTree != null) {
 					configureDialogs.setVisible(false);
 					creation.editEnvironment(configureDialogs, parentTree);
+					configureButton.setEnabled(false);
+					deleteButton.setEnabled(false);
 				}
 			}
 		});

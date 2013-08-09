@@ -1,7 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.photon.phresco.commons.PhrescoConstants;
@@ -419,7 +417,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			if (CollectionUtils.isNotEmpty(environments)) {
 				for (final Environment environment : environments) {
 					if (environment.getName().equalsIgnoreCase(parentTree.getText())) {
-						System.out.println("NAme header = " + environment.getName());
 						final Shell envDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
 						envDialog.setText(ENVIROMENT);
 						envDialog.setLocation(385,130);
@@ -439,7 +436,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						envText.setMessage(ENVIRONMENT_NAME);
 						envText.setLayoutData(new GridData(80,13));
 						if (StringUtils.isNotEmpty(environment.getName())) {
-							System.out.println("NAme = " + environment.getName());
 							envText.setText(environment.getName());
 						}
 
@@ -492,19 +488,17 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										environment.setDefaultEnv(selection);
 									}
 
-									if (environment != null) {
-										List<Environment> envList = impl.getEnvironments();
-										if (selection) { 
-											for (Environment environment : envList) {
-												boolean defaultEnv = environment.isDefaultEnv();
-												if (defaultEnv) {
-													environment.setDefaultEnv(false);
-													impl.updateEnvironment(environment);
-												}
+									List<Environment> envList = impl.getEnvironments();
+									if (selection) { 
+										for (Environment env : envList) {
+											boolean defaultEnv = env.isDefaultEnv();
+											if (defaultEnv) {
+												env.setDefaultEnv(false);
+												impl.updateEnvironment(env);
 											}
 										}
-										impl.updateEnvironment(environment);
 									}
+									impl.updateEnvironment(environment);
 									envDialog.setVisible(false);
 									ConfigurationPage configPage = new ConfigurationPage();
 									configPage.push();
