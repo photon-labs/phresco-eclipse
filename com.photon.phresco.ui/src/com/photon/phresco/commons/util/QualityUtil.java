@@ -35,6 +35,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -151,21 +152,19 @@ public class QualityUtil implements PhrescoConstants {
 	/**
 	 * @throws PhrescoException
 	 */
-	public Table getTestReport(Shell functionalDialog, String testType, String techType, String moduleName) throws PhrescoException {
+	public Table getTestReport(Composite testDialog, String testType, String techType, String moduleName) throws PhrescoException {
 		QualityUtil qualityUtil = new QualityUtil();
 		List<TestSuite> testSuites = qualityUtil.getTestSuite(testType, techType, moduleName);
 
-		Table table = new Table(functionalDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		Table table = new Table(testDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		if(CollectionUtils.isEmpty(testSuites)) {
 			TableItem tableItem = new TableItem(table, SWT.NONE);
 			tableItem.setText(0, Messages.REPORT_NOT_AVAILABLE);
-			table.setSize(600, 400);
 			table.setHeaderVisible(false);
 			table.setLinesVisible(false);
-			functionalDialog.pack();
 			return table;
 		}
 		String[] columnValues = {Messages.TEST_SUITE, Messages.TOTAL, Messages.SUCCESS, Messages.FAILURE, Messages.ERROR};
@@ -192,8 +191,6 @@ public class QualityUtil implements PhrescoConstants {
 			item.setText(3, Math.round(failures) + "");
 			item.setText(4, Math.round(errors) + "");
 		}
-		table.setSize(600, 400);
-		functionalDialog.pack();
 		return table;
 	}
 	

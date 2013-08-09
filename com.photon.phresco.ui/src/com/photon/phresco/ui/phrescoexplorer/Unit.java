@@ -1,8 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,8 +12,6 @@ import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -23,7 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -42,17 +38,13 @@ import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
-import com.photon.phresco.commons.model.ProjectInfo;
-import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
-import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
@@ -81,7 +73,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
+		final Shell shell = HandlerUtil.getActiveShell(event);
 
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
@@ -103,6 +95,10 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 			List<String> unitReportOptions = getUnitReportOptions(appInfo.getAppDirName());
 			String techReport = "";
+			
+			final Composite reportComposite = new Composite(dialog, SWT.NONE);
+			reportComposite.setLayout(new GridLayout(1, false));
+			reportComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 			if(CollectionUtils.isNotEmpty(unitReportOptions)) {
 				Label techLabel = new Label(composite, SWT.NONE);
 				techLabel.setText(Messages.TECHNOLOGY);
@@ -115,11 +111,12 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						try {
+							Point size = dialog.getSize();
 							if(testReport != null && !testReport.isDisposed()) {
 								testReport.dispose();
 							}
-							testReport = qualityUtil.getTestReport(dialog, UNIT, techCombo.getText(), "");
-							dialog.setSize(600, 400);
+							testReport = qualityUtil.getTestReport(reportComposite, UNIT, techCombo.getText(), "");
+							testReport.setSize(size);
 						} catch (PhrescoException e1) {
 							PhrescoDialog.exceptionDialog(dialog, e1);
 						}
@@ -136,13 +133,13 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 					super.widgetSelected(e);
 				}
 			});
-			testReport = qualityUtil.getTestReport(dialog,UNIT, techReport, "");
+			testReport = qualityUtil.getTestReport(reportComposite,UNIT, techReport, "");
 		} catch (PhrescoException e1) {
 			e1.printErrorStack();
 			PhrescoDialog.exceptionDialog(dialog, e1);
 		}
 
-		Composite buttonComposite = new Composite(dialog, SWT.RIGHT);
+		Composite buttonComposite = new Composite(dialog, SWT.NONE);
 		GridLayout buttonLayout = new GridLayout(2, false);
 		buttonComposite.setLayout(buttonLayout);
 		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
@@ -158,7 +155,6 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 			}
 		});
 
-		dialog.setSize(600, 400);
 		dialog.open();
 		return dialog;
 	}
