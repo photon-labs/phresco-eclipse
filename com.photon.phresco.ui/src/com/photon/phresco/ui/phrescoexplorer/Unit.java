@@ -74,7 +74,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
-
+		
 		BaseAction baseAction = new BaseAction();
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(baseAction.getUserId());
 		if(serviceManager == null) {
@@ -83,8 +83,9 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		}
 
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN | SWT.MAX);
-		dialog.setText(Messages.UNIT_TEST_TITLE);
+		dialog.setText(Messages.UNIT_TEST_REPORT);
 		dialog.setLayout(new GridLayout(1, false));
+		
 		try {
 			Composite composite = new Composite(dialog, SWT.NONE);
 			composite.setLayout(new GridLayout(3, false));

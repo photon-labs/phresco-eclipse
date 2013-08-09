@@ -76,6 +76,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		final Shell functionalDialog = new Shell(shell, SWT.CENTER | SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX | SWT.MIN);
 		functionalDialog.setLayout(new GridLayout(1, false));
+		functionalDialog.setText(Messages.FUN_TEST_REPORT);
 		
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
 		if(serviceManager == null) {
@@ -100,11 +101,6 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 				public void widgetSelected(SelectionEvent e) {
 					Shell generateDialog = createFunctionalDialog(functionalDialog, parameters, processor);
 					generateDialog.open();
-					/*try {
-						qualityUtil.getTestReport(functionalDialog, FUNCTIONAL, "", "");
-					} catch (PhrescoException e1) {
-						PhrescoDialog.exceptionDialog(functionalDialog, e1);
-					}*/
 					super.widgetSelected(e);
 				}
 			});
@@ -132,7 +128,6 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			}
 		});
 		
-		functionalDialog.setSize(600, 400);
 		functionalDialog.open();
 		return null;
 	}
@@ -158,15 +153,20 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 
 	public Shell createFunctionalDialog(final Shell dialog, final List<Parameter> parameters, MojoProcessor processor) {
 
-		final Shell functionalTestDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.MAX | SWT.RESIZE);
-		functionalTestDialog.setText("Functional");
-		functionalTestDialog.setLocation(385, 130);
-		functionalTestDialog.setSize(451,188);
+		final Shell functionalDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.RESIZE);
+		functionalDialog.setText("Functional");
+		
+		int dialog_height = 130;
+		int comp_height = 17;
 
-		GridLayout gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(1, false);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		functionalTestDialog.setLayout(gridLayout);
-		functionalTestDialog.setLayoutData(data);
+		functionalDialog.setLayout(gridLayout);
+		functionalDialog.setLayoutData(data);
+		
+		Composite composite = new Composite(functionalDialog, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		try {
 			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
@@ -178,61 +178,65 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 				String type = parameter.getType();
 
 				if (type.equalsIgnoreCase(STRING)) {
-					Label buildNameLabel = new Label(functionalTestDialog, SWT.NONE);
+					Label buildNameLabel = new Label(composite, SWT.NONE);
 					buildNameLabel.setText(parameter.getName().getValue().get(0).getValue());
 					buildNameLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					nameText = new Text(functionalTestDialog, SWT.BORDER);
+					nameText = new Text(composite, SWT.BORDER);
 					nameText.setToolTipText(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
 					nameText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), nameText);
 
 				} else if (type.equalsIgnoreCase(NUMBER)) {
-					Label buildNumberLabel = new Label(functionalTestDialog, SWT.NONE);
+					Label buildNumberLabel = new Label(composite, SWT.NONE);
 					buildNumberLabel.setText(parameter.getName().getValue().get(0).getValue());
 					buildNumberLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP,false, false));
 
-					numberText = new Text(functionalTestDialog, SWT.BORDER);
+					numberText = new Text(composite, SWT.BORDER);
 					numberText.setToolTipText(parameter.getKey());
 					numberText.setMessage(parameter.getKey());
 					data = new GridData(GridData.FILL_BOTH);
 					numberText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), numberText);
 
 				} else if (type.equalsIgnoreCase(BOOLEAN)) {
 					if (parameter.getKey().equalsIgnoreCase(SHOW_SETTINGS)) {
 						continue;
 					}
-					Label defaults = new Label(functionalTestDialog, SWT.LEFT);
+					Label defaults = new Label(composite, SWT.LEFT);
 					defaults.setText(parameter.getName().getValue().get(0).getValue());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					checkBoxButton = new Button(functionalTestDialog, SWT.CHECK);
+					checkBoxButton = new Button(composite, SWT.CHECK);
 					checkBoxButton.setLayoutData(new GridData(75, 20));
 					data = new GridData(GridData.FILL_BOTH);
 					checkBoxButton.setLayoutData(data);
-
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), checkBoxButton);
 				}
 				else if (type.equalsIgnoreCase(PASSWORD)) {
-					Label defaults = new Label(functionalTestDialog, SWT.LEFT);
+					Label defaults = new Label(composite, SWT.LEFT);
 					defaults.setText(parameter.getName().getValue().get(0).getValue());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-					passwordText = new Text(functionalTestDialog, SWT.PASSWORD | SWT.BORDER);
+					passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
 					passwordText.setToolTipText(PASSWORD);
 					passwordText.setMessage(parameter.getKey());
 					passwordText.setLayoutData(new GridData(100, 13));
 					data = new GridData(GridData.FILL_BOTH);
 					passwordText.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), passwordText);
+					
 				}	else if (type.equalsIgnoreCase(LIST)) {
-					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
+					Label Logs = new Label(composite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
 
-					Combo listLogs = new Combo(functionalTestDialog, SWT.DROP_DOWN | SWT.READ_ONLY);
+					Combo listLogs = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
@@ -242,18 +246,18 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					data = new GridData(GridData.FILL_BOTH);
 					listLogs.select(0);
 					listLogs.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), listLogs); 
 
 				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-					int yaxis = 0;
 					String key = null;
-					Label Logs = new Label(functionalTestDialog, SWT.LEFT);
+					Label Logs = new Label(composite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
-					Logs.setBounds(24, 40, 80, 23);
 
-					Group group = new Group(functionalTestDialog, SWT.SHADOW_IN);
+					Group group = new Group(composite, SWT.NONE);
 					group.setText(Messages.ENVIRONMENT);
-					group.setLocation(146, 26);
+					group.setLayout(new GridLayout(1, false));
+					group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 					final List<String> buttons = new ArrayList<String>();
 					Set<Entry<String,Object>> entrySet = maps.entrySet();
@@ -266,10 +270,8 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 						for (Value value : values) {
 							envSelectionButton = new Button(group, SWT.CHECK);
 							envSelectionButton.setText(value.getValue());
-							envSelectionButton.setLocation(20, 20+yaxis);
 							data = new GridData(GridData.FILL_BOTH);
 							envSelectionButton.setLayoutData(data);
-							yaxis+=15;
 							envSelectionButton.addSelectionListener(new SelectionAdapter() {
 								@Override
 								public void widgetSelected(SelectionEvent e) {
@@ -282,16 +284,17 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 									}
 								}
 							});
+							dialog_height = dialog_height + comp_height;
 							envSelectionButton.pack();
 						}
 					}
 					map.put(key, buttons);
-					group.pack();
+					dialog_height = dialog_height + comp_height;
 				} 
 			}
 
 
-			Composite buttonComposite = new Composite(functionalTestDialog, SWT.RIGHT);
+			Composite buttonComposite = new Composite(functionalDialog, SWT.RIGHT);
 			GridLayout buttonLayout = new GridLayout(2, false);
 			buttonComposite.setLayout(buttonLayout);
 			buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
@@ -305,7 +308,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					functionalTestDialog.close();
+					functionalDialog.close();
 					super.widgetSelected(e);
 				}
 			});
@@ -317,7 +320,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					try {
 						saveCongfiguration();
 					} catch (PhrescoException e) {
-						PhrescoDialog.exceptionDialog(functionalTestDialog, e);
+						PhrescoDialog.exceptionDialog(functionalDialog, e);
 					}
 					BusyIndicator.showWhile(null, new Runnable() {
 						public void run() {
@@ -329,9 +332,10 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			});
 			
 		} catch (PhrescoException e) {
-			PhrescoDialog.exceptionDialog(functionalTestDialog, e);
+			PhrescoDialog.exceptionDialog(functionalDialog, e);
 		}
-		return functionalTestDialog;
+		functionalDialog.setSize(400, dialog_height);
+		return functionalDialog;
 	}
 
 	public void saveCongfiguration() throws PhrescoException  {
