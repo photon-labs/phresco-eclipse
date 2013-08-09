@@ -143,7 +143,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 		Composite buttonComposite = new Composite(dialog, SWT.NONE);
 		GridLayout buttonLayout = new GridLayout(2, false);
 		buttonComposite.setLayout(buttonLayout);
-		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, false, false, 1, 1));
 
 		Button cancelButton = new Button(buttonComposite, SWT.PUSH);
 		cancelButton.setText(Messages.CANCEL);
