@@ -76,6 +76,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
+	private Combo listLogs;
 
 	Map<String, String> deploytypeMaps = new HashedMap();
 	private static Map<String, Object> deploymap = new HashedMap();
@@ -105,7 +106,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			e1.printStackTrace();
 		}
 
-		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM);
+		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE);
 
 		final Shell createDeployDialog = createDeployDialog(dialog);
 
@@ -143,7 +144,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	}
 
 	public Shell createDeployDialog(Shell dialog) {
-		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE);
+		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.RESIZE);
 		deployDialog.setText(Messages.DEPLOY_DIALOG_TITLE);
 		
 		try {
@@ -251,13 +252,15 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						deploymap.put(parameter.getKey(), listLogs); 
 
 					} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
-						Label Logs = new Label(composite, SWT.LEFT);
-						Logs.setText(parameter.getName().getValue().get(0).getValue());
 						final List<String> buttons = new ArrayList<String>();
 
 						String isMultiple = checkMultiple(processor, DEPLOY);
 
-						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {						
+						if (StringUtils.isNotEmpty(isMultiple) && isMultiple.equalsIgnoreCase("true")) {	
+							
+							Label Logs = new Label(composite, SWT.LEFT);
+							Logs.setText(parameter.getName().getValue().get(0).getValue());
+							
 							Group group = new Group(composite, SWT.SHADOW_IN);
 							group.setText(parameter.getName().getValue().get(0).getValue());
 							List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());		
@@ -285,17 +288,43 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 							group.pack();
 
 						} else {
-							Combo listLogs = new Combo(composite,SWT.DROP_DOWN | SWT.READ_ONLY);
+							data = new GridData(GridData.FILL_BOTH);
 							final List<Value> dynParamPossibleValues  = (List<Value>) maps.get(parameter.getKey());
-							if (CollectionUtils.isNotEmpty(dynParamPossibleValues)) {
-								for (Value value : dynParamPossibleValues) {
-									listLogs.add(value.getValue());
+							
+							if (parameter.getKey().equalsIgnoreCase("fetchSql")) {
+								Label dynamicLabel = new Label(composite, SWT.LEFT);
+								dynamicLabel.setText(parameter.getName().getValue().get(0).getValue());
+								
+								org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List(composite,  SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
+								list.setLayoutData(data);
+								if (CollectionUtils.isNotEmpty(dynParamPossibleValues)) {
+									for (Value value : dynParamPossibleValues) {
+										list.add(value.getValue());
+									}
+								}
+								dynamicLabel.setVisible(false);
+								list.setVisible(false);
+								deploymap.put(parameter.getKey() + "Label", dynamicLabel);
+								deploymap.put(parameter.getKey(), list);
+								
+							} else {
+								Label dynamicLabel = new Label(composite, SWT.LEFT);
+								dynamicLabel.setText(parameter.getName().getValue().get(0).getValue());
+								listLogs = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
+								listLogs.setLayoutData(data);
+								if (CollectionUtils.isNotEmpty(dynParamPossibleValues)) {
+									for (Value value : dynParamPossibleValues) {
+										listLogs.add(value.getValue());
+									}
+								}
+								listLogs.select(0);
+								deploymap.put(parameter.getKey(), listLogs);
+								if (parameter.getKey().equalsIgnoreCase("dataBase")) {
+									listLogs.setVisible(false);
+									dynamicLabel.setVisible(false);
+									deploymap.put(parameter.getKey() + "Label", dynamicLabel);
 								}
 							}
-							data = new GridData(GridData.FILL_BOTH);
-							listLogs.select(0);
-							listLogs.setLayoutData(data);
-							deploymap.put(parameter.getKey(), listLogs);
 
 							listLogs.addListener(SWT.Selection, new Listener() {
 
@@ -305,25 +334,65 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 									String value = combo.getText();
 									Map<String, DependantParameters> map = changeEveDependancyListener(parameter.getKey(), value, maps);
 									String dependency = parameter.getDependency();
-									String[] split = dependency.split(",");
-									Combo typecombo = null;
-									for (String dep : split) {
-										try {
-											List<Value> updateDependancy = updateDependancy(parameter.getKey(),dep, map);
-											typecombo = (Combo) deploymap.get(dep);
-											typecombo.removeAll();
-											for (Value val : updateDependancy) {
-												typecombo.add(val.getValue());
+									if (StringUtils.isNotEmpty(dependency)) {
+										String[] split = dependency.split(",");
+										Combo typecombo = null;
+										for (String dep : split) {
+											try {
+												List<Value> updateDependancy = updateDependancy(parameter.getKey(),dep, map);
+												if (dep.equalsIgnoreCase("fetchSql")) {
+													org.eclipse.swt.widgets.List list = (org.eclipse.swt.widgets.List) deploymap.get(dep);
+													list.removeAll();
+													for (Value val : updateDependancy) {
+														list.add(val.getValue());
+													}
+													deploymap.put(dep, list);
+													
+												} else {
+													if (dep.equalsIgnoreCase("dataBase")) {
+														typecombo = (Combo) deploymap.get(dep);
+														typecombo.removeAll();
+														for (Value val : updateDependancy) {
+															typecombo.add(val.getValue());
+														}
+														typecombo.select(0);
+														deploymap.put(dep, typecombo);
+													}
+												}
+											} catch (IOException e) {
+												e.printStackTrace();
 											}
-											typecombo.select(0);
-											deploymap.put(parameter.getKey(), typecombo);
-
-										} catch (IOException e) {
-											e.printStackTrace();
 										}
 									}
 								}
 							});
+							
+							if (checkBoxButton != null) {
+								checkBoxButton.addListener(SWT.Selection, new Listener() {
+									
+									@Override
+									public void handleEvent(Event event) {
+										Button button = (Button) event.widget;
+										boolean selection = button.getSelection();
+										org.eclipse.swt.widgets.List list = (org.eclipse.swt.widgets.List) deploymap.get("fetchSql");
+										Label fetchSqllabel = (Label) deploymap.get("fetchSqlLabel");
+										Combo combolist = (Combo) deploymap.get("dataBase");
+										Label databaseLabel = (Label) deploymap.get("dataBaseLabel");
+										if (selection) {
+											list.setVisible(true);
+											fetchSqllabel.setVisible(true);
+											combolist.setVisible(true);
+											databaseLabel.setVisible(true);
+										} else {
+											list.setVisible(false);
+											fetchSqllabel.setVisible(false);
+											combolist.setVisible(false);
+											databaseLabel.setVisible(false);
+										}
+									}
+								});
+							}
+							
 							dialog_height = dialog_height + comp_height;
 						}
 					} 
@@ -468,12 +537,17 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 							envValue = envValue.substring(0, envValue.lastIndexOf(","));
 							parameter.setValue(envValue); 
 						} else {
-							Combo list =  (Combo) deploymap.get(parameter.getKey());
 							if (parameter.getKey().equalsIgnoreCase("database")) {
-								databaseName = list.getText();
+								Object object = deploymap.get(parameter.getKey());
+								if (object instanceof Combo) {
+									Combo list =  (Combo) deploymap.get(parameter.getKey());
+									parameter.setValue(list.getText());
+									databaseName = list.getText();
+								}
 							}
 							JSONArray sqlarray = new JSONArray();
 							if (parameter.getKey().equalsIgnoreCase("fetchSql")) {
+								org.eclipse.swt.widgets.List list = (org.eclipse.swt.widgets.List) deploymap.get(parameter.getKey());
 								String[] items = list.getItems();
 								for (String string : items) {
 									sqlarray.add(string);
@@ -481,7 +555,11 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 								jsonObject.put(databaseName, sqlarray);
 								parameter.setValue(jsonObject.toJSONString());
 							} else {
-								parameter.setValue(list.getText());
+								Object object = deploymap.get(parameter.getKey());
+								if (object instanceof Combo) {
+									Combo list =  (Combo) deploymap.get(parameter.getKey());
+									parameter.setValue(list.getText());
+								}
 							}
 						}
 					} else if (parameter.getType().equalsIgnoreCase("Hidden")) {
