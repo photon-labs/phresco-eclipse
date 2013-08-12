@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.internal.OpenPreferencesAction;
 
 import com.photon.phresco.ui.resource.Messages;
 
@@ -65,28 +64,12 @@ public class ConfirmDialog implements PhrescoConstants {
             for (int i = 0; i < rootSubNodes.length; i++) {
             	IPreferenceNode iPreferenceNode = rootSubNodes[i];
             	if (PHRESCO_PREFERENCE_ID.equals(iPreferenceNode.getId())) {
-            		PreferenceAction t = new PreferenceAction(s, PHRESCO_PREFERENCE_ID);
-            		t.run();
+            		String displayLoginPage[] = new String[1];
+            		displayLoginPage[0] = PhrescoConstants.PHRESCO_LOGIN_PREFERENCE_ID;
+            		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(s, PHRESCO_PREFERENCE_ID, displayLoginPage, null);
+            		dialog.open();
             	}
 			}
 	    }
-	}
-}
-
-class PreferenceAction extends OpenPreferencesAction {
-	Shell shell = null;
-	String PHRESCO_PREFERENCE_ID;
-	
-	PreferenceAction(Shell s, String id) {
-		this.shell = s;
-		this.PHRESCO_PREFERENCE_ID = id;
-	}
-	@Override
-	public void run() {
-		String displayLoginPage[] = new String[1];
-		displayLoginPage[0] = PhrescoConstants.PHRESCO_LOGIN_PREFERENCE_ID;
-		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(shell, PHRESCO_PREFERENCE_ID, displayLoginPage, null);
-		dialog.open();
-		
 	}
 }

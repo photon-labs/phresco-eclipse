@@ -110,6 +110,7 @@ public class UpdateFeature extends AbstractHandler  {
 
 		public FeatureWizard() {
 			super();
+			this.setWindowTitle(Messages.FEATURE_DIALOG_TITLE);
 		}
 
 		public void addPages() {

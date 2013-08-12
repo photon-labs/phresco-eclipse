@@ -88,6 +88,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 
 		public EditWizard() {
 			super();
+			this.setWindowTitle(Messages.EDIT_PROJECT_DIALOG_TITLE);
 		}
 
 

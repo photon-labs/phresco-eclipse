@@ -96,6 +96,9 @@ public class Messages extends NLS {
 	//Edit Project
 	public static String EDIT_PROJECT_DIALOG_TITLE;
 	
+	//Features
+	public static String FEATURE_DIALOG_TITLE;	
+	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE;
 	public static String PHRESCO_IMPORT_PAGE_TITLE;
@@ -195,6 +198,9 @@ public class Messages extends NLS {
 	
 	//Edit Project
 	public static String EDIT_PROJECT_DIALOG_TITLE = "Edit Project"; 
+	
+	//Features
+	public static String FEATURE_DIALOG_TITLE = "Features";
 	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE="Phresco";
