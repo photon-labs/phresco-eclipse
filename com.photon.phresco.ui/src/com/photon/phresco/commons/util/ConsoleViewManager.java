@@ -72,6 +72,7 @@ public class ConsoleViewManager {
 		
 		/* display message on console */	
 		MessageConsoleStream newMessageConsoleStream = getNewMessageConsoleStream();
+		newMessageConsoleStream.setActivateOnWrite(true);
 //		newMessageConsoleStream.println();
 		try {
 			String line;

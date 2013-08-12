@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -110,7 +111,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		int dialog_height = 130;
 		int comp_height = 17;
 
-		buildDialog.setText(BUILD);
+		buildDialog.setText(Messages.BUILD);
 		buildDialog.setLayout(new GridLayout(1, false));
 		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -188,7 +189,15 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+		
+		int x = buildDialog.getSize().x - 500;
+		int y = buildDialog.getSize().y - 360;
+		
 		buildDialog.setSize(400,dialog_height);
+		Point location = new Point(x, y);
+		buildDialog.setLocation(location);
+		
+		
 		return buildDialog;
 	}
 

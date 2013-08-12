@@ -55,6 +55,7 @@ public class Messages extends NLS {
 	public static String PROJ_ALREADY_IMPORTED;
 	public static String FAILED;
 	public static String PROJ_IMPORT_FAILED;
+	public static String ADDTO_REPO_DIALOG_TITLE;
 	
 	//Build related Keys
 	public static String  BUILD;
@@ -157,6 +158,7 @@ public class Messages extends NLS {
 	public static String LOGIN_FAILED_MSG="Login Failed \n\n\nInvalid credentials";
 	public static String PROJ_ALREADY_IMPORTED="Project already imported";
 	public static String PROJ_IMPORT_FAILED="Failed to import project";
+	public static String ADDTO_REPO_DIALOG_TITLE = "Add to Repo";
 	public static String BUILD ="Build";
 	public static String OK="Ok";
 	public static String CANCEL="Cancel";

@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -413,7 +414,14 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+
+		int x = deployDialog.getSize().x - 500;
+		int y = deployDialog.getSize().y - 360;
+		
 		deployDialog.setSize(381,dialog_height);
+		Point location = new Point(x, y);
+		deployDialog.setLocation(location);
+		
 		return deployDialog;
 	}
 

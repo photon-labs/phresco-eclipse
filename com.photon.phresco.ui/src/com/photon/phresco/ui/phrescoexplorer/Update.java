@@ -51,7 +51,9 @@ public class Update extends AbstractHandler implements PhrescoConstants {
 		final WizardComposite wizardComposite = new WizardComposite(buildDialog);
 		BusyIndicator.showWhile(null, new Runnable() {
 			public void run() {
-				WizardDialog wizardControl = wizardComposite.getWizardControl(new UpdateSCM());
+				UpdateSCM updateSCM = new UpdateSCM();
+				updateSCM.setWindowTitle(Messages.TITLE_UPDATE);
+				WizardDialog wizardControl = wizardComposite.getWizardControl(updateSCM);
 				wizardControl.open();
 			}
 		});
@@ -71,7 +73,7 @@ public class Update extends AbstractHandler implements PhrescoConstants {
 		
 		@Override
 		public void addPages() {
-			UpdateWizardPage wizardPage = new UpdateWizardPage("Update");
+			UpdateWizardPage wizardPage = new UpdateWizardPage(Messages.TITLE_UPDATE);
 			addPage(wizardPage);
 			super.addPages();
 		}

@@ -66,6 +66,7 @@ public class AddtoRepo extends AbstractHandler implements PhrescoConstants {
 
 		public AddToRepoWizard() {
 			super();
+			this.setWindowTitle(Messages.ADDTO_REPO_DIALOG_TITLE);
 		}
 		
 		public Combo typeCombo;
@@ -76,7 +77,7 @@ public class AddtoRepo extends AbstractHandler implements PhrescoConstants {
 
 		@Override
 		public void addPages() {
-			AddToRepoWizardPage wizardPage = new AddToRepoWizardPage("Add to Repo");
+			AddToRepoWizardPage wizardPage = new AddToRepoWizardPage(Messages.ADDTO_REPO_DIALOG_TITLE);
 			addPage(wizardPage);
 			super.addPages();
 		}
