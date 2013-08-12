@@ -234,7 +234,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		addButton.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-//				configureDialogs.setVisible(false);
+				configureDialogs.setVisible(false);
 				ConfigurationCreation creation = new ConfigurationCreation();
 				creation.createTemplateByType(configureDialogs);
 			}
@@ -269,6 +269,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 					TreeItem parent = (TreeItem) treeMap.get(PARENT);
 					TreeItem child =  (TreeItem) treeMap.get(CHILD);
 					if (parent != null  && child != null) {
+						configureDialogs.setVisible(false);
 						creation.editConfiguration(configureDialogs, parent, child);
 						configureButton.setEnabled(false);
 						deleteButton.setEnabled(false);

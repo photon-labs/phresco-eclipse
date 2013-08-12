@@ -293,7 +293,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			if (propertyTemplate.isRequired()){
 				return true;
 			} else {
-				if (!protocolList.isDisposed() && protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)){
+				if (protocolList != null && !protocolList.isDisposed() && protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)){
 					if (propertyTemplate.getKey().equalsIgnoreCase(ADMIN_USERNAME) || propertyTemplate.getKey().equalsIgnoreCase(ADMIN_PASSWORD)) {
 						return true;
 					}
@@ -510,7 +510,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										certificateCombo.add(path);
 									}
 									certificateCombo.select(0);
-									
 								}
 							});
 						} else {
@@ -524,7 +523,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					}
 				});
 			}
-			if (!protocolList.isDisposed()) {
+			if (protocolList != null && !protocolList.isDisposed()) {
 				protocolList.addListener(SWT.Selection, new Listener() {
 					@Override
 					public void handleEvent(Event event) {
@@ -853,8 +852,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						System.out.println("Key = " + propertyTemplate.getKey());
 						if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
 								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
-							Text text = (Text) map.get(propertyTemplate.getKey());
-							text.setVisible(false);
+							Text deployText = (Text) map.get(propertyTemplate.getKey());
+							deployText.setVisible(false);
+							Label label =  (Label) map.get("deployLabel");
+							label.setVisible(false);
 							continue;
 						}
 						
@@ -959,14 +960,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 								Text passwordText = (Text) map.get(propertyTemplate.getKey());
 								String password = passwordText.getText();
-								byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
-								String encodedString = new String(encodedPwd);
 								Boolean required = validate(propertyTemplate);
-								if (required && StringUtils.isEmpty(passwordText.getText())) {
+								if (required && StringUtils.isEmpty(password)) {
 									PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
 									return;
 								}
-								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), encodedString);
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), password);
 							} 
 						}
 
