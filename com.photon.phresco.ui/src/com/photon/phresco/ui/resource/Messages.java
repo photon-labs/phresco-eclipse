@@ -99,6 +99,9 @@ public class Messages extends NLS {
 	//Features
 	public static String FEATURE_DIALOG_TITLE;	
 	
+	//Environment
+	public static String ENVIRONMENT_DIALOG_TITLE;
+	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE;
 	public static String PHRESCO_IMPORT_PAGE_TITLE;
@@ -201,6 +204,9 @@ public class Messages extends NLS {
 	
 	//Features
 	public static String FEATURE_DIALOG_TITLE = "Features";
+	
+	//Environment
+	public static String ENVIRONMENT_DIALOG_TITLE = "Environment";
 	
 	//Import
 	public static String PHRESCO_IMPORT_WINDOW_TITLE="Phresco";

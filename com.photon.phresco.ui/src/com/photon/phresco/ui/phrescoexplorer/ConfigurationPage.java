@@ -183,9 +183,9 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 	 */
 	private Shell createConfigurationDialog(final Shell shell) {
 		configureDialogs = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
-		configureDialogs.setText("Environment");
+		configureDialogs.setText(Messages.ENVIRONMENT_DIALOG_TITLE);
 		configureDialogs.setLocation(385,130);
-		configureDialogs.setSize(416, 230);
+		configureDialogs.setSize(450, 275);
 
 		GridLayout subLayout = new GridLayout(1, false);
 		configureDialogs.setLayout(subLayout);
@@ -208,11 +208,11 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		status.setText(DEFAULT);
 		status.setWidth(100);
 
-		GridLayout tableLayout = new GridLayout(5,false);
+		GridLayout tableLayout = new GridLayout(5, false);
 
 		Composite composites = new Composite(configureDialogs, SWT.NONE);
 		composites.setLayout(tableLayout);
-		composites.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		composites.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 2, 1));
 
 		addEnvironmentButton = new Button(composites, SWT.PUSH);
 		
@@ -234,7 +234,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		addButton.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				configureDialogs.setVisible(false);
+//				configureDialogs.setVisible(false);
 				ConfigurationCreation creation = new ConfigurationCreation();
 				creation.createTemplateByType(configureDialogs);
 			}
@@ -349,7 +349,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 
 		descText = new Text(envDialog, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL); 
 		descText.setToolTipText(DESCRITPTION);
-		descText.setLayoutData(new GridData(80,13));
+		descText.setLayoutData(new GridData(100,50));
 		descText.setMessage(DESCRITPTION);
 
 		Label defaults = new  Label(envDialog,  SWT.LEFT);
@@ -359,14 +359,18 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		defaultCheckBoxButton = new Button(envDialog, SWT.CHECK);
 		defaultCheckBoxButton.setLayoutData(new GridData(75,20));
 
+		GridLayout tableLayout = new GridLayout(2, false);
+		Composite composite = new Composite(envDialog, SWT.NONE);
+		composite.setLayout(tableLayout);
+		composite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 2, 1));
 
-		envSaveButton = new Button(envDialog, SWT.PUSH);
+		envSaveButton = new Button(composite, SWT.PUSH);
 		envSaveButton.setText(SAVE);
 		envSaveButton.setLayoutData(new GridData(75,20));
 		envSaveButton.setLocation(500,505);
 
 
-		envCancelButton = new Button(envDialog, SWT.PUSH);
+		envCancelButton = new Button(composite, SWT.PUSH);
 		envCancelButton.setText(Messages.CANCEL);
 		envCancelButton.setLayoutData(new GridData(75,20));
 		

@@ -143,14 +143,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			buttonGroup.setLayout(buttonLayout);
 			buttonGroup.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
 
-			renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+			renderConfigTypes(configDialog, composite, typeList);
 
 			typeList.addListener(SWT.Selection, new Listener() {
 
 				@Override
 				public void handleEvent(Event event) {
 
-					renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+					renderConfigTypes(configDialog, composite, typeList);
 
 					buttonGroup.pack();
 					buttonGroup.redraw();	
@@ -305,8 +305,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 	private void renderConfigTypes(final Shell configDialog,
-			final Composite composite, final Combo typeList,
-			final Composite buttonGroup) {
+			final Composite composite, final Combo typeList) {
 
 		typeGroup.setText(typeList.getText());
 		typeGroup.setLocation(250, 5);
@@ -610,7 +609,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 						final Text descText = new Text(envDialog, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL); 
 						descText.setToolTipText(DESCRITPTION);
-						descText.setLayoutData(new GridData(80,13));
+						descText.setLayoutData(new GridData(100,50));
 						descText.setMessage(DESCRITPTION);
 						if (StringUtils.isNotEmpty(environment.getDesc())) {
 							descText.setText(environment.getDesc());
@@ -625,13 +624,19 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						if (StringUtils.isNotEmpty(String.valueOf(environment.isDefaultEnv()))) {
 							defaultCheckBoxButton.setSelection(environment.isDefaultEnv());
 						}
-						Button envSaveButton = new Button(envDialog, SWT.PUSH);
+						
+						GridLayout tableLayout = new GridLayout(2, false);
+						Composite composite = new Composite(envDialog, SWT.NONE);
+						composite.setLayout(tableLayout);
+						composite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 2, 1));
+						
+						Button envSaveButton = new Button(composite, SWT.PUSH);
 						envSaveButton.setText("Update");
 						envSaveButton.setLayoutData(new GridData(75,20));
 						envSaveButton.setLocation(500,505);
 
 
-						Button envCancelButton = new Button(envDialog, SWT.PUSH);
+						Button envCancelButton = new Button(composite, SWT.PUSH);
 						envCancelButton.setText("Cancel");
 						envCancelButton.setLayoutData(new GridData(75,20));
 						
@@ -766,14 +771,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			GridLayout mainLayout = new GridLayout(2, false);
 			buttonGroup.setLayout(mainLayout);
 
-			renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+			renderConfigTypes(configDialog, composite, typeList);
 
 			typeList.addListener(SWT.Selection, new Listener() {
 
 				@Override
 				public void handleEvent(Event event) {
 
-					renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+					renderConfigTypes(configDialog, composite, typeList);
 
 					buttonGroup.pack();
 					buttonGroup.redraw();	
@@ -783,18 +788,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				}
 			});
 
-			renderConfigTypes(configDialog, composite, typeList, buttonGroup);
+			renderConfigTypes(configDialog, composite, typeList);
 
-			final GridData leftButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
-			leftButtonData.grabExcessHorizontalSpace = true;
-			leftButtonData.horizontalIndent = IDialogConstants.HORIZONTAL_MARGIN;
-			buttonGroup.setLayoutData(leftButtonData);
-
-			Button saveButton = new Button(buttonGroup, SWT.PUSH);
-			saveButton.setText("Update");
+			GridLayout tableLayout = new GridLayout(2, false);
+			Composite btnComposite = new Composite(configDialog, SWT.NONE);
+			btnComposite.setLayout(tableLayout);
+			btnComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 2, 1));
 			
-			Button cancelButton = new Button(buttonGroup, SWT.PUSH);
-			cancelButton.setText("Cancel");
+			Button saveButton = new Button(btnComposite, SWT.PUSH);
+			saveButton.setText(Messages.UPDATE);
+			
+			Button cancelButton = new Button(btnComposite, SWT.PUSH);
+			cancelButton.setText(Messages.CANCEL);
 		
 			cancelButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
