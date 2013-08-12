@@ -394,7 +394,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 								});
 							}
 							
-							dialog_height = dialog_height + comp_height;
+							dialog_height = dialog_height + comp_height+ 30;
 						}
 					} 
 				}
