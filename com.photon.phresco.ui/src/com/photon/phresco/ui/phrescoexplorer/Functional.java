@@ -288,7 +288,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 							envSelectionButton.pack();
 						}
 					}
-					map.put(key, buttons);
+					map.put(parameter.getKey(), buttons);
 					dialog_height = dialog_height + comp_height;
 				} 
 			}
@@ -355,8 +355,10 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 						parameter.setValue(numberText.getText());
 					} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
 						Button checkBoxButton = (Button) map.get(parameter.getKey());
-						boolean selection = checkBoxButton.getSelection();
-						parameter.setValue(String.valueOf(selection));
+						if (checkBoxButton != null) {
+							boolean selection = checkBoxButton.getSelection();
+							parameter.setValue(String.valueOf(selection));
+						}
 					} else if (parameter.getType().equalsIgnoreCase(PASSWORD)) {
 						Text passwordText = (Text) map.get(parameter.getKey());
 						String password = passwordText.getText();
