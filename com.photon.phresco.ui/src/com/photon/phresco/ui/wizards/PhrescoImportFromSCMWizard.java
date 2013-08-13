@@ -47,6 +47,7 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 
 	public PhrescoImportFromSCMWizard() {
 		// TODO Auto-generated constructor stub
+		this.setWindowTitle(Messages.IMPORT_FROM_SCM);
 	}
 
 	@Override
@@ -58,8 +59,10 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 	@Override
 	public boolean performFinish() {
 		IWizardPage wizardPage = getContainer().getCurrentPage();
+		
 		if (wizardPage instanceof ImportFromSCMPage) {
 			final ImportFromSCMPage scmPage = (ImportFromSCMPage) wizardPage;
+			
 			if (validate(scmPage)) {
 				BusyIndicator.showWhile(null, new Runnable() {
 		            public void run() {
@@ -78,11 +81,13 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 							String testRepoUrl = scmPage.testRepoUrlText.getText();
 							boolean selection = scmPage.repoUrlHeadRevisionButton.getSelection();
 							String testRepoRevision = "";
+							
 							if(selection) {
 								testRepoRevision = HEAD_REVISION;
 							} else {
 								testRepoRevision = scmPage.testRepoRevisionText.getText();
 							}
+							
 							String projectHome = PhrescoUtil.getProjectHome();
 							ApplicationInfo importedProject = SCMManagerUtil.importProject(scmType, scmUrl, username, password, STR_EMPTY, revision, projectHome);
 							
@@ -97,13 +102,16 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 								FileUtils.cleanDirectory(testFolder);
 								managerUtil.svnCheckout(testRepoUsername, testRepoPassword, testRepoUrl, testFolder.getPath(), testRepoRevision);
 							}
+							
 							ProjectManager.updateProjectIntoWorkspace(importedProject.getAppDirName());
+							
 						} catch (Exception e) {
 							e.printStackTrace();
 							PhrescoDialog.errorDialog(getShell(), "ERROR", e.getLocalizedMessage()); //$NON-NLS-1$
 						}
 		            }
 		        });
+				
 				PhrescoDialog.messageDialog(getShell(), "Check out Successfull");
 				return true;
 			}
