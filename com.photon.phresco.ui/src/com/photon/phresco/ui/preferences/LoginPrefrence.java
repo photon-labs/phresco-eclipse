@@ -22,6 +22,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
+import com.photon.phresco.commons.SuccessDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.ui.PhrescoPlugin;
@@ -138,6 +139,8 @@ public class LoginPrefrence
             PhrescoPlugin.getDefault().savePluginPreferences();
             result = true;
             setMessage(Messages.LOGIN_SUCCESSFUL);
+            
+            PhrescoDialog.messageDialog(getShell(), Messages.LOGIN_SUCCESSFUL);
         } 
         return result;
     }

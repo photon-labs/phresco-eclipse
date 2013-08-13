@@ -153,14 +153,16 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			}
 			  
 			editor = new TableEditor(table);
-			Text text = new Text(table, SWT.NONE);
+			Text text = new Text(table, SWT.NONE | SWT.BORDER);
+			text.setEditable(false);
 			text.setText(artifactGroup.getDisplayName());
 			text.setToolTipText(artifactGroup.getDisplayName());
 			editor.grabHorizontal = true;
 			editor.setEditor(text, tableItem, 1);
 			  
 			editor = new TableEditor(table);
-			text = new Text(table, SWT.NONE);
+			text = new Text(table, SWT.NONE | SWT.BORDER);
+			text.setEditable(false);
 			if (artifactGroup.getDescription() != null) {
 				text.setText(artifactGroup.getDescription());
 				text.setToolTipText(artifactGroup.getDescription());
@@ -174,9 +176,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			editor = new TableEditor(table);
 	        List<ArtifactInfo> versions = artifactGroup.getVersions();
 	        
-	        final CCombo combo = new CCombo(table, SWT.NONE);
-	        final Text versionText = new Text(table, SWT.NONE);
-	        
+	        final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER);
+	        combo.setEditable(false);
+	        final Text versionText = new Text(table, SWT.NONE | SWT.BORDER);
+	        versionText.setEditable(false);
 	        if (versions.size() > 1) {
 		        for (ArtifactInfo artifactInfo : versions) {
 		        	combo.add(artifactInfo.getVersion()); 

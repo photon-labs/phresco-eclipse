@@ -235,6 +235,8 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 		} catch (InterruptedException e) {
 			PhrescoDialog.errorDialog(getShell(), Messages.ERROR, e.getLocalizedMessage());
 		}
+		
+		PhrescoDialog.messageDialog(getShell(), Messages.PROJECT_CREATED_SUCCESS_MSG);
 		return true;
 	}
 }

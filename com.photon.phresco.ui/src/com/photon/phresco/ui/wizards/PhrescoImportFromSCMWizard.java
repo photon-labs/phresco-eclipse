@@ -112,7 +112,7 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 		            }
 		        });
 				
-				PhrescoDialog.messageDialog(getShell(), "Check out Successfull");
+				PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
 				return true;
 			}
 		}

@@ -38,9 +38,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 
 import com.photon.phresco.commons.ConfirmDialog;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
+import com.photon.phresco.ui.resource.Messages;
 
 /**
  * @author suresh_ma
@@ -154,6 +156,9 @@ public class PhrescoImportWizard extends MavenImportWizard {
 		  } catch(InterruptedException e) {
 			  // User cancelled operation, we don't return the 
 		  }
+		  
+		  PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
+		  
 		  return false;
 	  }
 

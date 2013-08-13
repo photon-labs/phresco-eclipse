@@ -93,12 +93,15 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_DESC;
 	public static String PROJECT_LABEL_VERSION;
 	public static String PROJECT_VERSION_TEXT;
+	public static String PROJECT_CREATED_SUCCESS_MSG;
 	
 	//Edit Project
 	public static String EDIT_PROJECT_DIALOG_TITLE;
+	public static String PROJECT_UPDATED_SUCCESS_MSG;
 	
 	//Features
 	public static String FEATURE_DIALOG_TITLE;	
+	public static String FEATURE_UPDATED_SUCCESS_MSG;
 	
 	//Environment
 	public static String ENVIRONMENT_DIALOG_TITLE;
@@ -109,6 +112,7 @@ public class Messages extends NLS {
 	public static String PHRESCO_IMPORT_PAGE_DESC;
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME;
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME;
+	public static String IMPORT_PROJECT_SUCCESS_MSG;
 	
 	//Deploy
 	public static String DEPLOY_DIALOG_TITLE;
@@ -200,12 +204,15 @@ public class Messages extends NLS {
 	public static String PROJECT_LABEL_DESC="Description";
 	public static String PROJECT_LABEL_VERSION="Version";
 	public static String PROJECT_VERSION_TEXT="1.0.0";
+	public static String PROJECT_CREATED_SUCCESS_MSG = "Project created Successfully";
 	
 	//Edit Project
 	public static String EDIT_PROJECT_DIALOG_TITLE = "Edit Project"; 
+	public static String PROJECT_UPDATED_SUCCESS_MSG = "Project updated Successfully";
 	
 	//Features
 	public static String FEATURE_DIALOG_TITLE = "Features";
+	public static String FEATURE_UPDATED_SUCCESS_MSG = "Features Updated Succesfully";
 	
 	//Environment
 	public static String ENVIRONMENT_DIALOG_TITLE = "Environment";
@@ -216,6 +223,7 @@ public class Messages extends NLS {
 	public static String PHRESCO_IMPORT_PAGE_DESC="Phresco Import Page Description Appears here";
 	public static String IMPORT_ADD_PROJECT_PAGE_NAME="AddProjectPage";
 	public static String IMPORT_TECHNOLOGY_PAGE_NAME="Technology Page";
+	public static String IMPORT_PROJECT_SUCCESS_MSG = "Project imported successfully";
 	
 	//Deploy
 	public static String DEPLOY_DIALOG_TITLE = "Deploy";

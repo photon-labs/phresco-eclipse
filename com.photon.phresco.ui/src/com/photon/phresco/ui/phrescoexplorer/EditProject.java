@@ -121,6 +121,8 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 					update();
 				}
 			});
+			
+			PhrescoDialog.messageDialog(getShell(), Messages.PROJECT_UPDATED_SUCCESS_MSG);
 			return true;
 		}
 
