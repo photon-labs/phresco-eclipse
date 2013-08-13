@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.internal.events.BuildCommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -19,6 +20,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.m2e.core.project.MavenProjectInfo;
+import org.eclipse.m2e.core.ui.internal.wizards.MavenProjectWizard;
 
 import com.photon.phresco.api.ApplicationProcessor;
 import com.photon.phresco.commons.PhrescoConstants;
@@ -39,6 +42,7 @@ import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.PhrescoDynamicLoader;
 import com.photon.phresco.util.Utility;
+import com.phresco.pom.util.PomProcessor;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class ProjectManager implements PhrescoConstants {
@@ -104,16 +108,26 @@ public class ProjectManager implements PhrescoConstants {
         }
     }
 	
-	public static void updateProjectIntoWorkspace(String projectName) {
+	public static void updateProjectIntoWorkspace(String projectName) throws PhrescoException {
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
 		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
 		description.setLocation(new Path(PhrescoUtil.getProjectHome() + projectName));
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
 		try {
+			List<String> projectModules = PhrescoUtil.getProjectModules(projectName);
 			project.create(description, progressMonitor);
 			project.open(progressMonitor);
+			if(CollectionUtils.isNotEmpty(projectModules)) {
+				for (String moduleName : projectModules) {
+					IProjectDescription multiDescription = ResourcesPlugin.getWorkspace().newProjectDescription(moduleName);
+					multiDescription.setLocation(new Path(PhrescoUtil.getProjectHome() + File.separatorChar + projectName + File.separatorChar + moduleName));
+					IProject multiProject = ResourcesPlugin.getWorkspace().getRoot().getProject(multiDescription.getName());
+					multiProject.create(multiDescription, progressMonitor);
+					multiProject.open(progressMonitor);
+				}
+			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			throw new PhrescoException(e);
 		}
 	}
 	
