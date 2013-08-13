@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
@@ -77,6 +78,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Combo protocolList;
 	private Label certifacteLabel;
 	private Combo certifacteList;
+	private Combo certificateComb;
 	
 	private void createTemplateByTypes(final Shell configureDialogs) {
 		try {
@@ -161,13 +163,35 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 				@Override
 				public void handleEvent(Event event) {
-
-					renderConfigTypes(configDialog, composite, typeList);
-
-					buttonGroup.pack();
-					buttonGroup.redraw();	
-					configDialog.pack();
-					configDialog.redraw();
+					
+					Combo combo = (Combo) event.widget;
+					try {
+						if (combo.getText().equalsIgnoreCase(SERVER)) {
+							File configurationFile = PhrescoUtil.getConfigurationFile();
+							ConfigManagerImpl impl = new ConfigManagerImpl(configurationFile);
+							List<Configuration> configurations = impl.getConfigurations(environmentList.getText());
+							if (CollectionUtils.isNotEmpty(configurations)) {
+								for (Configuration config : configurations) {
+									if (config.getType().equalsIgnoreCase(SERVER)) {
+										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, SERVER + "Configuration Already exists");
+										configureDialogs.setVisible(true);
+										configDialog.close();
+										return;
+									}
+								}
+							}
+						}
+						renderConfigTypes(configDialog, composite, typeList);
+						buttonGroup.pack();
+						buttonGroup.redraw();	
+						configDialog.pack();
+						configDialog.redraw();
+						
+					} catch (PhrescoException e) {
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						e.printStackTrace();
+					}
 				}
 			});
 
@@ -256,9 +280,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), passwordText.getText());
 							} 
 						}
-
+						
+						
 						String environmentName = environmentList.getText();
-
 						Configuration configuration = new Configuration();
 						configuration.setEnvName(environmentName);
 						configuration.setName(confignameText.getText());
@@ -320,8 +344,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		return false;
 	}
 
-	private void renderConfigTypes(final Shell configDialog,
-			final Composite composite, final Combo typeList) {
+	private void renderConfigTypes(final Shell configDialog, final Composite composite, final Combo typeList) {
 
 		typeGroup.setText(typeList.getText());
 		typeGroup.setLocation(250, 5);
@@ -405,36 +428,49 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										PhrescoDialog.errorDialog(new Shell(), Messages.WARNING, PORT + " " + Messages.EMPTY_STRING_WARNING);
 										return;
 									}
-									Combo certificateCombo = (Combo) map.get(CERTIFICATE);
 									RemoteCertificateInfo authenticateServerInfo = authenticateServer(host.getText(), port.getText());
+									Object object = map.get(CERTIFICATE);
+									if (object instanceof Combo) {
+										certificateComb = (Combo) map.get(CERTIFICATE);
+									}
 									if (authenticateServerInfo != null && authenticateServerInfo.isCertificateAvailable()) {
 										List<CertificateInfo> certificates = authenticateServerInfo.getCertificates();
 										if (CollectionUtils.isNotEmpty(certificates)) {
-											certificateCombo.removeAll();
-											certificateCombo.setEnabled(true);
+											certificateComb.removeAll();
+											certificateComb.setEnabled(true);
 											for (CertificateInfo info : certificates) {
-												if (certificateCombo != null) {
-													certificateCombo.add(info.getDisplayName());
+												if (certificateComb != null) {
+													certificateComb.add(info.getDisplayName());
 												}
 											}
-											certificateCombo.select(0);
-											map.put(CERTIFICATE, certificateCombo);
+											certificateComb.select(0);
+											try {
+												ConfirmDialog.getConfirmDialog().addCerficate(new Shell(), authenticateServerInfo, certificateComb.getText(),  environmentList.getText(), host.getText(), port.getText());
+											} catch (PhrescoException e) {
+												e.printStackTrace();
+											}
+											certificateText.setEnabled(false);
+											map.put(CERTIFICATE, certificateComb);
 										}
 									} else {
-										certificateCombo.removeAll();
-										certificateCombo.setEnabled(false);
+										certificateComb.removeAll();
+										certificateComb.setEnabled(false);
 										FileDialog fd = new FileDialog(new Shell(), SWT.OPEN);
 										fd.setFilterPath(PhrescoUtil.getApplicationHome());
 										fd.setText("Browse");
 										String path = fd.open();
 										certificateText.setEnabled(true);
-										if (certificateText != null) {
+										if (certificateText != null && path != null) {
 											certificateText.setText(path);
+											try {
+												ConfirmDialog.getConfirmDialog().addCerficate(new Shell(), authenticateServerInfo, path, environmentList.getText(), host.getText(), port.getText());
+											} catch (PhrescoException e) {
+												e.printStackTrace();
+											}
 											map.put(CERTIFICATE, certificateText);
 										}
 									}
 								}
-
 							});
 							
 							buttonComposite.pack();
@@ -459,7 +495,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(DB_TYPE)) {
-							
 							Label defaults = new  Label(composite,  SWT.LEFT);
 							defaults.setText(propertyTemplate.getName());
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -577,23 +612,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					}
 				});
 			}
-			if (protocolList != null && !protocolList.isDisposed()) {
-				protocolList.addListener(SWT.Selection, new Listener() {
-					@Override
-					public void handleEvent(Event event) {
-						if (protocolList != null && !protocolList.isDisposed()) {
-							String protocol = protocolList.getText();
-							if (protocol.equalsIgnoreCase(HTTPS_PROTOCOL)) {
-								certifacteLabel.setVisible(true);
-								certifacteList.setVisible(true);
-							} else {
-								certifacteLabel.setVisible(false);
-								certifacteList.setVisible(false);
-							}
-						}
-					}
-				});
-			}
 			
 		} catch (PhrescoException e) {
 			e.printStackTrace();
@@ -649,7 +667,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 				socket.startHandshake();
 				socket.close();
 			} catch (SSLException e) {
-				e.printStackTrace();
 			}
 			X509Certificate[] chain = tm.chain;
 			for (int i = 0; i < chain.length; i++) {

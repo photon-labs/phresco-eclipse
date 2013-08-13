@@ -271,12 +271,17 @@ public interface PhrescoConstants {
 	String VERSION      = "version";
 	String SERVER_TYPE  = "server Type";
 	String DB_TYPE		= "DB Type";
-	String CERTIFICATE  = "Certificate";
+	String CERTIFICATE  = "certificate";
 	String CREATE       = "Create";
 	String ADD_ENVIRONMENT = "Add Environment";
 	String ADD_CONGIFURATION = "Add Configuration";
 	String CONFIGURE   = "Configure";
 	String CANCEL      = "Cancel";
+	String HOST		   = "host";
+	String PORT        = "port";
+	String DEPLOY_DIR  = "deploy_dir";
+	String FILE_TYPE_CRT = "crt";
+	 String CERTIFICATES = "certificates";
 	
 	
 	// Dynamic constants
