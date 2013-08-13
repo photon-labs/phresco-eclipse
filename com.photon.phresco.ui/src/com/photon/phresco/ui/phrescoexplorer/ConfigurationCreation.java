@@ -1,11 +1,22 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.File;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
@@ -30,6 +41,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ArtifactGroupInfo;
 import com.photon.phresco.commons.model.ArtifactInfo;
+import com.photon.phresco.commons.model.CertificateInfo;
 import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.PropertyTemplate;
@@ -39,9 +51,11 @@ import com.photon.phresco.configuration.Configuration;
 import com.photon.phresco.configuration.Environment;
 import com.photon.phresco.exception.ConfigurationException;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.model.RemoteCertificateInfo;
 import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.util.Utility;
 
 public class ConfigurationCreation  implements PhrescoConstants {
 
@@ -58,7 +72,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	private Group typeGroup;
 	private Combo typeList;
 	private Combo environmentList;
-	private Label browserlabel;
 	private Button browserButton;
 	private Label protocolLabel;
 	private Combo protocolList;
@@ -171,7 +184,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						java.util.Properties properties = new java.util.Properties();
 						
 						if (StringUtils.isEmpty(confignameText.getText())) {
-							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, "Name" + " " + Messages.EMPTY_STRING_WARNING);
+							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, NAME + " " + Messages.EMPTY_STRING_WARNING);
 							return;
 						}
 						
@@ -187,19 +200,25 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
 								if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE) || propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)
 										|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
-									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-									Boolean required = validate(propertyTemplate);
-									if (required &&  StringUtils.isEmpty(comboDropDown.getText())) {
-										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
-										return;
+									Object object = map.get(propertyTemplate.getKey());
+									if (object instanceof Combo ) {
+										Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
+										Boolean required = validate(propertyTemplate);
+										if (required &&  StringUtils.isEmpty(comboDropDown.getText())) {
+											PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
+											return;
+										}
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
+									} else {
+										Text text = (Text) map.get(propertyTemplate.getKey());
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), text.getText());
 									}
-									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
 								else {
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									Boolean required = validate(propertyTemplate);
 									if (required && StringUtils.isEmpty(nameText.getText())) {
-										if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+										if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && !protocolList.isDisposed() &&
 												protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
 											continue;
 										}
@@ -229,15 +248,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), (String.valueOf(selection)));
 							} else if (propertyTemplate.getType().equalsIgnoreCase(PASSWORD)) {
 								Text passwordText = (Text) map.get(propertyTemplate.getKey());
-								String password = passwordText.getText();
-								byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
-								String encodedString = new String(encodedPwd);
 								Boolean required = validate(propertyTemplate);
 								if (required && StringUtils.isEmpty(passwordText.getText())) {
 									PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
 									return;
 								}
-								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), encodedString);
+								properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), passwordText.getText());
 							} 
 						}
 
@@ -246,6 +262,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						Configuration configuration = new Configuration();
 						configuration.setEnvName(environmentName);
 						configuration.setName(confignameText.getText());
+						configuration.setDesc(descText.getText());
 						configuration.setType(typeList.getText());
 						configuration.setProperties(properties);
 						impl.createConfiguration(environmentName, configuration);
@@ -321,7 +338,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 	}
 
 	private Composite createDynamicDialog(final Group configDialog, String types) {
-		Composite composite = new Composite(configDialog, SWT.NONE);
+		final Composite composite = new Composite(configDialog, SWT.NONE);
 		try {
 			GridLayout subLayout = new GridLayout(2, false);
 			composite.setLayout(subLayout);
@@ -352,14 +369,76 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					try {
 						if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE)) {
 							
-							certifacteLabel = new  Label(composite,  SWT.LEFT);
+							certifacteLabel = new  Label(composite,  SWT.LEFT | SWT.CENTER);
 							certifacteLabel.setText(propertyTemplate.getName());
-							certifacteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-							certifacteLabel.setVisible(false);
+							certifacteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 							
-							certifacteList = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY | SWT.MULTI);
+							final Composite buttonComposite = new Composite(composite, SWT.NONE);
+							GridLayout buttonLayout = new GridLayout(2, false);
+							buttonComposite.setLayout(buttonLayout);
+							
+							certifacteList = new Combo(buttonComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY | SWT.MULTI);
 							certifacteList.select(0);
-							certifacteList.setVisible(false);
+							certifacteList.setEnabled(false);
+							
+							browserButton = new Button(buttonComposite, SWT.PUSH);
+							browserButton.setText("Authenticate");
+							browserButton.setEnabled(false);
+							
+							Label emptyLabel = new  Label(composite,  SWT.LEFT | SWT.CENTER);
+							emptyLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+							
+							final Text certificateText = new Text(composite, SWT.BORDER);
+							certificateText.setLayoutData(new GridData(80,13));
+							certificateText.setLayoutData(data);
+							certificateText.setEnabled(false);
+							
+							browserButton.addListener(SWT.Selection, new Listener() {
+								@Override
+								public void handleEvent(Event event) {
+									Text host = (Text) map.get(HOST);
+									Text port = (Text) map.get(PORT);
+									if (StringUtils.isEmpty(host.getText())) {
+										PhrescoDialog.errorDialog(new Shell(), Messages.WARNING, HOST + " " + Messages.EMPTY_STRING_WARNING);
+										return;
+									} else if (StringUtils.isEmpty(port.getText())) {
+										PhrescoDialog.errorDialog(new Shell(), Messages.WARNING, PORT + " " + Messages.EMPTY_STRING_WARNING);
+										return;
+									}
+									Combo certificateCombo = (Combo) map.get(CERTIFICATE);
+									RemoteCertificateInfo authenticateServerInfo = authenticateServer(host.getText(), port.getText());
+									if (authenticateServerInfo != null && authenticateServerInfo.isCertificateAvailable()) {
+										List<CertificateInfo> certificates = authenticateServerInfo.getCertificates();
+										if (CollectionUtils.isNotEmpty(certificates)) {
+											certificateCombo.removeAll();
+											certificateCombo.setEnabled(true);
+											for (CertificateInfo info : certificates) {
+												if (certificateCombo != null) {
+													certificateCombo.add(info.getDisplayName());
+												}
+											}
+											certificateCombo.select(0);
+											map.put(CERTIFICATE, certificateCombo);
+										}
+									} else {
+										certificateCombo.removeAll();
+										certificateCombo.setEnabled(false);
+										FileDialog fd = new FileDialog(new Shell(), SWT.OPEN);
+										fd.setFilterPath(PhrescoUtil.getApplicationHome());
+										fd.setText("Browse");
+										String path = fd.open();
+										certificateText.setEnabled(true);
+										if (certificateText != null) {
+											certificateText.setText(path);
+											map.put(CERTIFICATE, certificateText);
+										}
+									}
+								}
+
+							});
+							
+							buttonComposite.pack();
+							
 							map.put(propertyTemplate.getKey(), certifacteList);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)) {
 							Label defaults = new  Label(composite,  SWT.LEFT);
@@ -434,7 +513,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							nameText.setLayoutData(new GridData(80,13));
 							nameText.setLayoutData(data);
 							
-							if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir")) {
+							if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR)) {
 								map.put("deployLabel", defaults);
 							}
 							map.put(propertyTemplate.getKey(), nameText);
@@ -462,14 +541,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					defaultCheckBoxButton.setLayoutData(new GridData(75,20));
 					map.put(propertyTemplate.getKey(), defaultCheckBoxButton);
 				
-					browserlabel = new  Label(composite,  SWT.LEFT);
-					browserlabel.setText("Authenticate");
-					browserlabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-					browserlabel.setVisible(false);
-					
-					browserButton = new Button(composite, SWT.PUSH);
-					browserButton.setVisible(false);
-					
 				} else if (type.equalsIgnoreCase(PASSWORD)) {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
@@ -477,7 +548,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 					passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER); 
 					passwordText.setToolTipText(ENVIRONMENT_NAME);
-					passwordText.setLayoutData(new GridData(80,20));
+					passwordText.setLayoutData(new GridData(80,13));
 					map.put(propertyTemplate.getKey(), passwordText);
 				}
 			}
@@ -490,35 +561,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					public void handleEvent(Event event) {
 						Button button = (Button) event.widget;
 						Label deployLabel = (Label) map.get("deployLabel");
-						Text deployDirectory = (Text) map.get("deploy_dir");
+						Text deployDirectory = (Text) map.get(DEPLOY_DIR);
 						boolean selection = button.getSelection();
 						if (selection) {
-							browserlabel.setVisible(true);
-							browserButton.setVisible(true);
-							deployLabel.setVisible(false);
-							deployDirectory.setVisible(false);
-							
-							browserButton.addListener(SWT.Selection, new Listener() {
-								@Override
-								public void handleEvent(Event event) {
-									FileDialog fd = new FileDialog(new Shell(), SWT.OPEN);
-									fd.setFilterPath(PhrescoUtil.getApplicationHome());
-									fd.setText("Browse");
-									String path = fd.open();
-									Combo certificateCombo = (Combo) map.get("certificate");
-									if (certificateCombo != null) {
-										certificateCombo.add(path);
-									}
-									certificateCombo.select(0);
-								}
-							});
+							browserButton.setEnabled(true);
+							deployLabel.setEnabled(false);
+							deployDirectory.setEnabled(false);
+							certifacteList.setEnabled(true);
 						} else {
-							browserlabel.setVisible(false);
-							browserButton.setVisible(false);
-							certifacteLabel.setVisible(false);
-							certifacteList.setVisible(false);
-							deployLabel.setVisible(true);
-							deployDirectory.setVisible(true);
+							browserButton.setEnabled(false);
+							certifacteList.setEnabled(false);
+							deployLabel.setEnabled(true);
+							deployDirectory.setEnabled(true);
 						}
 					}
 				});
@@ -544,9 +598,76 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		} catch (PhrescoException e) {
 			e.printStackTrace();
 		}
+		composite.pack();
+		composite.redraw();
 		return composite;
 	}
 
+	private RemoteCertificateInfo authenticateServer(String host, String port) {
+		try {
+			RemoteCertificateInfo remoteCertificateInfo = new RemoteCertificateInfo();
+			int portValue = Integer.parseInt(port);
+			boolean connctionAlive = Utility.isConnectionAlive("https", host, portValue);
+			boolean isCertificateAvailable = false;
+			String projectLocation = "";
+			projectLocation = PhrescoUtil.getApplicationHome();
+			if (connctionAlive) {
+				List<CertificateInfo> certificates = getCertificate(host, portValue);
+				if (CollectionUtils.isNotEmpty(certificates)) {
+					isCertificateAvailable = true;
+					remoteCertificateInfo.setCertificates(certificates);
+					remoteCertificateInfo.setProjectLocation(projectLocation);
+					remoteCertificateInfo.setCertificateAvailable(isCertificateAvailable);
+					return remoteCertificateInfo;
+				}
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (PhrescoException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
+	public static List<CertificateInfo> getCertificate(String host, int port) throws PhrescoException {
+		List<CertificateInfo> certificates = new ArrayList<CertificateInfo>();
+		CertificateInfo info;
+		try {
+			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+			SSLContext context = SSLContext.getInstance("TLS");
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			tmf.init(ks);
+			X509TrustManager defaultTrustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+			SavingTrustManager tm = new SavingTrustManager(defaultTrustManager);
+			context.init(null, new TrustManager[] { tm }, null);
+			SSLSocketFactory factory = context.getSocketFactory();
+			SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+			socket.setSoTimeout(10000);
+			try {
+				socket.startHandshake();
+				socket.close();
+			} catch (SSLException e) {
+				e.printStackTrace();
+			}
+			X509Certificate[] chain = tm.chain;
+			for (int i = 0; i < chain.length; i++) {
+				X509Certificate x509Certificate = chain[i];
+				String subjectDN = x509Certificate.getSubjectDN().getName();
+				String[] split = subjectDN.split(",");
+				info = new CertificateInfo();
+				info.setSubjectDN(subjectDN);
+				info.setDisplayName(split[0]);
+				info.setCertificate(x509Certificate);
+				certificates.add(info);
+			}
+		} catch (Exception e) {
+			throw new PhrescoException(e);
+		}
+		return certificates;
+	}
+	
 
 	private void numberValidation() {
 		numberText.addListener(SWT.Verify, new Listener() {
@@ -818,8 +939,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						comboDropDown.add(value);
 						comboDropDown.select(0);
-					} else if (propertyTemplate.getName().equalsIgnoreCase("Certificate") || propertyTemplate.getName().equalsIgnoreCase("server Type")
-							|| propertyTemplate.getName().equalsIgnoreCase("DB Type") || propertyTemplate.getName().equalsIgnoreCase("Version")) {
+					} else if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE) || propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)
+							|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 						Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 						
 						if (propertyTemplate.getKey().equalsIgnoreCase(VERSION)) {
@@ -849,8 +970,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						
 					} 
 					else {
-						System.out.println("Key = " + propertyTemplate.getKey());
-						if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+						if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && !protocolList.isDisposed() &&
 								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
 							Text deployText = (Text) map.get(propertyTemplate.getKey());
 							deployText.setVisible(false);
@@ -899,7 +1019,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						java.util.Properties properties = new java.util.Properties();
 
 						if (StringUtils.isEmpty(confignameText.getText())) {
-							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, "Name" + " " + Messages.EMPTY_STRING_WARNING);
+							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, NAME + " " + Messages.EMPTY_STRING_WARNING);
 							return;
 						}
 						
@@ -915,22 +1035,29 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							} else if (propertyTemplate.getType().equalsIgnoreCase(STRING)) {
 								if (propertyTemplate.getName().equalsIgnoreCase(CERTIFICATE) || propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)
 										|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
-									Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
-									Boolean required = validate(propertyTemplate);
-									if (required && StringUtils.isEmpty(comboDropDown.getText())) {
-										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
-										return;
+									
+									Object object = map.get(propertyTemplate.getKey());
+									if (object instanceof Combo ) {
+										Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
+										Boolean required = validate(propertyTemplate);
+										if (required &&  StringUtils.isEmpty(comboDropDown.getText())) {
+											PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName() + " " + Messages.EMPTY_STRING_WARNING);
+											return;
+										}
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
+									} else {
+										Text text = (Text) map.get(propertyTemplate.getKey());
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), text.getText());
 									}
-									properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 								} 
 								else {
-									if (propertyTemplate.getKey().equalsIgnoreCase("Name")) {
+									if (propertyTemplate.getKey().equalsIgnoreCase(NAME)) {
 										Text nameText = (Text) map.get(propertyTemplate.getKey());
 									}
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									Boolean required = validate(propertyTemplate);
 									if (required && StringUtils.isEmpty(nameText.getText())) {
-										if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir") && !protocolList.isDisposed() &&
+										if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && !protocolList.isDisposed() &&
 												protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
 											continue;
 										}
@@ -975,6 +1102,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						configuration.setName(confignameText.getText());
 						configuration.setType(typeList.getText());
 						configuration.setProperties(properties);
+						configuration.setDesc(descText.getText());
 						impl.updateConfiguration(environmentName, item.getText(), configuration);
 						configDialog.setVisible(false);
 						ConfigurationPage page = new ConfigurationPage();
@@ -1039,4 +1167,27 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		}
 	}
 
+}
+
+class SavingTrustManager implements X509TrustManager {
+
+	private final X509TrustManager tm;
+	X509Certificate[] chain;
+
+	SavingTrustManager(X509TrustManager tm) {
+		this.tm = tm;
+	}
+
+	public X509Certificate[] getAcceptedIssuers() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+		throw new UnsupportedOperationException();
+	}
+
+	public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+		this.chain = chain;
+		tm.checkServerTrusted(chain, authType);
+	}
 }
