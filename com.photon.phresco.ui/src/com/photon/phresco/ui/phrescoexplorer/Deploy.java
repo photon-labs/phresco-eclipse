@@ -108,9 +108,11 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 		}
 
 		final Shell dialog = new Shell(shell, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.RESIZE);
-
+		
 		final Shell createDeployDialog = createDeployDialog(dialog);
-
+		
+		
+		createDeployDialog.open();
 		deployButton.addListener(SWT.Selection, new Listener() {
 
 			@Override
@@ -130,7 +132,6 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 				dialog.close();
 			}
 		});
-		createDeployDialog.open();
 
 
 		Listener generatePopupCancelListener = new Listener() {
@@ -368,7 +369,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 								}
 							});
 							
-							if (checkBoxButton != null) {
+							if (checkBoxButton != null && !checkBoxButton.isDisposed()) {
 								checkBoxButton.addListener(SWT.Selection, new Listener() {
 									
 									@Override
