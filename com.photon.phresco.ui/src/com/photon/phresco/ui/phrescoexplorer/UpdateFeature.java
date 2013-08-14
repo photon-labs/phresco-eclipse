@@ -47,7 +47,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoDialog;
-import com.photon.phresco.commons.SuccessDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;

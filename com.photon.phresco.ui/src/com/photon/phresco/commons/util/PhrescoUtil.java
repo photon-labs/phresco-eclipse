@@ -261,7 +261,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 	
 	public static PomProcessor getPomProcessor(String appDirName) throws PhrescoException {
-		String applicationHome = getProjectHome() + File.separator + appDirName;
+		String applicationHome = getApplicationHome();
 		try {
 			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
 		} catch (PhrescoPomException e) {

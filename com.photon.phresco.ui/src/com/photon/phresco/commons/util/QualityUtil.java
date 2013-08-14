@@ -527,7 +527,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getUnitTestResultPath(String appDirName, String moduleName, String techReport)
 			throws PhrescoException {
-		StringBuilder sb = new StringBuilder(Utility.getProjectHome() + appDirName);
+		StringBuilder sb = new StringBuilder(PhrescoUtil.getApplicationHome());
 		if (StringUtils.isNotEmpty(moduleName)) {
 			sb.append(File.separatorChar);
 			sb.append(moduleName);
@@ -598,7 +598,7 @@ public class QualityUtil implements PhrescoConstants {
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			sb.append(Utility.getProjectHome() + appDirName);
+			sb.append(PhrescoUtil.getApplicationHome());
 			if (StringUtils.isNotEmpty(moduleName)) {
 				sb.append(File.separatorChar);
 				sb.append(moduleName);

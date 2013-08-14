@@ -22,7 +22,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
-import com.photon.phresco.commons.SuccessDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.ui.PhrescoPlugin;

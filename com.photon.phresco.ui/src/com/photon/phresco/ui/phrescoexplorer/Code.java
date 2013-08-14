@@ -268,15 +268,17 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				String profile = techValues.get(key);
 				if (StringUtils.isNotEmpty(profile)) {
 					Profile typeProfile = processor.getProfile(profile);
-					Properties properties = typeProfile.getProperties();
-					if (properties != null) {
-						List<Element> elements = properties.getAny();
-						if (CollectionUtils.isNotEmpty(elements)) {
-							for (Element element : elements) {
-								if (element.getTagName().equals(SONAR_BRANCH)) {
-									branchValue = element.getTextContent();
-									builder.append(COLON);
-									builder.append(branchValue);
+					if(typeProfile != null) {
+						Properties properties = typeProfile.getProperties();
+						if (properties != null) {
+							List<Element> elements = properties.getAny();
+							if (CollectionUtils.isNotEmpty(elements)) {
+								for (Element element : elements) {
+									if (element.getTagName().equals(SONAR_BRANCH)) {
+										branchValue = element.getTextContent();
+										builder.append(COLON);
+										builder.append(branchValue);
+									}
 								}
 							}
 						}
