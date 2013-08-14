@@ -91,7 +91,7 @@ public class ConfirmDialog implements PhrescoConstants {
 	    }
 	}
 	
-	public void addCerficate(Shell s, RemoteCertificateInfo authenticateServerInfo, String value, String env, String host, String port) throws PhrescoException {
+	public String addCerficate(Shell s, RemoteCertificateInfo authenticateServerInfo, String value, String env, String host, String port) throws PhrescoException {
 		MessageBox messageBox = new MessageBox(s, SWT.ICON_QUESTION
 	            | SWT.YES | SWT.NO);
 			messageBox.setText("Add Certificate");
@@ -112,14 +112,16 @@ public class ConfirmDialog implements PhrescoConstants {
 				info.setEnvironmentName(env);
 				info.setHost(host);
 				info.setPort(port);
-				addCertificate(info);
+				String certificatePath = addCertificate(info);
+				return certificatePath;
 			} catch (PhrescoException e) {
 				throw new PhrescoException(e);
 			}
 	    }
+		return "";
 	}
 	
-	public Response addCertificate(AddCertificateInfo addCertificateInfo) {
+	public String addCertificate(AddCertificateInfo addCertificateInfo) {
 		String certificatePath = "";
 		try {
 			String propValue = addCertificateInfo.getPropValue();
@@ -127,6 +129,7 @@ public class ConfirmDialog implements PhrescoConstants {
 			if (StringUtils.isNotEmpty(propValue)) {
 				File file = new File(propValue);
 				certificatePath = configCertificateSave(propValue, file, appDirName, addCertificateInfo);
+				return certificatePath;
 			}
 		} catch (PhrescoException e) {
 		}

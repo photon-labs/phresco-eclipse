@@ -234,8 +234,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										}
 										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 									} else {
-										Text text = (Text) map.get(propertyTemplate.getKey());
-										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), text.getText());
+										String value = (String) map.get(propertyTemplate.getKey());
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), value);
 									}
 								} 
 								else {
@@ -433,6 +433,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									if (object instanceof Combo) {
 										certificateComb = (Combo) map.get(CERTIFICATE);
 									}
+									String certificatePath = "";
 									if (authenticateServerInfo != null && authenticateServerInfo.isCertificateAvailable()) {
 										List<CertificateInfo> certificates = authenticateServerInfo.getCertificates();
 										if (CollectionUtils.isNotEmpty(certificates)) {
@@ -445,12 +446,14 @@ public class ConfigurationCreation  implements PhrescoConstants {
 											}
 											certificateComb.select(0);
 											try {
-												ConfirmDialog.getConfirmDialog().addCerficate(new Shell(), authenticateServerInfo, certificateComb.getText(),  environmentList.getText(), host.getText(), port.getText());
+												certificatePath = ConfirmDialog.getConfirmDialog().addCerficate(new Shell(), authenticateServerInfo, certificateComb.getText(),  environmentList.getText(), host.getText(), port.getText());
 											} catch (PhrescoException e) {
 												e.printStackTrace();
 											}
 											certificateText.setEnabled(false);
-											map.put(CERTIFICATE, certificateComb);
+											if (StringUtils.isNotEmpty(certificatePath)) {
+												map.put(CERTIFICATE, certificatePath);
+											}
 										}
 									} else {
 										certificateComb.removeAll();
@@ -461,13 +464,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										String path = fd.open();
 										certificateText.setEnabled(true);
 										if (certificateText != null && path != null) {
+											path = path.substring(path.indexOf("."));
 											certificateText.setText(path);
-											try {
-												ConfirmDialog.getConfirmDialog().addCerficate(new Shell(), authenticateServerInfo, path, environmentList.getText(), host.getText(), port.getText());
-											} catch (PhrescoException e) {
-												e.printStackTrace();
-											}
-											map.put(CERTIFICATE, certificateText);
+											map.put(CERTIFICATE, path);
 										}
 									}
 								}
@@ -1063,8 +1062,8 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										}
 										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), comboDropDown.getText());
 									} else {
-										Text text = (Text) map.get(propertyTemplate.getKey());
-										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), text.getText());
+										String value = (String) map.get(propertyTemplate.getKey());
+										properties.put(propertyTemplate.getKey().replaceAll("\\s", ""), value);
 									}
 								} 
 								else {
