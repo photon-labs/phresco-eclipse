@@ -336,7 +336,7 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 		envDialog.setLayout(subLayout);
 
 		Label envLabel = new  Label(envDialog,  SWT.LEFT);
-		envLabel.setText(ENVIRONMENT_NAME);
+		envLabel.setText(ENVIRONMENT_NAME + ASTERICK);
 		envLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
 		envText = new Text(envDialog, SWT.BORDER); 
