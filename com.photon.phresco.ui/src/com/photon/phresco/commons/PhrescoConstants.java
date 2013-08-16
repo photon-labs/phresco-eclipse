@@ -27,7 +27,8 @@ package com.photon.phresco.commons;
  
 public interface PhrescoConstants {
 	
-	String DEFAULT_SERVICE_URL = "http://172.16.17.117:7070/service-testing/rest/api";
+//	String DEFAULT_SERVICE_URL = "http://172.16.17.117:7070/service-testing/rest/api";
+	String DEFAULT_SERVICE_URL = "http://172.16.25.89:3030/service/rest/api";
 	String SONAR_REPORT_URL = "http://localhost:9000/dashboard/index/";
 	
 	char CHAR_ASTERISK = '*';
@@ -281,8 +282,8 @@ public interface PhrescoConstants {
 	String PORT        = "port";
 	String DEPLOY_DIR  = "deploy_dir";
 	String FILE_TYPE_CRT = "crt";
-	 String CERTIFICATES = "certificates";
-	
+	String CERTIFICATES = "certificates";
+	String ASTERICK     = "*";
 	
 	// Dynamic constants
 	
