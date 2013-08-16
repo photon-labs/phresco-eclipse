@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -99,7 +98,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Shell createSonarDialog(final Shell shell) {
 		codeDialog = new Shell(shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		codeDialog.setText(SONAR_DIALOG_NAME);
-//		codeDialog.setLocation(385,130);
 		
 		GridLayout gridLayout = new GridLayout(1, false);
 		codeDialog.setLayout(gridLayout);
@@ -114,7 +112,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 		Label reportTypeLabel = new Label(composite, SWT.NONE);
 		reportTypeLabel.setText("Report Type");
-
 
 
 		reportType =  new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
@@ -309,8 +306,10 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						parameter.setValue(numberText.getText());
 					} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
 						Button checkBoxButton = (Button) map.get(parameter.getKey());
-						boolean selection = checkBoxButton.getSelection();
-						parameter.setValue(String.valueOf(selection));
+						if (checkBoxButton != null) {
+							boolean selection = checkBoxButton.getSelection();
+							parameter.setValue(String.valueOf(selection));
+						}
 					} else if (parameter.getType().equalsIgnoreCase(PASSWORD)) {
 						Text passwordText = (Text) map.get(parameter.getKey());
 						String password = passwordText.getText();
@@ -328,14 +327,16 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						}
 					} else if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 						List<String> list =  (List<String>) map.get(parameter.getKey());
-						StringBuilder env = new StringBuilder();
-						for (String string: list) {
-							env.append(string);
-							env.append(",");
+						if (CollectionUtils.isNotEmpty(list)) {
+							StringBuilder env = new StringBuilder();
+							for (String string: list) {
+								env.append(string);
+								env.append(",");
+							}
+							String envValue = env.toString();
+							envValue = envValue.substring(0, envValue.lastIndexOf(","));
+							parameter.setValue(envValue); 
 						}
-						String envValue = env.toString();
-						envValue = envValue.substring(0, envValue.lastIndexOf(","));
-						parameter.setValue(envValue); 
 					}
 				}
 			}
