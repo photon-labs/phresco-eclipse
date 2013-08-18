@@ -20,18 +20,19 @@
 package com.photon.phresco.commons.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+
+import com.photon.phresco.ui.resource.Messages;
 
 /**
  * Class to render information in the console
@@ -41,16 +42,15 @@ import org.eclipse.ui.console.MessageConsoleStream;
 public class ConsoleViewManager {
 	
 	private static ConsoleViewManager fDefault = null;
-	private String fTitle = null;
-	private MessageConsole fMessageConsole = null;
 	
 	public static final int MSG_INFORMATION = 1;
 	public static final int MSG_ERROR = 2;
 	public static final int MSG_WARNING = 3;
+	
+	String line;
 		
 	public ConsoleViewManager(String messageTitle) {		
 		fDefault = this;
-		fTitle = messageTitle;
 	}
 	
 	public static ConsoleViewManager getDefault(String msgTitle) {
@@ -61,72 +61,55 @@ public class ConsoleViewManager {
 	}	
 		
 	public void println(BufferedReader performAction) {		
+		showConsolePopup(performAction);
+	}
+	
+	public void showConsolePopup(BufferedReader performAction) {
 		
-		/* if console-view in Java-perspective is not active, then show it and
-		 * then display the message in the console attached to it */		
-		if( !displayConsoleView()) {
-			/*If an exception occurs while displaying in the console, then just diplay atleast the same in a message-box */
-			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error", "Opening console view has problem");
-			return;
-		}
+		Display display = Display.getDefault();
+		final Shell shell = new Shell(display, SWT.APPLICATION_MODAL | SWT.DIALOG_TRIM | SWT.MAX);
+
+		shell.setText(Messages.CONSOLE_DIALOG_TITLE);
+		shell.setLayout(new GridLayout(1, false));
+		shell.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		/* display message on console */	
-		MessageConsoleStream newMessageConsoleStream = getNewMessageConsoleStream();
-		newMessageConsoleStream.setActivateOnWrite(true);
-//		newMessageConsoleStream.println();
+	    final Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+	    text.setEditable(false);
+	    text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	    text.redraw();
+	    text.pack(true);
+	    text.setSize(700, 540);
+
+	    Composite buttonComposite = new Composite(shell, SWT.RIGHT | SWT.END);
+	    buttonComposite.setSize(700, 50);
+		GridLayout buttonLayout = new GridLayout(1, false);
+		buttonComposite.setLayout(buttonLayout);
+		buttonComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.END, false, false, 1, 1)); 
+		
+		Button ok = new Button(buttonComposite, SWT.PUSH | SWT.RIGHT);
+		ok.setText(Messages.CLOSE);
+		
+		Listener closeListener = new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				shell.close();
+			}
+		};
+		
+		ok.addListener(SWT.Selection, closeListener);
+		
+		buttonComposite.setSize(700, 50);
+		buttonComposite.pack();
+		
+		shell.setSize(720, 550);
+		shell.open();
+	    
 		try {
-			String line;
 			while ((line = performAction.readLine())!= null) {
-				newMessageConsoleStream.println(line);
-				newMessageConsoleStream.flush();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+				text.append(line + "\n");
+			} 
+		} catch (Exception e) {
+		}	    
 	}
-	
-	/*
-	 * To check the console can be viewable
-	 */
-	private boolean displayConsoleView() {
-		
-		try {
-			
-			IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			if( activeWorkbenchWindow != null ) {
-				IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-				
-				if( activePage != null )
-					activePage.showView(IConsoleConstants.ID_CONSOLE_VIEW, null, IWorkbenchPage.VIEW_VISIBLE);
-			}
-			
-		} catch (PartInitException partEx) {			
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/*
-	 * Get the console message stream to render the message in console
-	 */
-	private MessageConsoleStream getNewMessageConsoleStream() {		
-		MessageConsoleStream msgConsoleStream = getMessageConsole().newMessageStream();		
-		return msgConsoleStream;
-	}
-	
-	private MessageConsole getMessageConsole() {
-		if( fMessageConsole == null )
-			createMessageConsoleStream(fTitle);	
-		
-		return fMessageConsole;
-	}
-	
-	/*
-	 * Creating instance of message console
-	 */
-	private void createMessageConsoleStream(String title) {
-		fMessageConsole = new MessageConsole(title, null); 
-		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{ fMessageConsole });
-	}	
 }

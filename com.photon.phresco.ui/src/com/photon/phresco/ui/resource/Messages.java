@@ -62,6 +62,8 @@ public class Messages extends NLS {
 	public static String  OK;
 	public static String  CANCEL;
 	public static String ERROR;
+	public static String CLOSE;
+	public static String CONSOLE_DIALOG_TITLE;
 	
 	//Create page related keys
 	public static String WARNING;
@@ -166,6 +168,8 @@ public class Messages extends NLS {
 	public static String BUILD ="Build";
 	public static String OK="Ok";
 	public static String CANCEL="Cancel";
+	public static String CLOSE="Close";
+	public static String CONSOLE_DIALOG_TITLE = "Console";
 	public static String ERROR="Error";
 	public static String WARNING="Warning";
 	public static String WARN_APPCODE_EMPTY="Appcode should not be empty";
