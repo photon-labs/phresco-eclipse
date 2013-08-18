@@ -201,7 +201,7 @@ public class CommitScmPage extends WizardPage implements PhrescoConstants {
 	 */
 	private String getConnectionUrl(ApplicationInfo applicationInfo) throws PhrescoException {
 		try {
-			PomProcessor processor = PhrescoUtil.getPomProcessor(applicationInfo.getAppDirName());
+			PomProcessor processor = PhrescoUtil.getPomProcessor();
 			Scm scm = processor.getSCM();
 			if (scm != null && !scm.getConnection().isEmpty()) {
 				return scm.getConnection();

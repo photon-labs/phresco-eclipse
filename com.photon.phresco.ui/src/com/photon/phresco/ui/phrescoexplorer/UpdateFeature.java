@@ -154,31 +154,29 @@ public class UpdateFeature extends AbstractHandler  {
 				public void run() {
 					for (int i = 0; i < pages.length; i++) {
 						IWizardPage wizardPage = pages[i];
-
 						if (wizardPage instanceof JSLibraryFeaturePage) {
 							JSLibraryFeaturePage jsLibPage = (JSLibraryFeaturePage) wizardPage;
 							List<SelectedFeature> selectedItems = jsLibPage.getSelectedItems();
 							for (SelectedFeature selectedFeature : selectedItems) {
 								selectedFeatures.add(selectedFeature);
 							}
-						} else if (wizardPage instanceof ModuleFeaturePage) {
+						} if (wizardPage instanceof ModuleFeaturePage) {
 							ModuleFeaturePage modulePage = (ModuleFeaturePage) wizardPage;
 							List<SelectedFeature> selectedItems = modulePage.getSelectedItems();
 							for (SelectedFeature selectedFeature : selectedItems) {
 								selectedFeatures.add(selectedFeature);
 							}
-						} else if (wizardPage instanceof ComponentFeaturePage) {
+						} if (wizardPage instanceof ComponentFeaturePage) {
 							ComponentFeaturePage componentPage = (ComponentFeaturePage) wizardPage;
 							List<SelectedFeature> selectedItems = componentPage.getSelectedItems();
 							for (SelectedFeature selectedFeature : selectedItems) {
 								selectedFeatures.add(selectedFeature);
 							}
 						}
-						if(CollectionUtils.isNotEmpty(selectedFeatures)) {
-							updateFeatures(selectedFeatures);
-						}
 					}
-					
+					if(CollectionUtils.isNotEmpty(selectedFeatures)) {
+						updateFeatures(selectedFeatures);
+					}
 					PhrescoDialog.messageDialog(getShell(), Messages.FEATURE_UPDATED_SUCCESS_MSG);
 				}
 			});

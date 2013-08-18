@@ -134,7 +134,6 @@ public class SCMManagerUtil implements PhrescoConstants {
 				FileUtils.deleteDirectory(gitImportTemp);
 			}
 			if (applicationInfo != null) {
-				ProjectManager.updateProjectIntoWorkspace(applicationInfo.getAppDirName());
 				return applicationInfo;
 			} 
 		} else if (BITKEEPER.equals(type)) {
@@ -704,6 +703,7 @@ public class SCMManagerUtil implements PhrescoConstants {
 						}
 						ApplicationInfo appInfo = appInfos.get(0);
 						File file = new File(Utility.getProjectHome(), appInfo.getAppDirName());
+						System.out.println("SCM file Path===> " + file.getPath());
 						if (file.exists()) {
 							throw new PhrescoException(PROJECT_ALREADY);
 			            }
@@ -756,6 +756,8 @@ public class SCMManagerUtil implements PhrescoConstants {
 	
 	private static void updateSCMConnection(ApplicationInfo appInfo, String repoUrl)throws Exception {
 		try {
+			System.out.println("AppDir==> " + appInfo.getAppDirName());
+			System.out.println("repoUrl====> " + repoUrl);
 			PomProcessor processor = getPomProcessor(appInfo);
 				processor.setSCM(repoUrl, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				processor.save();

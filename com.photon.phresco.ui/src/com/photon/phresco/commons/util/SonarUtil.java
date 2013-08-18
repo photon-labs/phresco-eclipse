@@ -212,7 +212,7 @@ public class SonarUtil implements PhrescoConstants {
 			ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 
 			// To get parameter values for Iphone technology
-			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(PhrescoUtil.getApplicationInfo().getAppDirName());
+			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor();
 			String validateReportUrl = pomProcessor.getProperty(Constants.POM_PROP_KEY_VALIDATE_REPORT);
 			if (StringUtils.isNotEmpty(validateReportUrl)) {
 				CodeValidationReportType codeValidationReportType = new CodeValidationReportType();
@@ -251,7 +251,7 @@ public class SonarUtil implements PhrescoConstants {
 		boolean status = false;
 		try {
 			String appDirName = PhrescoUtil.getApplicationInfo().getAppDirName();
-			PomProcessor processor = PhrescoUtil.getPomProcessor(appDirName);
+			PomProcessor processor = PhrescoUtil.getPomProcessor();
 			String functionalDir = processor.getProperty("phresco.functionalTest.dir");
 			if (StringUtils.isNotEmpty(functionalDir)) {
 				status = true;

@@ -135,13 +135,26 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 	
 	public static String getProjectHome() {
-		File path = null;
-		String workingDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separatorChar + "projects";
-		path = new File(workingDir);
-		if(path.isDirectory()) {
-			return path.getPath() + File.separatorChar;
+		IPath location = null ;
+		String workingPath = "";
+		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
+		if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
+			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
+			for (Object object : selectedObjects) {
+				IProject iProject = (IProject) object;
+				location = iProject.getLocation();
+			} 
+			String dir = location.toOSString();
+			workingPath = StringUtils.removeEnd(dir, location.lastSegment());
+		} else {
+			String workingDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separatorChar + "projects";
+			File filePath = new File(workingDir);
+			if(!filePath.isDirectory()) {
+				filePath.mkdir();
+			}
+			workingPath =  filePath.getPath() + File.separatorChar;
 		}
-		return ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() + File.separatorChar;
+		return workingPath;
 	}
 
 	public static String getProjectName() {
@@ -261,6 +274,15 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 	
 	public static PomProcessor getPomProcessor(String appDirName) throws PhrescoException {
+		String applicationHome = getProjectHome() + File.separatorChar + appDirName;
+		try {
+			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
+		} catch (PhrescoPomException e) {
+			throw new PhrescoException(e);
+		}
+	}
+	
+	public static PomProcessor getPomProcessor() throws PhrescoException {
 		String applicationHome = getApplicationHome();
 		try {
 			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
@@ -270,7 +292,7 @@ public class PhrescoUtil implements PhrescoConstants {
 	}
 	
 	public static String getSqlFilePath(String appDirName) throws PhrescoException, PhrescoPomException {
-		String sqlPath = getPomProcessor(appDirName).getProperty(PHRESCO_SQL_PATH);
+		String sqlPath = getPomProcessor().getProperty(PHRESCO_SQL_PATH);
 		return getApplicationHome() + File.separatorChar + sqlPath;
 	}
 	
@@ -317,47 +339,47 @@ public class PhrescoUtil implements PhrescoConstants {
     }
 	
 	public static String getUnitTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
-        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR);
     }
 	
 	public static String getUnitTestReportOptions(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
-		return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.PHRESCO_UNIT_TEST);
+		return getPomProcessor().getProperty(Constants.PHRESCO_UNIT_TEST);
 	}
 	
 	public static String getUnitTestReportDir(ApplicationInfo appInfo, String option) throws PhrescoPomException, PhrescoException {
-        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_START + option + Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_END);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_START + option + Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_END);
     }
 	
 	public static String getFunctionalTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
-        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_FUNCTEST_RPT_DIR);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_FUNCTEST_RPT_DIR);
     }
 	
 	public static String getComponentTestReportDir(ApplicationInfo appInfo) throws PhrescoPomException, PhrescoException {
-        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_COMPONENTTEST_RPT_DIR);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_COMPONENTTEST_RPT_DIR);
     }
 	
 	public static String isIphoneTagExists(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
-        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.PHRESCO_CODE_VALIDATE_REPORT);
+        return getPomProcessor().getProperty(Constants.PHRESCO_CODE_VALIDATE_REPORT);
     }
 	
 	public static String getLoadTestReportDir(ApplicationInfo appinfo) throws PhrescoPomException, PhrescoException {
-    	return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_LOADTEST_RPT_DIR);
+    	return getPomProcessor().getProperty(Constants.POM_PROP_KEY_LOADTEST_RPT_DIR);
     }
 	
 	public static String getPerformanceTestReportDir(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
-        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RPT_DIR);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RPT_DIR);
     }
 	
 	public static String getPerformanceResultFileExtension(String appDirName) throws PhrescoException, PhrescoPomException {
-		return getPomProcessor(appDirName).getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RESULT_EXTENSION);
+		return getPomProcessor().getProperty(Constants.POM_PROP_KEY_PERFORMANCETEST_RESULT_EXTENSION);
 	}
 	
 	public static String getLoadResultFileExtension(ApplicationInfo appinfo) throws PhrescoException, PhrescoPomException {
-        return getPomProcessor(appinfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_LOADTEST_RESULT_EXTENSION);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_LOADTEST_RESULT_EXTENSION);
     }
 	
 	public static String getSeleniumToolType(ApplicationInfo appInfo) throws PhrescoException, PhrescoPomException {
-        return getPomProcessor(appInfo.getAppDirName()).getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
+        return getPomProcessor().getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
     }
 	
 	public static String getPhrescoPluginInfoFilePath(String goal, String phase) throws PhrescoException {

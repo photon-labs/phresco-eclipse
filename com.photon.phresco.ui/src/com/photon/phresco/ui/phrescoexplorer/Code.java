@@ -235,8 +235,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 
 	private String getReportUrl() {
 		try {
-			String appDirName = PhrescoUtil.getApplicationInfo().getAppDirName();
-			PomProcessor processor = PhrescoUtil.getPomProcessor(appDirName);
+			PomProcessor processor = PhrescoUtil.getPomProcessor();
 			StringBuilder builder = new StringBuilder();
 			String branchValue = "";
 			String sourceType = "";
@@ -248,7 +247,8 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			}
 			sourceType = reportType.getText();
 			if (sourceType.contains("functional")) {
-				PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(appDirName + functionalDir);
+				String funDir = PhrescoUtil.getApplicationHome() + functionalDir + File.separatorChar + POM_FILENAME;
+				PomProcessor pomProcessor = new PomProcessor(new File(funDir));
 				Model model = pomProcessor.getModel();
 				model.getGroupId();
 				builder.append(model.getGroupId());

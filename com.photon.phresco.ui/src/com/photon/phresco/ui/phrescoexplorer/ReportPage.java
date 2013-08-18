@@ -198,7 +198,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 			// unit xml check
 			if (!xmlResultsAvailable) {
 				List<String> moduleNames = new ArrayList<String>();
-				PomProcessor processor = PhrescoUtil.getPomProcessor(appInfo.getAppDirName());
+				PomProcessor processor = PhrescoUtil.getPomProcessor();
 				Modules pomModules = processor.getPomModule();
 				List<String> modules = null;
 				// check multimodule or not

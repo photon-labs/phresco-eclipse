@@ -85,8 +85,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 		}
 
 		try {
-			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
-			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(applicationInfo.getAppDirName());
+			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor();
 			String seleniumToolType = pomProcessor.getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
 			String phrescoPluginInfoFilePath = PhrescoUtil.getPhrescoPluginInfoFilePath(Constants.PHASE_FUNCTIONAL_TEST, "");
 			final MojoProcessor processor = new MojoProcessor(new File(phrescoPluginInfoFilePath));

@@ -44,6 +44,7 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.TechnologyInfo;
 import com.photon.phresco.commons.util.ProjectManager;
+import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.ui.PhrescoPlugin;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
@@ -227,7 +228,11 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					ProjectManager.createProject(projectInfo, monitor);
+					try {
+						ProjectManager.createProject(projectInfo, monitor);
+					} catch (PhrescoException e) {
+						PhrescoDialog.exceptionDialog(getShell(), e);
+					}
 				}
 			});
 		} catch (InvocationTargetException e) {

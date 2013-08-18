@@ -20,11 +20,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.m2e.core.project.MavenProjectInfo;
-import org.eclipse.m2e.core.ui.internal.wizards.MavenProjectWizard;
 
 import com.photon.phresco.api.ApplicationProcessor;
 import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
@@ -42,7 +41,6 @@ import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.PhrescoDynamicLoader;
 import com.photon.phresco.util.Utility;
-import com.phresco.pom.util.PomProcessor;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class ProjectManager implements PhrescoConstants {
@@ -114,9 +112,9 @@ public class ProjectManager implements PhrescoConstants {
 		description.setLocation(new Path(PhrescoUtil.getProjectHome() + projectName));
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName());
 		try {
-			List<String> projectModules = PhrescoUtil.getProjectModules(projectName);
 			project.create(description, progressMonitor);
 			project.open(progressMonitor);
+			List<String> projectModules = PhrescoUtil.getProjectModules(projectName);
 			if(CollectionUtils.isNotEmpty(projectModules)) {
 				for (String moduleName : projectModules) {
 					IProjectDescription multiDescription = ResourcesPlugin.getWorkspace().newProjectDescription(moduleName);
@@ -131,7 +129,7 @@ public class ProjectManager implements PhrescoConstants {
 		}
 	}
 	
-	public static void deleteProjectIntoWorkspace(String projectName) {
+	public static void deleteProjectIntoWorkspace(String projectName) throws PhrescoException {
 		IProgressMonitor progressMonitor = new NullProgressMonitor();
 		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
 		description.setLocation(new Path(PhrescoUtil.getProjectHome() + projectName));
@@ -139,17 +137,17 @@ public class ProjectManager implements PhrescoConstants {
 		try {
 			project.delete(true, true, progressMonitor);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			throw new PhrescoException(e);
 		}
 	}
 	
-	public static void createProject(ProjectInfo projectInfo, IProgressMonitor monitor){
+	public static void createProject(ProjectInfo projectInfo, IProgressMonitor monitor) throws PhrescoException{
 		//Create Phresco Project
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 		try {
 			File file = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().getAbsolutePath() + File.separatorChar + "projects");
 			ClientResponse response = serviceManager.createProject(projectInfo);
-			if(response.getStatus() == 200) {
+			if(response.getStatus() == 200) { 
 				extractArchive(response, projectInfo, file.getPath());
 				String path = "";
 				List<ApplicationInfo> appInfos = projectInfo.getAppInfos();
@@ -175,14 +173,12 @@ public class ProjectManager implements PhrescoConstants {
 					}
 				}
 			}
-		} catch (PhrescoException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new PhrescoException(e);
 		}
 	}
 	
-	private static void CreateGeneralProject(ApplicationInfo appInfo, String path, IProgressMonitor monitor){
+	private static void CreateGeneralProject(ApplicationInfo appInfo, String path, IProgressMonitor monitor) throws PhrescoException{
 		try {
 			//Link the created Project to Eclipse
 			IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(appInfo.getAppDirName());
@@ -193,7 +189,7 @@ public class ProjectManager implements PhrescoConstants {
 			project.create(description, monitor);
 			project.open(monitor);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			throw new PhrescoException(e);
 		}
 	}
 	

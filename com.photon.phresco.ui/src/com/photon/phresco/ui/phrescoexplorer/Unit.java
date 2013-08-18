@@ -438,7 +438,7 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 	 */
 	private String getUnitTestReportOptions(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(Constants.PHRESCO_UNIT_TEST);
+			return PhrescoUtil.getPomProcessor().getProperty(Constants.PHRESCO_UNIT_TEST);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
 		}

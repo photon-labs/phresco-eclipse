@@ -345,7 +345,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	public String getUnitTestSuitePath(String appDirName, String option) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_UNITTEST_TESTSUITE_XPATH_START + option
 							+ Constants.POM_PROP_KEY_UNITTEST_TESTSUITE_XPATH_END);
 		} catch (PhrescoPomException e) {
@@ -362,7 +362,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	public String getUnitTestSuitePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_UNITTEST_TESTSUITE_XPATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -378,7 +378,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getComponentTestSuitePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_COMPONENTTEST_TESTSUITE_XPATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -394,7 +394,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getFunctionalTestSuitePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_FUNCTEST_TESTSUITE_XPATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -436,7 +436,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getUnitTestCasePath(String appDirName, String option) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_UNITTEST_TESTCASE_PATH_START + option
 							+ Constants.POM_PROP_KEY_UNITTEST_TESTCASE_PATH_END);
 		} catch (PhrescoPomException e) {
@@ -453,7 +453,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getUnitTestCasePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_UNITTEST_TESTCASE_PATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -469,7 +469,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getFunctionalTestCasePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_FUNCTEST_TESTCASE_PATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -485,7 +485,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getComponentTestCasePath(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_COMPONENTTEST_TESTCASE_PATH);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -562,7 +562,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getUnitTestReportDir(String appDirName, String option) throws PhrescoException {
 		try {
-			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(appDirName);
+			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor();
 			return pomProcessor.getProperty(Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_START + option
 					+ Constants.POM_PROP_KEY_UNITTEST_RPT_DIR_END);
 		} catch (PhrescoPomException e) {
@@ -579,7 +579,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	public String getUnitTestReportDir(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_UNITTEST_RPT_DIR);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -620,7 +620,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getFunctionalTestReportDir(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_FUNCTEST_RPT_DIR);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -639,7 +639,7 @@ public class QualityUtil implements PhrescoConstants {
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			sb.append(Utility.getProjectHome() + appDirName);
+			sb.append(PhrescoUtil.getApplicationHome());
 			if (StringUtils.isNotEmpty(moduleName)) {
 				sb.append(File.separatorChar);
 				sb.append(moduleName);
@@ -661,7 +661,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getComponentTestReportDir(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_COMPONENTTEST_RPT_DIR);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
@@ -888,7 +888,7 @@ public class QualityUtil implements PhrescoConstants {
 
 			List<TestCase> testCases = new ArrayList<TestCase>();
 
-			StringBuilder screenShotDir = new StringBuilder(Utility.getProjectHome() + appDirName);
+			StringBuilder screenShotDir = new StringBuilder(PhrescoUtil.getApplicationHome());
 			screenShotDir.append(File.separator);
 			String sceenShotDir = getSceenShotDir(appDirName);
 			if (StringUtils.isEmpty(sceenShotDir)) {
@@ -1002,7 +1002,7 @@ public class QualityUtil implements PhrescoConstants {
 	 */
 	private String getSceenShotDir(String appDirName) throws PhrescoException {
 		try {
-			return PhrescoUtil.getPomProcessor(appDirName).getProperty(
+			return PhrescoUtil.getPomProcessor().getProperty(
 					Constants.POM_PROP_KEY_SCREENSHOT_DIR);
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
