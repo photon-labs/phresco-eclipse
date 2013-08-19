@@ -73,12 +73,12 @@ public class JSLibraryFeaturePage extends AbstractFeatureWizardPage {
 		}
 		
 		final Composite parentComposite = (Composite) getControl();
-		
+/*		showSelectedFeaturesCount(parentComposite);
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(parentComposite, SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		scrolledComposite.setAlwaysShowScrollBars(false);
 		scrolledComposite.setBounds(5, 5, 500, 350);
-		
-		renderFeatureTable(scrolledComposite, PAGE_NAME, features);
+		*/
+		renderFeatureTable(parentComposite, PAGE_NAME, features);
 	}
 }

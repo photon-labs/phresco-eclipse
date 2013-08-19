@@ -34,13 +34,16 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -78,28 +81,53 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private static Map<String, Object>  depMap = new HashMap<String, Object>();
 	private static Map<String, Object>  selectedDepMap = new HashMap<String, Object>();
 	
+	private Label selectedCountLabel = null;
+	
 	protected AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 	}
 	
 	public void renderFeatureTable(final Composite composite, String featureName, List<ArtifactGroup> features) {
+		
 		Group jsLibGroups = new Group(composite, SWT.SHADOW_ETCHED_IN);
+		
 		jsLibGroups.setText(featureName);
+		GridLayout mainLayout = new GridLayout(1, false);
+		jsLibGroups.setLayout(mainLayout);
+		jsLibGroups.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		
+		selectedCountLabel = new Label(jsLibGroups, SWT.NONE);
 		
 		renderTable(jsLibGroups, features);
 		
-		jsLibGroups.setBounds(0, 5, 250, 240);
+		jsLibGroups.setBounds(0, 5, 300, 175);
 	    jsLibGroups.pack();
 		
 	}
 	
+	int totalSize;
+	int selectedCount = 0;
+	
+	private void setSelectedCountSize() {
+		selectedCountLabel.setText("  Selected (" + selectedCount+"/"+totalSize+")");
+	}
+	
 	private Table renderTable(Group jsLibGroups, final List<ArtifactGroup> features) {
-		Table table = new Table(jsLibGroups, SWT.BORDER | SWT.MULTI);
+		totalSize = features.size();
+		
+		Composite cmp = new Composite(jsLibGroups, SWT.None);
+		
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(cmp, SWT.V_SCROLL);
+		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		scrolledComposite.setAlwaysShowScrollBars(false);
+		scrolledComposite.setBounds(5, 5, 500, 350);
+		
+		Table table = new Table(scrolledComposite, SWT.BORDER | SWT.MULTI);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		table.setLayoutData(new GridData());
 		
-		table.setBounds(12, 20, 450, 175);
+		table.setBounds(0, 0, 490, 320);
 		
         TableColumn checkBoxColumn = new TableColumn(table, SWT.LEFT, 0);
         checkBoxColumn.setText("");
@@ -149,6 +177,8 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 					if(artifactGroupId.equals(artifactGroup.getId())) {
 						checkButton.setSelection(true);
 						selectedFeatures.remove(selectedFeature);
+						selectedCount++;
+						setSelectedCountSize();
 						break;
 					}
 				}
@@ -229,9 +259,16 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        	if (selection) {
 		        		ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
 			        	selectDependency(features, artifactInfo);
+			        	
+						selectedCount++;
+						setSelectedCountSize();
+						
 		        	}  else {
 		        		ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
 			        	deSelectDependency(features, artifactInfo);
+			        	
+						selectedCount--;
+						setSelectedCountSize();
 		        	}
 		        	
 			    	if (selectedVersion.equals("")) {
@@ -427,6 +464,8 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 								Button button = (Button) depMap.get(artifactGroup.getId());
 								selectedDepMap.put(artInfo.getId() , null);
 		        				button.setSelection(true);
+								selectedCount++;
+								setSelectedCountSize();
 							} 
 						}
         			}
@@ -446,6 +485,8 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
 		        				button.setSelection(false);
+								selectedCount--;
+								setSelectedCountSize();
 							} 
 						}
         			}
