@@ -1,9 +1,11 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +42,7 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.Technology;
+import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
@@ -441,20 +444,8 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
 			buildArgCmds.add(HYPHEN_N);
 			String workingDirectory = PhrescoUtil.getApplicationHome();
-			BufferedInputStream reader = applicationManager.performAction(projectInfo, ActionType.PDF_REPORT, buildArgCmds, workingDirectory);
-			
-			int available = reader.available();
-			while (available != 0) {
-				byte[] buf = new byte[available];
-                int read = reader.read(buf);
-                if (read == -1 ||  buf[available-1] == -1) {
-                	break;
-                } else {
-                	System.out.println("Restart Start Console : " + new String(buf));
-                }
-                available = reader.available();
-			}
-			
+			BufferedInputStream inputStream = applicationManager.performAction(projectInfo, ActionType.PDF_REPORT, buildArgCmds, workingDirectory);
+			ConsoleViewManager.getDefault("PDF Report Console").println(new BufferedReader(new InputStreamReader(inputStream)));
 		} catch (Exception e) {
 			throw new PhrescoException("exception occured in the Print As PDF functionality");
 		}

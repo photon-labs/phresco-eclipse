@@ -195,8 +195,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 								action.execute();
 							}
 						});
-
-						dialog.setVisible(false);
+						dialog.close();
 						codeDialog.setVisible(true);
 						setBrowserUrl();
 					}
@@ -373,7 +372,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, VALIDATE_CODE_GOAL);
 
-			for (Parameter parameter : parameters) {
+			for (final Parameter parameter : parameters) {
 				String type = parameter.getType();
 				if (type.equalsIgnoreCase(STRING)) {
 					Label buildNameLabel = new Label(codeComposite, SWT.NONE);
@@ -426,7 +425,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					Label Logs = new Label(codeComposite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
 
-					Combo listLogs = new Combo(codeComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+					final Combo listLogs = new Combo(codeComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
 
 					List<Value> values = parameter.getPossibleValues().getValue();
 					for (Value value : values) {
@@ -439,6 +438,27 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), listLogs); 
 
+					if (parameter.getKey() != null && parameter.getKey().equalsIgnoreCase("sonar")) {
+						final Combo validateagainst = (Combo) map.get(parameter.getKey());
+						validateagainst.addListener(SWT.Selection, new Listener() {
+							@Override
+							public void handleEvent(Event event) {
+								String value = validateagainst.getText();
+								if (value.equalsIgnoreCase("Functional Test")) {
+									Combo src = (Combo) map.get("src");
+									if (src!= null && !src.isDisposed()) {
+										src.setEnabled(false);
+									}
+								} else {
+									Combo src = (Combo) map.get("src");
+									if (src!= null && !src.isDisposed()) {
+										src.setEnabled(true);
+									}
+								}
+							}
+						});
+					}
+					
 				} else if (type.equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					String key = null;
 					Label Logs = new Label(codeComposite, SWT.LEFT);
