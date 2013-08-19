@@ -173,7 +173,22 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					}
 					map.put(key, buttons);
 					group.pack();
-				} 
+				} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
+					if (parameter.getKey().equalsIgnoreCase(SHOW_SETTINGS)) {
+						continue;
+					}
+					Label defaults = new Label(composite, SWT.LEFT);
+					defaults.setText(parameter.getName().getValue().get(0).getValue());
+					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+					Button checkBoxButton = new Button(composite, SWT.CHECK);
+					checkBoxButton.setLayoutData(new GridData(75, 20));
+					GridData data = new GridData(GridData.FILL_BOTH);
+					checkBoxButton.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
+					System.out.println("Parameter key = " + parameter.getKey());
+					map.put(parameter.getKey(), checkBoxButton);
+				}
 			}
 
 			Composite buttonComposite = new Composite(buildDialog, SWT.NONE);
@@ -218,6 +233,12 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 							String envValue = env.toString();
 							envValue = envValue.substring(0, envValue.lastIndexOf(","));
 							parameter.setValue(envValue); 
+						}
+					} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
+						Button checkBoxButton = (Button) map.get(parameter.getKey());
+						if (checkBoxButton != null && !checkBoxButton.isDisposed()) {
+							boolean selection = checkBoxButton.getSelection();
+							parameter.setValue(String.valueOf(selection));
 						}
 					}
 				}

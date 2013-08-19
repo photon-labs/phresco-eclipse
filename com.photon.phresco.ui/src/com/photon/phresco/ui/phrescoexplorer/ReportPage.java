@@ -421,26 +421,20 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 					String key = parameter.getKey();
 					if (REQ_REPORT_TYPE.equals(key)) {
 						parameter.setValue(reportDataType);
-					} else if (REQ_TEST_TYPE.equals(key)) {
-						/*if (StringUtils.isEmpty(fromPage)) {
-							setFromPage(FROMPAGE_ALL);
-						}*/
-						parameter.setValue(fromPage);
-					} /*else if (REQ_SONAR_URL.equals(key)) {
-	            		parameter.setValue(sonarUrl);
-	            	}*/ else if ("logo".equals(key)) {
+					} else if (SONAR_URL.equals(key)) {
+	            		parameter.setValue(PhrescoUtil.getSonarUrl());
+	            	} else if (LOGO.equals(key)) {
 	            		parameter.setValue(getLogoImageString(userId, customerId));
-	            	} else if ("theme".equals(key)) {
+	            	} else if (THEME.equals(key)) {
 	            		parameter.setValue(getThemeColorJson(userId, customerId));
 	            	} else if (REQ_REPORT_NAME.equals(key)) {
 	            		parameter.setValue(pdfName);
-	            	} else if ("technologyName".equals(key)) {
+	            	} else if (TECHNOLOGY_NAME.equals(key)) {
 	            		parameter.setValue(technology.getName());
 	            	}
 				}
 			}
 			mojo.save();
-
 			List<String> buildArgCmds = getMavenArgCommands(parameters);
 			buildArgCmds.add(HYPHEN_N);
 			String workingDirectory = PhrescoUtil.getApplicationHome();

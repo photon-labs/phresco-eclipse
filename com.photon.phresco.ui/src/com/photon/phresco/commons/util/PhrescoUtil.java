@@ -382,6 +382,10 @@ public class PhrescoUtil implements PhrescoConstants {
         return getPomProcessor().getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
     }
 	
+	public static String getSonarUrl() throws PhrescoException, PhrescoPomException {
+        return SONAR_HOST_URL;
+    }
+	
 	public static String getPhrescoPluginInfoFilePath(String goal, String phase) throws PhrescoException {
 		StringBuilder sb = new StringBuilder(getApplicationHome());
 		sb.append(File.separator);

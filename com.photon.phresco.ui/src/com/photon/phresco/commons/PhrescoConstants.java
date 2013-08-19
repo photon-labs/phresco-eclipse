@@ -260,6 +260,15 @@ public interface PhrescoConstants {
 	String ARCHIVES = "archives";
 	String CUMULATIVE = "cumulativeReports";
 	String PDF = "pdf";
+	String SONAR_URL = "sonarUrl";
+	String LOGO = "logo";
+	String THEME = "theme";
+	String TECHNOLOGY_NAME = "technologyName";
+	
+	
+	
+	
+	
 
 	String PHRESCO_PREFERENCE_ID = "com.photon.phresco.ui.preferences.PhrescoPreferences";
 	String PHRESCO_LOGIN_PREFERENCE_ID = "com.photon.phresco.ui.preferences.LoginPrefrence";	
