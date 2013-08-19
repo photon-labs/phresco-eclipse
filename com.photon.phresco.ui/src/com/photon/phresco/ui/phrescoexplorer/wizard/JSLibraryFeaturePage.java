@@ -22,11 +22,8 @@ package com.photon.phresco.ui.phrescoexplorer.wizard;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Table;
 
 import com.photon.phresco.commons.model.ArtifactGroup;
 
