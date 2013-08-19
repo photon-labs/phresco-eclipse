@@ -486,7 +486,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										fd.setText("Browse");
 										String path = fd.open();
 										if (path != null) {
-											path = path.substring(path.indexOf("."));
+//											path = path.substring(path.indexOf("."));
 											certificateComb.add(path);
 											certificateComb.select(0);
 											map.put(CERTIFICATE, certificateComb);
@@ -1025,18 +1025,20 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						}
 					} 
 					else {
+						Boolean remoteStatus = (Boolean) map.get(REMOTE_DEPLOYMENT_VALUE);
 						if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && !protocolList.isDisposed() &&
-								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL) || propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && remoteStatus != null && remoteStatus.equals(Boolean.TRUE)) {
 							Text deployText = (Text) map.get(propertyTemplate.getKey());
-							deployText.setVisible(false);
+							deployText.setEnabled(false);
 							Label label =  (Label) map.get("deployLabel");
-							label.setVisible(false);
+							label.setEnabled(false);
 							continue;
 						}
-						
 						Text text = (Text) map.get(propertyTemplate.getKey());
 						String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
-						text.setText(value);
+						if (StringUtils.isNotEmpty(value) && !text.isDisposed()) {
+							text.setText(value);
+						}
 					}				
 				} 
 				else if (propertyTemplate.getType().equalsIgnoreCase(NUMBER)) {
@@ -1048,12 +1050,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					if (checkBoxButton != null) {
 						final String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						checkBoxButton.setSelection(Boolean.parseBoolean(value));
+						if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+							map.put(REMOTE_DEPLOYMENT_VALUE, Boolean.parseBoolean(value));
+						}
 						checkBoxButton.addListener(SWT.Selection, new Listener() {
 							@Override
 							public void handleEvent(Event event) {
 								Button button = (Button) event.widget;
 								boolean selection = button.getSelection();
 								String value = String.valueOf(selection);
+								if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+									map.put(REMOTE_DEPLOYMENT_VALUE, selection);
+								}
 								String text = protocolList.getText();
 								if (value.equalsIgnoreCase("false")&& !protocolList.isDisposed() &&	protocolList.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
 									Text deployText = (Text) map.get(DEPLOY_DIR);
@@ -1128,9 +1136,15 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									}
 									Text nameText = (Text) map.get(propertyTemplate.getKey());
 									Boolean required = validate(propertyTemplate);
+									Boolean status = false;
+									if (propertyTemplate.getKey().equalsIgnoreCase("deploy_dir")) {
+										status = (Boolean) map.get(REMOTE_DEPLOYMENT_VALUE);
+									}
 									if (required && StringUtils.isEmpty(nameText.getText())) {
 										if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && !protocolList.isDisposed() &&
 												protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+											continue;
+										} else if (status.equals(Boolean.TRUE)) {
 											continue;
 										}
 										PhrescoDialog.errorDialog(configDialog, Messages.WARNING, propertyTemplate.getName()+ " " + Messages.EMPTY_STRING_WARNING);

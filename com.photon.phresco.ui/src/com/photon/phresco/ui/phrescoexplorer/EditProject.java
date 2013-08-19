@@ -78,6 +78,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 		public Text descText;
 		public Text appDirText;
 		public Text versionText;
+		public String projectName;
 
 		public List<ServerComponent> serverComponents = new ArrayList<ServerComponent>();
 		public List<DatabaseComponent> dbComponents = new ArrayList<DatabaseComponent>();
@@ -92,8 +93,18 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 
 		@Override
 		public void addPages() {
-			EditProjectPage editProjectPage = new EditProjectPage("Edit Page");
-			addPage(editProjectPage);
+			try {
+				projectName = PhrescoUtil.getApplicationInfo().getAppDirName();
+				if (StringUtils.isNotEmpty(projectName)) {
+					EditProjectPage editProjectPage = new EditProjectPage(projectName);
+					addPage(editProjectPage);
+				} else {
+					EditProjectPage editProjectPage = new EditProjectPage(Messages.EDIT_PROJECT_DIALOG_TITLE);
+					addPage(editProjectPage);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		@Override

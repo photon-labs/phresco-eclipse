@@ -52,7 +52,7 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 	
 	public EditProjectPage(String pageName) {
 		super(pageName);
-		setTitle(Messages.EDIT_PROJECT_DIALOG_TITLE);
+		setTitle(pageName);
 	}
 	
 	@Override
