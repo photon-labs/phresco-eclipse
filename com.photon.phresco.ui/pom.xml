@@ -11,7 +11,7 @@
 	
 
 	<properties>
-		<phresco.version>3.0.0.19005-SNAPSHOT</phresco.version>
+		<phresco.version>3.0.0.22001-SNAPSHOT</phresco.version>
 	</properties>
 
 	<dependencies>
@@ -35,7 +35,11 @@
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>3.0.0.201306101825-r</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>4.0-beta</version>
+	</dependency>
 	</dependencies>
 
 	<build>
