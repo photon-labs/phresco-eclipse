@@ -12,10 +12,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -33,12 +30,13 @@ import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
-import com.photon.phresco.ui.phrescoexplorer.UpdateFeature.FeatureWizard;
 import com.photon.phresco.ui.phrescoexplorer.wizard.EditProjectPage;
 import com.photon.phresco.ui.phrescoexplorer.wizard.WizardComposite;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.componets.DatabaseComponent;
 import com.photon.phresco.ui.wizards.componets.ServerComponent;
+import com.phresco.pom.exception.PhrescoPomException;
+import com.phresco.pom.util.PomProcessor;
 
 /**
  * @author suresh_ma
@@ -129,6 +127,7 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 		private void update() {
 			try {
 				boolean validate = validate();
+				updateFunctionalTestType();
 				if(!validate) {
 					return;
 				}
@@ -173,6 +172,22 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 				PhrescoDialog.exceptionDialog(getShell(), e);
 			}
 		}
+
+		private void updateFunctionalTestType() {
+			try {
+				PomProcessor pomProcessor = PhrescoUtil.getPomProcessor(PhrescoUtil.getApplicationInfo().getAppDirName());
+				String property = pomProcessor.getProperty("phresco.functionalTest.selenium.tool");
+				if (StringUtils.isNotEmpty(property)) {
+					pomProcessor.setProperty("phresco.functionalTest.selenium.tool", "webdriver");
+				}
+				pomProcessor.save();
+			} catch (PhrescoException e) {
+				e.printStackTrace();
+			} catch (PhrescoPomException e) {
+				e.printStackTrace();
+			}
+		}
+
 
 		private boolean validate() {
 			if(StringUtils.isEmpty(nameText.getText())) {

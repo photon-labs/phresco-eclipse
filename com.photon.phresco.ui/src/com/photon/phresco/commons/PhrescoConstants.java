@@ -284,6 +284,7 @@ public interface PhrescoConstants {
 	String FILE_TYPE_CRT = "crt";
 	String CERTIFICATES = "certificates";
 	String ASTERICK     = "*";
+	String REMOTE_DEPLOYMENT_VALUE = "remoteDeploymentValue";
 	
 	// Dynamic constants
 	
