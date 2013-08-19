@@ -186,6 +186,13 @@ public interface PhrescoConstants {
 	String DEPLOY 		 = "deploy";
 	String WATCHER_MAP       = "watchermap";
 	String DEPLOY_LOGS	= "Deploy Logs";
+	String BUILD_INFO_VALUE   = "buildinfo";
+	String BUILD_INFOS  = "buildinfoS";
+	String BUILD_NOS     = "BuildNo";
+	String TIME_STAMP    = "Date";
+	
+	
+	
 	
 	// Code Validate
 	

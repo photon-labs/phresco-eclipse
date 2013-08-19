@@ -3,6 +3,7 @@ package com.photon.phresco.ui.phrescoexplorer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
@@ -19,35 +20,45 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.ConfirmDialog;
+import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
@@ -78,6 +89,7 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	private Text numberText;
 	private Text passwordText;
 	private Combo listLogs;
+	private Shell downloadDialog; 
 
 	Map<String, String> deploytypeMaps = new HashedMap();
 	private static Map<String, Object> deploymap = new HashedMap();
@@ -99,7 +111,8 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 			List<String> options = technology.getOptions();
 			if (CollectionUtils.isNotEmpty(options)) {
 				if(!options.contains("Deploy")) {
-					PhrescoDialog.errorDialog(shell, "Deploy", "Deploy is not Applicable");
+					createDownloadDialog();
+//					PhrescoDialog.errorDialog(shell, "Deploy", "Deploy is not Applicable");
 					return null;
 				}
 			}
@@ -145,6 +158,174 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 		return null;
 	}
 
+	private void createDownloadDialog() {
+		downloadDialog = new Shell(new Shell(), SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE);
+		downloadDialog.setText(Messages.PDF_REPORT_DOWNLOAD_DIALOG_TITLE);
+		GridLayout layout = new GridLayout(1, false);
+		downloadDialog.setLocation(downloadDialog.getLocation());
+		downloadDialog.setLayout(layout);
+		downloadDialog.setSize(450, 300);
+		downloadDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		final Composite composite = new Composite(downloadDialog, SWT.NONE);
+		GridLayout compLayout = new GridLayout(2, false);
+		composite.setLayout(compLayout);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		final Table table = new Table(downloadDialog, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		
+		String[] columnValues = {BUILD_NOS, TIME_STAMP, DOWNLOAD, DELETE};
+		for (int i = 0; i < columnValues.length; i++) {
+			TableColumn column = new TableColumn(table, SWT.FILL);
+			column.setText(columnValues[i]);
+			column.setWidth(120);
+		}
+		
+		try {
+			File buildInfoPath = PhrescoUtil.getBuildInfoPath();
+			if (buildInfoPath.exists()) {
+				Gson gson = new Gson();
+				Type type = new TypeToken<List<BuildInfo>>() {}  .getType();
+				FileReader reader = new FileReader(buildInfoPath);
+				List<BuildInfo> buildInfos = (List<BuildInfo>)gson.fromJson(reader, type);
+				if (CollectionUtils.isNotEmpty(buildInfos)) {
+					for (BuildInfo buildInfo : buildInfos) {
+						TableItem item = new TableItem(table, SWT.FILL);
+						item.setText(0, String.valueOf(buildInfo.getBuildNo()));
+						item.setText(1, buildInfo.getTimeStamp());
+
+						int item_height = 18;
+						Image fake = new Image(table.getDisplay(), 1, item_height);
+						item.setImage(0, fake); 
+						
+						Composite configureButtonPan = new Composite(table, SWT.NONE);
+						configureButtonPan.setLayout(new FillLayout());
+						final Button downloadButton = new Button(configureButtonPan, SWT.PUSH);
+						downloadButton.setText(DOWNLOAD);
+						downloadButton.setData(BUILD_NAME, buildInfo.getBuildName());
+						
+						downloadButton.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								String buildFileName = (String) downloadButton.getData(BUILD_NAME);
+								if(StringUtils.isNotEmpty(buildFileName)) {
+									try {
+										download(buildFileName, downloadDialog);
+									} catch (PhrescoException e1) {
+										PhrescoDialog.exceptionDialog(downloadDialog, e1);
+									}
+								}
+								super.widgetSelected(e);
+							}
+						});
+						
+						TableEditor editor = new TableEditor(table);
+						editor.horizontalAlignment = SWT.CENTER;
+						editor.grabHorizontal = true;
+						editor.setEditor(configureButtonPan, item, 2);
+						
+						int delete_item_height = 18;
+						Image deleteFake = new Image(table.getDisplay(), 1, delete_item_height);
+						item.setImage(0, deleteFake); 
+						
+						Composite deleteButtonPan = new Composite(table, SWT.NONE);
+						deleteButtonPan.setLayout(new FillLayout());
+						final Button deleteButton = new Button(deleteButtonPan, SWT.PUSH);
+						deleteButton.setText(DELETE);
+						deleteButton.setData(BUILD_INFO_VALUE, buildInfo);
+						deleteButton.setData(BUILD_INFOS, buildInfos);
+						
+						deleteButton.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								BuildInfo selectedBuildInfo = (BuildInfo) deleteButton.getData(BUILD_INFO_VALUE);
+								List<BuildInfo> buildInfos = (List<BuildInfo>) deleteButton.getData(BUILD_INFOS);
+								if(selectedBuildInfo != null) {
+									delete(buildInfos, selectedBuildInfo, downloadDialog);
+								}
+								super.widgetSelected(e);
+							}
+						});
+						
+						TableEditor deleteButtoneditor = new TableEditor(table);
+						deleteButtoneditor.horizontalAlignment = SWT.CENTER;
+						deleteButtoneditor.grabHorizontal = true;
+						deleteButtoneditor.setEditor(deleteButtonPan, item, 3);
+					}
+				}
+			}
+		} catch (JsonIOException e) {
+			e.printStackTrace();
+		} catch (JsonSyntaxException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		Button cancelButton = new Button(downloadDialog, SWT.RIGHT | SWT.END | SWT.PUSH);
+		cancelButton.setText(Messages.CANCEL);
+		cancelButton.setLayoutData(new GridData(SWT.RIGHT, SWT.END, true, true, 1, 1));
+		
+		cancelButton.addListener(SWT.Selection, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				downloadDialog.close();
+			}
+		});
+		
+		
+		downloadDialog.open();
+	}
+	
+	private void delete(List<BuildInfo> buildInfos, BuildInfo selectedBuildInfo, Shell downloadDialog) {
+		if (CollectionUtils.isNotEmpty(buildInfos)) {
+			String applicationHome = PhrescoUtil.getApplicationHome();
+			File buildLoc = new File(applicationHome + File.separator + DO_NOT_CHECKIN_DIR + File.separator + "build" + File.separator +  selectedBuildInfo.getBuildName());
+			buildInfos.remove(selectedBuildInfo);
+			Gson gson = new Gson();
+			String json = gson.toJson(buildInfos);
+			File path = PhrescoUtil.getBuildInfoPath();
+			try {
+				FileWriter writer = new FileWriter(path);
+				writer.write(json);
+				buildLoc.delete();
+				writer.close();
+				downloadDialog.close();
+				createDownloadDialog();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	
+	private void download(String buildFileName, Shell shell) throws PhrescoException {
+		String buildLoc = "";
+		String applicationHome = PhrescoUtil.getApplicationHome();
+		String archivePath = applicationHome + File.separator + DO_NOT_CHECKIN_DIR + File.separator + "build"
+				+ File.separator;
+		buildLoc = archivePath + File.separator + buildFileName;
+		
+		File buildFile = new File(buildLoc);
+		if (buildFile.isFile()) {
+			FileDialog fileDialog = new FileDialog(shell, SWT.SAVE);
+			fileDialog.setText("Save");
+			fileDialog.setFileName(buildFile.getName());
+			String[] filterExt = { "*.zip"};
+			fileDialog.setFilterExtensions(filterExt);
+			String selected = fileDialog.open();
+			try {
+				if (StringUtils.isNotEmpty(selected)) {
+					FileUtils.copyFile(buildFile, new File(selected) , true);
+				}
+			} catch (IOException e) {
+				throw new PhrescoException(e);
+			}
+		}
+	}
+	
+	
 	public Shell createDeployDialog(Shell dialog) {
 		deployDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE | SWT.RESIZE);
 		deployDialog.setText(Messages.DEPLOY_DIALOG_TITLE);
