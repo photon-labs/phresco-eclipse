@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -81,7 +80,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private Map<ArtifactGroup, String> selectedArtifactGroupWithComboVersion = new HashMap<ArtifactGroup, String>();
 	private Map<ArtifactGroup, String> selectedArtifactGroup = new HashMap<ArtifactGroup, String>();
 	private static Map<String, Object>  depMap = new HashMap<String, Object>();
-	private static Map<String, Object>  selectedDepMap = new HashMap<String, Object>();
 	private static List<ArtifactGroup> artifactGroupList = new ArrayList<ArtifactGroup>();
 	private Label selectedCountLabel = null;
 	
@@ -467,7 +465,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
         				for (ArtifactInfo artInfo : versions) {
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
-								selectedDepMap.put(artInfo.getId() , null);
 		        				button.setSelection(true);
 								selectedCount++;
 								setSelectedCountSize();
