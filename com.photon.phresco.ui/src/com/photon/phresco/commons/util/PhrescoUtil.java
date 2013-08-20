@@ -20,6 +20,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
@@ -126,8 +127,15 @@ public class PhrescoUtil implements PhrescoConstants {
 		if (selection instanceof IStructuredSelection) {
 			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
 			for (Object object : selectedObjects) {
-				IProject iProject = (IProject) object;
-				location = iProject.getLocation();
+				if(object instanceof IProject) {
+					IProject iProject = (IProject) object;
+					location = iProject.getLocation();
+				} 
+				if(object instanceof IJavaProject) {
+					IJavaProject project = (IJavaProject) object;
+					project.getJavaModel().getPath();
+					location = project.getProject().getLocation();
+				}
 			}
 		}
 		File path = new File(location.toOSString());
@@ -141,8 +149,15 @@ public class PhrescoUtil implements PhrescoConstants {
 		if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
 			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
 			for (Object object : selectedObjects) {
-				IProject iProject = (IProject) object;
-				location = iProject.getLocation();
+				if(object instanceof IProject) {
+					IProject iProject = (IProject) object;
+					location = iProject.getLocation();
+				} 
+				if(object instanceof IJavaProject) {
+					IJavaProject project = (IJavaProject) object;
+					project.getJavaModel().getPath();
+					location = project.getProject().getLocation();
+				}
 			} 
 			String dir = location.toOSString();
 			workingPath = StringUtils.removeEnd(dir, location.lastSegment());
