@@ -259,7 +259,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        	if (selection) {
 		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
 		        		for (ArtifactInfo artifactInfo : artifactInfos) {
-				        	selectDependency(features, artifactInfo);
+				        	selectDependency(artifactInfo);
 				        	
 							selectedCount++;
 							setSelectedCountSize();
@@ -267,7 +267,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        	}  else {
 		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
 		        		for (ArtifactInfo artifactInfo : artifactInfos) {
-				        	deSelectDependency(features, artifactInfo);
+				        	deSelectDependency(artifactInfo);
 				        	
 							selectedCount--;
 							setSelectedCountSize();
@@ -455,7 +455,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		}
 	}
 	
-	private void selectDependency(final List<ArtifactGroup> features, ArtifactInfo artifactInfo) {
+	private void selectDependency(ArtifactInfo artifactInfo) {
 		List<String> dependentIds = artifactInfo.getDependencyIds();
     	if (CollectionUtils.isNotEmpty(dependentIds)) {
         	for (String depId : dependentIds) {
@@ -466,8 +466,12 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
 		        				button.setSelection(true);
+//		        				button.setEnabled(false);
 								selectedCount++;
 								setSelectedCountSize();
+								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
+	        						selectDependency(artInfo);
+	        					}
 							} 
 						}
         			}
@@ -476,7 +480,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
     	}
 	}
 	
-	private void deSelectDependency(List<ArtifactGroup> features, ArtifactInfo artifactInfo) {
+	private void deSelectDependency(ArtifactInfo artifactInfo) {
 		List<String> dependentIds = artifactInfo.getDependencyIds();
     	if (CollectionUtils.isNotEmpty(dependentIds)) {
         	for (String depId : dependentIds) {
@@ -487,8 +491,12 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
 		        				button.setSelection(false);
+//		        				button.setEnabled(true);
 								selectedCount--;
 								setSelectedCountSize();
+								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
+									deSelectDependency(artInfo);
+	        					}
 							} 
 						}
         			}
