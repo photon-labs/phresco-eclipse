@@ -56,10 +56,11 @@ public class ComponentFeaturePage  extends AbstractFeatureWizardPage {
         
 		Composite topLevel = new Composite(parent, SWT.NONE);
 		topLevel.setLayout(layout);
+		renderFeatureTable(topLevel, PAGE_NAME, features);
 		setControl(topLevel);
 		
 		if (isFirstPage) {
-			renderPage();
+//			renderPage();
 			isRendered = true;
 		}
 	}

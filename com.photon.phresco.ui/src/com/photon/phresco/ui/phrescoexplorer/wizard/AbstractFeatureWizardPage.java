@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +39,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -80,7 +82,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private Map<ArtifactGroup, String> selectedArtifactGroup = new HashMap<ArtifactGroup, String>();
 	private static Map<String, Object>  depMap = new HashMap<String, Object>();
 	private static Map<String, Object>  selectedDepMap = new HashMap<String, Object>();
-	
+	private static List<ArtifactGroup> artifactGroupList = new ArrayList<ArtifactGroup>();
 	private Label selectedCountLabel = null;
 	
 	protected AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
@@ -161,6 +163,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		
 	    
 	    for (final ArtifactGroup artifactGroup : features) {
+	    	artifactGroupList.add(artifactGroup);
 	    	final TableItem tableItem = items[i];
 	    	TableEditor editor = new TableEditor(table);
 			final Button checkButton = new Button(table, SWT.CHECK);
@@ -170,6 +173,9 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			editor.horizontalAlignment = SWT.LEFT;
 			editor.setEditor(checkButton, tableItem, 0);
 			
+			int item_height = 17;
+			Image fake = new Image(table.getDisplay(), 1, item_height);
+			tableItem.setImage(0, fake); 
 					
 			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
 				for (SelectedFeature selectedFeature : selectedFeatures) {
@@ -185,16 +191,14 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			}
 			  
 			editor = new TableEditor(table);
-			Text text = new Text(table, SWT.NONE | SWT.BORDER);
-			text.setEditable(false);
+			Text text = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 			text.setText(artifactGroup.getDisplayName());
 			text.setToolTipText(artifactGroup.getDisplayName());
 			editor.grabHorizontal = true;
 			editor.setEditor(text, tableItem, 1);
 			  
 			editor = new TableEditor(table);
-			text = new Text(table, SWT.NONE | SWT.BORDER);
-			text.setEditable(false);
+			text = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 			if (artifactGroup.getDescription() != null) {
 				text.setText(artifactGroup.getDescription());
 				text.setToolTipText(artifactGroup.getDescription());
@@ -208,10 +212,8 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			editor = new TableEditor(table);
 	        List<ArtifactInfo> versions = artifactGroup.getVersions();
 	        
-	        final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER);
-	        combo.setEditable(false);
-	        final Text versionText = new Text(table, SWT.NONE | SWT.BORDER);
-	        versionText.setEditable(false);
+	        final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
+	        final Text versionText = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 	        if (versions.size() > 1) {
 		        for (ArtifactInfo artifactInfo : versions) {
 		        	combo.add(artifactInfo.getVersion()); 
@@ -249,7 +251,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
     			selectedArtifactGroup.remove(artifactGroup);
 	        }
-	        
+			
 			checkButton.addSelectionListener(new SelectionAdapter() {
 			    @Override
 			    public void widgetSelected(SelectionEvent e) {
@@ -257,18 +259,21 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        	
 		        	boolean selection = checkButton.getSelection();
 		        	if (selection) {
-		        		ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
-			        	selectDependency(features, artifactInfo);
-			        	
-						selectedCount++;
-						setSelectedCountSize();
-						
+		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
+		        		for (ArtifactInfo artifactInfo : artifactInfos) {
+				        	selectDependency(features, artifactInfo);
+				        	
+							selectedCount++;
+							setSelectedCountSize();
+						}
 		        	}  else {
-		        		ArtifactInfo artifactInfo = artifactGroup.getVersions().get(0);
-			        	deSelectDependency(features, artifactInfo);
-			        	
-						selectedCount--;
-						setSelectedCountSize();
+		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
+		        		for (ArtifactInfo artifactInfo : artifactInfos) {
+				        	deSelectDependency(features, artifactInfo);
+				        	
+							selectedCount--;
+							setSelectedCountSize();
+						}
 		        	}
 		        	
 			    	if (selectedVersion.equals("")) {
@@ -453,10 +458,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	}
 	
 	private void selectDependency(final List<ArtifactGroup> features, ArtifactInfo artifactInfo) {
-		List<String> dependentIds = getDependentIds(artifactInfo.getId());
+		List<String> dependentIds = artifactInfo.getDependencyIds();
     	if (CollectionUtils.isNotEmpty(dependentIds)) {
         	for (String depId : dependentIds) {
-        		for (final ArtifactGroup artifactGroup : features) {
+        		for (final ArtifactGroup artifactGroup : artifactGroupList) {
         			List<ArtifactInfo> versions = artifactGroup.getVersions();
         			if (CollectionUtils.isNotEmpty(versions)) {
         				for (ArtifactInfo artInfo : versions) {
@@ -475,10 +480,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	}
 	
 	private void deSelectDependency(List<ArtifactGroup> features, ArtifactInfo artifactInfo) {
-		List<String> dependentIds = getDependentIds(artifactInfo.getId());
+		List<String> dependentIds = artifactInfo.getDependencyIds();
     	if (CollectionUtils.isNotEmpty(dependentIds)) {
         	for (String depId : dependentIds) {
-        		for (final ArtifactGroup artifactGroup : features) {
+        		for (final ArtifactGroup artifactGroup : artifactGroupList) {
         			List<ArtifactInfo> versions = artifactGroup.getVersions();
         			if (CollectionUtils.isNotEmpty(versions)) {
         				for (ArtifactInfo artInfo : versions) {
@@ -493,20 +498,5 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
         		}
         	}
     	}
-	}
-	
-	private static List<String> getDependentIds(String versionId) {
-		try {
-			ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
-			ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(versionId);
-			List<String> dependencyIds = artifactInfo.getDependencyIds();
-			if (CollectionUtils.isNotEmpty(dependencyIds)) {
-				return dependencyIds;
-			}
-		} catch (PhrescoException e) {
-			e.printStackTrace();
-		}
-		
-		return null;
 	}
 }

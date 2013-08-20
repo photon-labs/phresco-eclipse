@@ -188,7 +188,7 @@ public class UpdateFeature extends AbstractHandler  {
 			return true;
 		}
 
-		public IWizardPage getNextPage(IWizardPage page) {
+		/*public IWizardPage getNextPage(IWizardPage page) {
 
 			if (page instanceof JSLibraryFeaturePage) {
 				JSLibraryFeaturePage libraryPage = (JSLibraryFeaturePage) page;
@@ -206,7 +206,7 @@ public class UpdateFeature extends AbstractHandler  {
 			}
 
 			return super.getNextPage(page);
-		}
+		}*/
 
 		private void updateFeatures(List<SelectedFeature> selectedFeaturesFromUI) {
 			File filePath = null;
