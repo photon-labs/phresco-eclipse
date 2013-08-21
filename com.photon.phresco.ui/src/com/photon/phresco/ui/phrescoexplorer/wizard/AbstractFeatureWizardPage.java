@@ -42,6 +42,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -81,6 +82,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private Map<ArtifactGroup, String> selectedArtifactGroup = new HashMap<ArtifactGroup, String>();
 	private static Map<String, Object>  depMap = new HashMap<String, Object>();
 	private static List<ArtifactGroup> artifactGroupList = new ArrayList<ArtifactGroup>();
+	private static Map<Button, Object> depVersionMap = new HashMap<Button, Object>();
 	private Label selectedCountLabel = null;
 	
 	protected AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
@@ -219,11 +221,13 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        combo.select(0);
 				editor.grabHorizontal = true;
 				editor.setEditor(combo, tableItem, 3);
+				depVersionMap.put(checkButton, combo);
 	        } else {
 	        	versionText.setText(versions.get(0).getVersion());
 	        	versionText.setToolTipText(versions.get(0).getVersion());
 				editor.grabHorizontal = true;
 				editor.setEditor(versionText, tableItem, 3);
+				depVersionMap.put(checkButton, versionText);
 	        }
 	        
 			combo.addSelectionListener(new SelectionAdapter() {
@@ -466,7 +470,25 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
 		        				button.setSelection(true);
-//		        				button.setEnabled(false);
+		        				button.setEnabled(false);
+		        				Object object = depVersionMap.get(button);
+		        				String selectedVersion = "";
+		        				if(object instanceof CCombo) {
+		        					CCombo combo = (CCombo) object;
+		        					combo.removeAll();
+		        					combo.add(artInfo.getVersion());
+		        					combo.select(0);
+		        					selectedVersion = combo.getText();
+		        				} else if(object instanceof Text) {
+		        					Text text = (Text) object;
+		        					text.setText(artInfo.getVersion());
+		        					selectedVersion = text.getText();
+		        				}
+		        				if (button.getSelection()) {
+		    			            selectedArtifactGroup.put(artifactGroup, selectedVersion);
+		    			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+		                			selectedArtifactGroup.remove(artifactGroup);
+		    			        }
 								selectedCount++;
 								setSelectedCountSize();
 								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
@@ -491,7 +513,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
 		        				button.setSelection(false);
-//		        				button.setEnabled(true);
+		        				button.setEnabled(true);
 								selectedCount--;
 								setSelectedCountSize();
 								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
