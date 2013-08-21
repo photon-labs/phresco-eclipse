@@ -422,4 +422,14 @@ public class PhrescoUtil implements PhrescoConstants {
 
 		return sb.toString();
 	}
+	
+	public static void addM2Repo() throws PhrescoException {
+		String path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+		String command = "mvn -Declipse.workspace=" + path + " eclipse:configure-workspace";
+		try {
+			Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			throw new PhrescoException(e);
+		}
+	}
 }

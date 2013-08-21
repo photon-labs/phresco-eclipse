@@ -40,6 +40,7 @@ import org.eclipse.ui.IWorkbench;
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
 import com.photon.phresco.ui.resource.Messages;
@@ -260,7 +261,12 @@ public class PhrescoImportWizard extends MavenImportWizard {
 				  projectName = projectDir.getName();
 			  }
 		  }
-
+		  try {
+			PhrescoUtil.addM2Repo();
+		} catch (PhrescoException e) {
+			e.printErrorStack();
+		}
+		  
 		  monitor.subTask(NLS.bind("project", projectName));
 
 		  IProject project = root.getProject(projectName);
