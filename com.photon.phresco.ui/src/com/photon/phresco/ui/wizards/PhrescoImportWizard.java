@@ -261,12 +261,6 @@ public class PhrescoImportWizard extends MavenImportWizard {
 				  projectName = projectDir.getName();
 			  }
 		  }
-		  try {
-			PhrescoUtil.addM2Repo();
-		} catch (PhrescoException e) {
-			e.printErrorStack();
-		}
-		  
 		  monitor.subTask(NLS.bind("project", projectName));
 
 		  IProject project = root.getProject(projectName);
