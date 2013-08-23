@@ -386,7 +386,6 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 	public void printAsPdf (Shell reportDialog) throws PhrescoException {
 		try {
 			String userId = PhrescoUtil.getUserId();
-			String fromPage = "All";
 			String pdfName = pdfReportNameText.getText();
 			String report = reportTypeCombo.getText();
 			String reportDataType = "crisp";
@@ -424,7 +423,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 					} else if (SONAR_URL.equals(key)) {
 	            		parameter.setValue(PhrescoUtil.getSonarUrl());
 	            	} else if (REQ_TEST_TYPE.equals(key)) {
-	            		parameter.setValue(fromPage);
+	            		parameter.setValue(FROMPAGE_ALL);
 	            	} else if (LOGO.equals(key)) {
 	            		parameter.setValue(getLogoImageString(userId, customerId));
 	            	} else if (THEME.equals(key)) {
