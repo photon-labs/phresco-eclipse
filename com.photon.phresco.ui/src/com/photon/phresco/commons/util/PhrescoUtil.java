@@ -43,6 +43,7 @@ import com.photon.phresco.service.client.factory.ServiceClientFactory;
 import com.photon.phresco.service.client.impl.ServiceManagerImpl;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.util.Constants;
+import com.photon.phresco.util.Utility;
 import com.phresco.pom.exception.PhrescoPomException;
 import com.phresco.pom.model.Model.Modules;
 import com.phresco.pom.util.PomProcessor;
@@ -423,13 +424,8 @@ public class PhrescoUtil implements PhrescoConstants {
 		return sb.toString();
 	}
 	
-	public static void addM2Repo() throws PhrescoException {
-		String path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+	public static void addM2Repo(String path) throws PhrescoException {
 		String command = "mvn -Declipse.workspace=" + path + " eclipse:configure-workspace";
-		try {
-			Runtime.getRuntime().exec(command);
-		} catch (IOException e) {
-			throw new PhrescoException(e);
-		}
+		Utility.executeCommand(command, path);
 	}
 }

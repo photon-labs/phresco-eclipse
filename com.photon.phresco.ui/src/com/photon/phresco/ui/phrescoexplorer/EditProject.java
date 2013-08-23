@@ -150,6 +150,8 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 				appInfo.setCode(codeText.getText());
 				appInfo.setName(nameText.getText());
 				appInfo.setVersion(versionText.getText());
+				appInfo.setCreated(true);
+				
 				FunctionalFrameworkInfo functionalFrameworkInfo = new FunctionalFrameworkInfo();
 				functionalFrameworkInfo.setFrameworkGroupId("cac095c9-911a-4d8b-8613-65a994ed3a67");
 				functionalFrameworkInfo.setFrameworkIds("bf0170f7-2f03-44be-8f68-95c562347816");

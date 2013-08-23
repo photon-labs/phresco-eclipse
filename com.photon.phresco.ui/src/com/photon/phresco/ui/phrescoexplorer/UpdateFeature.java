@@ -269,6 +269,7 @@ public class UpdateFeature extends AbstractHandler  {
 				// To write selected Features into
 				// phresco-application-Handler-info.xml
 				String artifactGroup = gson.toJson(listArtifactGroup);
+				
 				applicationHandler.setSelectedFeatures(artifactGroup);
 
 				// To write Deleted Features into
@@ -283,6 +284,7 @@ public class UpdateFeature extends AbstractHandler  {
 				applicationInfo.setSelectedModules(selectedFeatures);
 				applicationInfo.setSelectedJSLibs(selectedJsLibs);
 				applicationInfo.setSelectedComponents(selectedComponents);
+				applicationInfo.setCreated(true);
 
 				projectinfo.setAppInfos(Collections.singletonList(applicationInfo));
 				ApplicationManagerUtil util = new ApplicationManagerUtil();

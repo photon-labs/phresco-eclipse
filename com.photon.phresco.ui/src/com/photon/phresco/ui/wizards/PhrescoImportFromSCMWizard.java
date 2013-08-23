@@ -102,7 +102,9 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 								FileUtils.cleanDirectory(testFolder);
 								managerUtil.svnCheckout(testRepoUsername, testRepoPassword, testRepoUrl, testFolder.getPath(), testRepoRevision);
 							}
-							PhrescoUtil.addM2Repo();
+							String path = PhrescoUtil.getProjectHome() + File.separator + importedProject.getAppDirName()
+									+ File.separator;
+							PhrescoUtil.addM2Repo(path);
 							
 							ProjectManager.updateProjectIntoWorkspace(importedProject.getAppDirName());
 							
