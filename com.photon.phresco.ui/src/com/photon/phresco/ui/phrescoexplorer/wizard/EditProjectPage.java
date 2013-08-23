@@ -25,6 +25,7 @@ import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.ArtifactGroupInfo;
 import com.photon.phresco.commons.model.Category;
 import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
@@ -49,6 +50,11 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 	public List<DatabaseComponent> dbComponents = new ArrayList<DatabaseComponent>();
 	
 	public Button[] webServiceButtons;
+	
+	private Button serverAddButton;
+	private Button serverDeleteButton;
+	private Button dbAddButton;
+	private Button dbDeleteButton;
 	
 	public EditProjectPage(String pageName) {
 		super(pageName);
@@ -95,17 +101,24 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 				serverGroup.setLayout(serverLayout);
 				serverGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
-				Composite serverComposite = new Composite(serverGroup, SWT.NONE);
-				GridLayout gridLayout = new GridLayout(5, false);
-				serverComposite.setLayout(gridLayout);
-				serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				
-				ServerComponent serverComponent = new ServerComponent();
-				serverComponent.getServers(serverComposite, servers, customerId, techId, platform);
-				serverComponents.add(serverComponent);
-				
-				Button serverAddButton = new Button(serverComposite, SWT.PUSH);
-				serverAddButton.setText(PLUS_SYMBOL);
+				List<ArtifactGroupInfo> selectedServers = appInfo.getSelectedServers();
+				if(CollectionUtils.isNotEmpty(selectedServers)) {
+					setSelectedServer(scrolledComposite, composite, customerId,
+							techId, platform, servers, serverGroup,
+							selectedServers);
+				} else {
+					final Composite serverComposite = new Composite(serverGroup, SWT.NONE);
+					GridLayout gridLayout = new GridLayout(5, false);
+					serverComposite.setLayout(gridLayout);
+					serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+					
+					ServerComponent serverComponent = new ServerComponent();
+					serverComponent.getServers(serverComposite, servers, customerId, techId, platform, null);
+					serverComponents.add(serverComponent);
+					
+					serverAddButton = new Button(serverComposite, SWT.PUSH);
+					serverAddButton.setText(PLUS_SYMBOL);
+				}
 				
 				serverAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -117,9 +130,9 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 							serverComposite.setLayout(gridLayout);
 							serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 							
-							serverComponent.getServers(serverComposite, servers, customerId, techId, platform);
+							serverComponent.getServers(serverComposite, servers, customerId, techId, platform, null);
 							serverComponents.add(serverComponent);
-							Button serverDeleteButton = new Button(serverComposite, SWT.PUSH);
+							serverDeleteButton = new Button(serverComposite, SWT.PUSH);
 							serverDeleteButton.setText(MINUS_SYMBOL);
 							
 							serverDeleteButton.addSelectionListener(new SelectionAdapter() {
@@ -151,17 +164,22 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 				dbGroup.setLayout(dbLlayout);
 				dbGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
-				Composite dbComposite = new Composite(dbGroup, SWT.NONE);
-				GridLayout gridLayout = new GridLayout(5, false);
-				dbComposite.setLayout(gridLayout);
-				dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				
-				DatabaseComponent dbComponent = new DatabaseComponent();
-				dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform);
-				dbComponents.add(dbComponent);
-				
-				Button dbAddButton = new Button(dbComposite, SWT.PUSH);
-				dbAddButton.setText(PLUS_SYMBOL);
+				List<ArtifactGroupInfo> selectedDatabases = appInfo.getSelectedDatabases();
+				if(CollectionUtils.isNotEmpty(selectedDatabases)) {
+					setSelectedDatabase(scrolledComposite, composite, customerId, techId, platform, dataBases, dbGroup, selectedDatabases);
+				} else {
+					Composite dbComposite = new Composite(dbGroup, SWT.NONE);
+					GridLayout gridLayout = new GridLayout(5, false);
+					dbComposite.setLayout(gridLayout);
+					dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+					
+					DatabaseComponent dbComponent = new DatabaseComponent();
+					dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform, null);
+					dbComponents.add(dbComponent);
+					
+					dbAddButton = new Button(dbComposite, SWT.PUSH);
+					dbAddButton.setText(PLUS_SYMBOL);
+				}
 				
 				dbAddButton.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -173,10 +191,10 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 							dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 							
 							final DatabaseComponent dbComponent = new DatabaseComponent();
-							dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform);
+							dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform, null);
 							dbComponents.add(dbComponent);
 							
-							Button dbDeleteButton = new Button(dbComposite, SWT.PUSH);
+							dbDeleteButton = new Button(dbComposite, SWT.PUSH);
 							dbDeleteButton.setText(MINUS_SYMBOL);
 							
 							dbDeleteButton.addSelectionListener(new SelectionAdapter() {
@@ -200,7 +218,7 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 					}
 				});
 			}
-			getWebServices(serviceManager, composite);
+			getWebServices(serviceManager, composite,appInfo);
 			
 		} catch (PhrescoException e) {
 			PhrescoDialog.errorDialog(buildDialog.getShell(), Messages.ERROR, e.getLocalizedMessage());
@@ -218,6 +236,86 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 		buildDialog.setSize(x + 100, y + 100);
 		setControl(buildDialog);
 		
+	}
+
+	private void setSelectedServer(final ScrolledComposite scrolledComposite,
+			final Composite composite, final String customerId,
+			final String techId, final String platform,
+			final List<DownloadInfo> servers, final Group serverGroup,
+			List<ArtifactGroupInfo> selectedServers) throws PhrescoException {
+		int i = 0;
+		for (ArtifactGroupInfo artifactGroupInfo : selectedServers) {
+			final Composite serverComposite = new Composite(serverGroup, SWT.NONE);
+			GridLayout gridLayout = new GridLayout(5, false);
+			serverComposite.setLayout(gridLayout);
+			serverComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			final ServerComponent serverComponent = new ServerComponent();
+			serverComponent.getServers(serverComposite, servers, customerId, techId, platform, artifactGroupInfo);
+			serverComponents.add(serverComponent);
+			if(i == 0) {
+				serverAddButton = new Button(serverComposite, SWT.PUSH);
+				serverAddButton.setText(PLUS_SYMBOL);
+			} else {
+				serverDeleteButton = new Button(serverComposite, SWT.PUSH);
+				serverDeleteButton.setText(MINUS_SYMBOL);
+				
+				serverDeleteButton.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						serverComponents.remove(serverComponent);
+						serverComposite.dispose();
+						composite.pack();
+						super.widgetSelected(e);
+					}
+				});
+			}
+			serverGroup.redraw();
+			serverGroup.pack();
+			composite.redraw();
+			composite.pack();
+			reSize(composite, scrolledComposite);
+			i = i + 1;
+		}
+	}
+	
+	private void setSelectedDatabase(final ScrolledComposite scrolledComposite,
+			final Composite composite, final String customerId,
+			final String techId, final String platform,
+			final List<DownloadInfo> dataBases, final Group dbGroup,
+			List<ArtifactGroupInfo> selectedDbs) throws PhrescoException {
+		int i = 0;
+		for (ArtifactGroupInfo artifactGroupInfo : selectedDbs) {
+			final Composite dbComposite = new Composite(dbGroup, SWT.NONE);
+			GridLayout gridLayout = new GridLayout(5, false);
+			dbComposite.setLayout(gridLayout);
+			dbComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			final DatabaseComponent dbComponent = new DatabaseComponent();
+			dbComponent.getDataBases(dbComposite, dataBases, customerId, techId, platform, artifactGroupInfo);
+			dbComponents.add(dbComponent);
+			if(i == 0) {
+				dbAddButton = new Button(dbComposite, SWT.PUSH);
+				dbAddButton.setText(PLUS_SYMBOL);
+			} else {
+				dbDeleteButton = new Button(dbComposite, SWT.PUSH);
+				dbDeleteButton.setText(MINUS_SYMBOL);
+				
+				dbDeleteButton.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						dbComponents.remove(dbComponent);
+						dbComposite.dispose();
+						composite.pack();
+						super.widgetSelected(e);
+					}
+				});
+			}
+			dbGroup.redraw();
+			dbGroup.pack();
+			composite.redraw();
+			composite.pack();
+			reSize(composite, scrolledComposite);
+			i = i + 1;
+		}
 	}
 	
 
@@ -283,12 +381,13 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 	}
 
 	
-	private void getWebServices(ServiceManager serviceManager, Composite composite) {
+	private void getWebServices(ServiceManager serviceManager, Composite composite, ApplicationInfo appInfo) {
 		try {
 			List<WebService> webServices = serviceManager.getWebServices();
 			if(CollectionUtils.isEmpty(webServices)) {
 				return;
 			}
+			List<String> selectedWebservices = appInfo.getSelectedWebservices();
 			Group webserviceGroup = new Group(composite, SWT.NONE);
 			webserviceGroup.setText(Messages.WEBSERVICES);
 			GridLayout webServiceLayout = new GridLayout(5, false);
@@ -300,6 +399,13 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 				webServiceButtons[i] = new Button(webserviceGroup, SWT.CHECK);
 				webServiceButtons[i].setText(webService.getName());
 				webServiceButtons[i].setData(webService.getName(), webService.getId());
+				if(CollectionUtils.isNotEmpty(selectedWebservices)) {
+					for (String selectedWebservice : selectedWebservices) {
+						if(webService.getId().equals(selectedWebservice)) {
+							webServiceButtons[i].setSelection(true);
+						}
+					}
+				}
 				i = i + 1;
 			}
 		} catch (PhrescoException e) {

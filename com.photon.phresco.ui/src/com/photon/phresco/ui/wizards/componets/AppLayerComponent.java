@@ -59,10 +59,12 @@ public class AppLayerComponent {
 			if("java".equals(technologyGroup.getId())) {
 				techInfoMap.put(technologyGroup.getName(), technologyGroup.getTechInfos());
 				for (TechnologyInfo techInfo : technologyGroup.getTechInfos()) {
-					techInfoList.add(techInfo.getName());
-					techIdMap.put(techInfo.getName(), techInfo.getId());
-					setTechIdMap(techIdMap);
-					techVersionMap.put(techInfo.getName(), techInfo.getTechVersions());
+					if(!"MacOSX".equals(techInfo.getName())) {
+						techInfoList.add(techInfo.getName());
+						techIdMap.put(techInfo.getName(), techInfo.getId());
+						setTechIdMap(techIdMap);
+						techVersionMap.put(techInfo.getName(), techInfo.getTechVersions());
+					}
 				}
 			}
 		}

@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.photon.phresco.commons.model.ArtifactGroupInfo;
 import com.photon.phresco.commons.model.ArtifactInfo;
 import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.exception.PhrescoException;
@@ -26,6 +27,7 @@ public class DatabaseComponent {
 	
 	public static Map<String, List<ArtifactInfo>> dbVersionMap = new HashMap<String, List<ArtifactInfo>>();
 	public static Map<String, String> dbIdMap = new HashMap<String, String>();
+	private static Map<String, String> dbVersionIdMap = new HashMap<String, String>();
 	
 	/**
 	 * @param dbGroup
@@ -36,10 +38,14 @@ public class DatabaseComponent {
 	 * @throws PhrescoException
 	 */
 	public void getDataBases(final Composite dbGroup,
-			List<DownloadInfo> dataBases, String customerId, String techId, String platform) throws PhrescoException {
+			List<DownloadInfo> dataBases, String customerId, String techId, String platform, ArtifactGroupInfo artifactGroupInfo) throws PhrescoException {
 		List<String> dbNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : dataBases) {
-			dbNames.add(downloadInfo.getName());
+			if(artifactGroupInfo != null && artifactGroupInfo.getArtifactGroupId().equals(downloadInfo.getId())) {
+				dbNames.add(0, downloadInfo.getName());
+			} else {
+				dbNames.add(downloadInfo.getName());
+			}
 			dbIdMap.put(downloadInfo.getName(), downloadInfo.getId());
 			List<ArtifactInfo> versions = downloadInfo.getArtifactGroup().getVersions();
 			dbVersionMap.put(downloadInfo.getName(), versions);
@@ -56,6 +62,7 @@ public class DatabaseComponent {
 		List<String> dbVersions = new ArrayList<String>();
 		List<ArtifactInfo> artifactInfos = dbVersionMap.get(dbNames.get(0));
 		for (ArtifactInfo artifactInfo : artifactInfos) {
+			dbVersionIdMap.put(artifactInfo.getId(), artifactInfo.getVersion());
 			dbVersions.add(artifactInfo.getVersion());
 		}
 		if(CollectionUtils.isNotEmpty(dbVersions)) {
@@ -67,7 +74,11 @@ public class DatabaseComponent {
 			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 			gridData.heightHint = 40;
 			dbVersionListBox.setLayoutData(gridData);
-			dbVersionListBox.select(0);
+			if(artifactGroupInfo != null) {
+				setSelectedDbVersion(artifactGroupInfo);
+			} else {
+				dbVersionListBox.select(0);
+			}
 		}
 		
 		dbNameCombo.addSelectionListener(new SelectionAdapter() {
@@ -86,6 +97,27 @@ public class DatabaseComponent {
 				super.widgetSelected(e);
 			}
 		});
+	}
+	
+	private void setSelectedDbVersion(ArtifactGroupInfo artifactGroupInfo) {
+		List<Integer> list = new ArrayList<Integer>();
+		List<String> artifactInfoIds = artifactGroupInfo.getArtifactInfoIds();
+		String[] items = dbVersionListBox.getItems();
+		for (String artifactInfoId : artifactInfoIds) {
+			String version = dbVersionIdMap.get(artifactInfoId);
+			for (int i = 0; i < items.length; i++) {
+				if(items[i].equals(version)) {
+					list.add(i);
+				}
+			}
+		} 
+		if (!list.isEmpty()) {
+			int[] indices = new int[list.size()];
+			for (int i = 0; i < list.size(); i++) {
+				indices[i] = list.get(i);
+			}
+			dbVersionListBox.select(indices);
+		}
 	}
 
 }
