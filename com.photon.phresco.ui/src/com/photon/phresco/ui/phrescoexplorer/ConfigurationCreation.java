@@ -486,7 +486,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										fd.setText("Browse");
 										String path = fd.open();
 										if (path != null) {
-//											path = path.substring(path.indexOf("."));
 											certificateComb.add(path);
 											certificateComb.select(0);
 											map.put(CERTIFICATE, certificateComb);
@@ -513,7 +512,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							map.put(propertyTemplate.getKey(), certifacteList);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE)) {
 							Label defaults = new  Label(composite,  SWT.LEFT);
-							defaults.setText(propertyTemplate.getName());
+							defaults.setText(propertyTemplate.getName() + ASTERICK);
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -531,7 +530,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						} else if (propertyTemplate.getName().equalsIgnoreCase(DB_TYPE)) {
 							Label defaults = new  Label(composite,  SWT.LEFT);
-							defaults.setText(propertyTemplate.getName());
+							defaults.setText(propertyTemplate.getName() + ASTERICK);
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -550,7 +549,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						}  else if (propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 							
 							Label defaults = new  Label(composite,  SWT.LEFT);
-							defaults.setText(propertyTemplate.getName());
+							defaults.setText(propertyTemplate.getName() + ASTERICK);
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 							
 							comboDropDown = new Combo(composite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
@@ -573,10 +572,21 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
 						}
-						else {
+						else { 
 							Label defaults = new  Label(composite,  SWT.LEFT);
-							defaults.setText(propertyTemplate.getName());
+							defaults.setText(propertyTemplate.getName() + ASTERICK);
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+							Combo combo = (Combo) map.get("protocol");
+							System.out.println("combo = " + combo);
+							if (combo != null) {
+								String protocol = combo.getText();
+								System.out.println("Text = " + protocol);
+								if (protocol.equalsIgnoreCase(HTTPS_PROTOCOL)) {
+									defaults.setText(propertyTemplate.getName() + ASTERICK);
+								}
+							} else {
+								defaults.setText(propertyTemplate.getName());
+							}
 							
 							nameText = new Text(composite, SWT.BORDER); 
 							nameText.setToolTipText("");
@@ -584,7 +594,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							nameText.setLayoutData(data);
 							
 							if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR)) {
-								map.put("deployLabel", defaults);
+								if (defaults != null) {
+									map.put("deployLabel", defaults);
+								}
 							}
 							map.put(propertyTemplate.getKey(), nameText);
 						}					
@@ -631,7 +643,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					@Override
 					public void handleEvent(Event event) {
 						Button button = (Button) event.widget;
-						Label deployLabel = (Label) map.get("deployLabel");
+						Label deployLabel = (Label) map.get("deployLabel" + ASTERICK);
 						Text deployDirectory = (Text) map.get(DEPLOY_DIR);
 						boolean selection = button.getSelection();
 						if (selection) {
@@ -1016,12 +1028,18 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									}
 								}
 								comboDropDown.select(0);
+								map.put(VERSION_STATUS, Boolean.FALSE);
+							} else {
+								map.put(VERSION_STATUS, Boolean.TRUE);
 							}
 						} else {
 							comboDropDown.removeAll();
 							String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
-							comboDropDown.add(value);
-							comboDropDown.select(0);
+							if (StringUtils.isNotEmpty(value)) {
+								comboDropDown.add(value);
+								comboDropDown.select(0);
+								map.put(VERSION_STATUS, Boolean.FALSE);
+							} 
 						}
 					} 
 					else {
@@ -1097,7 +1115,11 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						SettingsTemplate serverTemplates = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), typeList.getText());
 						List<PropertyTemplate> propertyTemplates  = serverTemplates.getProperties();
 						java.util.Properties properties = new java.util.Properties();
-
+						if ((Boolean) map.get(VERSION_STATUS)) {
+							PhrescoDialog.errorDialog(configDialog, Messages.WARNING,"please update the server or database version from appinfo");
+							return;
+						}
+						
 						if (StringUtils.isEmpty(confignameText.getText())) {
 							PhrescoDialog.errorDialog(configDialog, Messages.WARNING, NAME + " " + Messages.EMPTY_STRING_WARNING);
 							return;

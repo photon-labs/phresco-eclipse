@@ -178,8 +178,11 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 						parameter.setValue(numberText.getText());
 					} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
 						Button checkBoxButton = (Button) map.get(parameter.getKey());
-						boolean selection = checkBoxButton.getSelection();
-						parameter.setValue(String.valueOf(selection));
+						if (checkBoxButton != null) {
+							boolean selection = checkBoxButton.getSelection();
+							System.out.println("Selection = " + selection);
+							parameter.setValue(String.valueOf(selection));
+						}
 					} else if (parameter.getType().equalsIgnoreCase(PASSWORD)) {
 						Text passwordText = (Text) map.get(parameter.getKey());
 						String password = passwordText.getText();
@@ -203,8 +206,10 @@ public class Unit  extends AbstractHandler implements PhrescoConstants {
 							env.append(",");
 						}
 						String envValue = env.toString();
-						envValue = envValue.substring(0, envValue.lastIndexOf(","));
-						parameter.setValue(envValue); 
+						if (StringUtils.isNotEmpty(envValue)) {
+							envValue = envValue.substring(0, envValue.lastIndexOf(","));
+							parameter.setValue(envValue); 
+						}
 					}
 				}
 			}
