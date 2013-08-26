@@ -294,6 +294,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	    	i++;
 	    }
 	    
+	    if (selectedCount == 0) {
+	    	setSelectedCountSize();
+	    }
+	    
 	    return table;
 	}
 	
