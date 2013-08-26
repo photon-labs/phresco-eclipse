@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.google.gson.Gson;
@@ -146,8 +148,13 @@ public class PhrescoUtil implements PhrescoConstants {
 	public static String getProjectHome() {
 		IPath location = null ;
 		String workingPath = "";
-		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getSelection();
-		if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
+		ISelection selection = null;
+		IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if(workbenchWindow != null) {
+			IWorkbenchPage activePage = workbenchWindow.getActivePage();
+			selection = activePage.getSelection();
+		}
+		if (selection != null && !selection.isEmpty() && selection instanceof IStructuredSelection) {
 			Object[] selectedObjects = ((IStructuredSelection)selection).toArray();
 			for (Object object : selectedObjects) {
 				if(object instanceof IProject) {
