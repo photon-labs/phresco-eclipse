@@ -19,6 +19,7 @@
 
 package com.photon.phresco.ui.wizards.pages;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Text;
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.ui.PhrescoPlugin;
 import com.photon.phresco.ui.resource.Messages;
 
 /**
@@ -62,6 +64,11 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
     public Button repoUrlHeadRevisionButton;
     public Text testRepoRevisionText;
     
+    //Logged User details
+    
+    String loginUserName;
+    String loginPassword;
+    
 	public ImportFromSCMPage(String pageName, String message) {
 		super(pageName);
 		setMessage(message);
@@ -73,6 +80,14 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		if(!PhrescoUtil.isLoggedIn()) {
 			ConfirmDialog.getConfirmDialog().showConfirm(getShell());
 			return;
+		}
+		
+		
+		IPreferenceStore prefStore = PhrescoPlugin.getDefault().getPreferenceStore();
+		
+		if (prefStore != null) {
+			loginUserName = prefStore.getString(USER_ID);
+			loginPassword = prefStore.getString(PASSWORD);
 		}
 		
         Composite composite = new Composite(parent, 0);
@@ -109,14 +124,14 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         Label userNameLabel = new Label(composite, SWT.LEFT);
         userNameLabel.setText(Messages.USER_NAME);
         userName = new Text(composite, SWT.BORDER);
-        userName.setText(DEFAULT_USER_NAME);
+        userName.setText(loginUserName);
         userName.setLayoutData(new GridData(160,15));
 
         Label passwordLabel = new Label(composite, SWT.LEFT);
         passwordLabel.setText(Messages.USER_PWD);
         password = new Text(composite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
-        password.setText(DEFAULT_PASSWORD);
+        password.setText(loginPassword);
         password.setLayoutData(new GridData(160,15));
         
 		final Label lblHeadRevision = new Label(composite, SWT.NONE);
@@ -154,7 +169,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		final Label testRepouserNameLabel = new Label(composite, SWT.LEFT);
         testRepouserNameLabel.setText(Messages.USER_NAME);
         testRepoUsernameText = new Text(composite, SWT.BORDER);
-        testRepoUsernameText.setText(DEFAULT_USER_NAME);
+        testRepoUsernameText.setText(loginUserName);
         testRepoUsernameText.setEnabled(false);
         testRepoUsernameText.setLayoutData(new GridData(160,15));
 		
@@ -162,7 +177,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         testRepopasswordLabel.setText(Messages.USER_PWD);
         testRepoPasswordText = new Text(composite, SWT.BORDER);
         testRepoPasswordText.setEchoChar(CHAR_ASTERISK);
-        testRepoPasswordText.setText(DEFAULT_PASSWORD);
+        testRepoPasswordText.setText(loginPassword);
         testRepoPasswordText.setEnabled(false);
         testRepoPasswordText.setLayoutData(new GridData(160,15));
 		
@@ -315,8 +330,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					userName.setText(STR_EMPTY);
 					password.setText(STR_EMPTY);
 				} else {
-					userName.setText(DEFAULT_USER_NAME);
-					password.setText(DEFAULT_PASSWORD);
+					userName.setText(loginUserName);
+					password.setText(loginPassword);
 				}
 		    }
 		}); 
@@ -332,8 +347,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					testRepoUsernameText.setText(STR_EMPTY);
 					testRepoPasswordText.setText(STR_EMPTY);
 				} else {
-					testRepoUsernameText.setText(DEFAULT_USER_NAME);
-					testRepoPasswordText.setText(DEFAULT_PASSWORD);
+					testRepoUsernameText.setText(loginUserName);
+					testRepoPasswordText.setText(loginPassword);
 				}
 		    }
 		}); 

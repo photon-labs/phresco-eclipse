@@ -147,19 +147,19 @@ public class LoginPrefrence
     private void setDefaultValues() {
 
     	prefStore = getPreferenceStore();
-        String regUserName = prefStore.getString(USER_ID);
-        String regPassword = prefStore.getString(PASSWORD);
+        String loginUserName = prefStore.getString(USER_ID);
+        String loginPassword = prefStore.getString(PASSWORD);
 
-        if(PhrescoConstants.STR_EMPTY.equals(regUserName)) {
+        if(PhrescoConstants.STR_EMPTY.equals(loginUserName)) {
         	userName.setText(DEFAULT_USER_NAME);
         } else {
-        	userName.setText(regUserName);
+        	userName.setText(loginUserName);
         }
 
-        if (PhrescoConstants.STR_EMPTY.equals(regPassword)) {
+        if (PhrescoConstants.STR_EMPTY.equals(loginPassword)) {
         	password.setText(DEFAULT_PASSWORD);
         } else {
-        	password.setText(regPassword);
+        	password.setText(loginPassword);
         }
     }
     
