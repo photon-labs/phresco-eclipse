@@ -326,15 +326,15 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		    selectedFeature.setModuleId(key.getId());
 		    selectedFeature.setType(key.getType().name());
 		    List<ArtifactInfo> versions = key.getVersions();
+		    if (value != null && KEY_EMPTY.equals(value)) {
+		    	value = selectedComboBoxRows.get(key);
+		    }
 		    for (ArtifactInfo artifactInfo : versions) {
 				if(artifactInfo.getVersion().equals(value)) {
 					selectedFeature.setVersionID(artifactInfo.getId());
 				}
 			}
 		    
-		    if (value != null && KEY_EMPTY.equals(value)) {
-		    	value = selectedComboBoxRows.get(key);
-		    }
 		    selectedFeatures.add(selectedFeature);
 		}
 		return selectedFeatures;
