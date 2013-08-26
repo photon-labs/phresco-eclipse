@@ -90,8 +90,13 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			return null;
 		}
 
-		Shell createSonarDialog = createSonarDialog(shell);
-		createSonarDialog.open();
+		BusyIndicator.showWhile(null, new Runnable() {
+			public void run() {
+				Shell createSonarDialog = createSonarDialog(shell);
+				createSonarDialog.open();
+			}
+		});
+		
 		return null;
 	}
 
