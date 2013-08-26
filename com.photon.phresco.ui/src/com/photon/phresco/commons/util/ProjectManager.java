@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import com.photon.phresco.api.ApplicationProcessor;
 import com.photon.phresco.commons.PhrescoConstants;
-import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
@@ -31,10 +30,13 @@ import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.RepoInfo;
 import com.photon.phresco.exception.PhrescoException;
+import com.photon.phresco.framework.api.ApplicationManager;
+import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.ApplicationHandler;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
@@ -154,7 +156,8 @@ public class ProjectManager implements PhrescoConstants {
 				for (ApplicationInfo applicationInfo : appInfos) {
 					String appDirName = applicationInfo.getAppDirName();
 					path = file.getPath() + File.separator + appDirName;
-					if("android".equals(applicationInfo.getTechInfo().getTechGroupId())) {
+					CreateGeneralProject(projectInfo, applicationInfo, path, monitor);
+					/*if("android".equals(applicationInfo.getTechInfo().getTechGroupId())) {
 						String mainProjectName =appDirName + ".main"; 
 						applicationInfo.setAppDirName(mainProjectName);
 						String sourcePath = path + "/source";
@@ -169,8 +172,8 @@ public class ProjectManager implements PhrescoConstants {
 						String unitPath = path + "/test/unit";
 						CreateAndroidProject(applicationInfo, unitPath, monitor, mainProjectName);
 					} else {
-						CreateGeneralProject(applicationInfo, path, monitor);
-					}
+						CreateGeneralProject(projectInfo, applicationInfo, path, monitor);
+					}*/
 				}
 			}
 		} catch (IOException e) {
@@ -178,8 +181,10 @@ public class ProjectManager implements PhrescoConstants {
 		}
 	}
 	
-	private static void CreateGeneralProject(ApplicationInfo appInfo, String path, IProgressMonitor monitor) throws PhrescoException{
+	private static void CreateGeneralProject(ProjectInfo projectInfo, ApplicationInfo appInfo, String path, IProgressMonitor monitor) throws PhrescoException{
 		try {
+			String baseDir = PhrescoUtil.getProjectHome() + appInfo.getAppDirName();
+			Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
 			//Link the created Project to Eclipse
 			IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(appInfo.getAppDirName());
 			description.setLocation(new Path(path));
