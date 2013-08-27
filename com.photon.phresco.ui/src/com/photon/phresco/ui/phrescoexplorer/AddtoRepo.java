@@ -51,6 +51,7 @@ public class AddtoRepo extends AbstractHandler implements PhrescoConstants {
 		buildDialog.setLocation(385, 130);
 		buildDialog.setLayout(layout);
 		buildDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		buildDialog.setText(Messages.TITLE_COMMIT_TO_REPO);
 		
 		final WizardComposite wizardComposite = new WizardComposite(buildDialog);
 		BusyIndicator.showWhile(null, new Runnable() {
