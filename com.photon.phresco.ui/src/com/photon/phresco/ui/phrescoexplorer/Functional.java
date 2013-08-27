@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -67,6 +68,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 	private Button checkBoxButton;	
 
 	private Button envSelectionButton;
+	private String path;
 
 	Map<String, String> typeMaps = new HashMap<String, String>();
 	private static Map<String, Object> map = new HashMap<String, Object>();
@@ -173,7 +175,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, "functional-test-webdriver");
 
-			for (Parameter parameter : parameters) {
+			for (final Parameter parameter : parameters) {
 				String type = parameter.getType();
 
 				if (type.equalsIgnoreCase(STRING)) {
@@ -230,7 +232,41 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					dialog_height = dialog_height + comp_height;
 					map.put(parameter.getKey(), passwordText);
 					
-				}	else if (type.equalsIgnoreCase(LIST)) {
+				}	
+				else if (type.equalsIgnoreCase(FILE_BROWSE)) {
+				
+					final Composite buttonComposite = new Composite(functionalDialog, SWT.NONE);
+					GridLayout buttonLayout = new GridLayout(3, false);
+					buttonComposite.setLayout(buttonLayout);
+					buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+					
+					Label defaults = new Label(buttonComposite, SWT.LEFT);
+					defaults.setText(parameter.getName().getValue().get(0).getValue());
+					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+					
+					final Text text = new Text(buttonComposite, SWT.BORDER);
+					text.setToolTipText(parameter.getKey());
+					GridData fill_data = new GridData(GridData.FILL_HORIZONTAL);
+					text.setLayoutData(fill_data);
+					
+					Button button = new Button(buttonComposite, SWT.PUSH);
+					button.setText(BROWSE);
+					button.setLayoutData(new GridData(SWT.RIGHT, SWT.END, false, false));
+					
+					button.addListener(SWT.Selection, new Listener() {
+						@Override
+						public void handleEvent(Event event) {
+							FileDialog fileDialog = new FileDialog(new Shell(), SWT.SAVE);
+							fileDialog.setFilterPath(PhrescoUtil.getApplicationHome() + File.separator + DO_NOT_CHECKIN_DIR + File.separator + TARGET);
+							fileDialog.setText(BROWSE);
+							path = fileDialog.open();
+							text.setText(path);
+							map.put(parameter.getKey(), text);
+						}
+					});
+				}
+				
+				else if (type.equalsIgnoreCase(LIST)) {
 					Label Logs = new Label(composite, SWT.LEFT);
 					Logs.setText(parameter.getName().getValue().get(0).getValue());
 					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
@@ -364,7 +400,13 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 						byte[] encodedPwd = Base64.encodeBase64(password.getBytes());
 						String encodedString = new String(encodedPwd);
 						parameter.setValue(encodedString);
-					}else if (parameter.getType().equalsIgnoreCase(LIST)) {
+					} else if (parameter.getType().equalsIgnoreCase(FILE_BROWSE)) {
+						Text text = (Text) map.get(parameter.getKey());
+						if (text != null) {
+							parameter.setValue(text.getText());
+						}
+					}
+					else if (parameter.getType().equalsIgnoreCase(LIST)) {
 						Combo list =  (Combo) map.get(parameter.getKey());
 						String[] items = list.getItems();
 						for (String string : items) {
