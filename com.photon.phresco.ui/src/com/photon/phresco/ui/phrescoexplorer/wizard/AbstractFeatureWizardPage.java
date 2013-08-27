@@ -31,8 +31,10 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
@@ -42,7 +44,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -53,6 +54,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.photon.phresco.api.ApplicationProcessor;
 import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
@@ -60,14 +62,19 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
 import com.photon.phresco.commons.model.CoreOption;
+import com.photon.phresco.commons.model.Customer;
+import com.photon.phresco.commons.model.RepoInfo;
 import com.photon.phresco.commons.model.RequiredOption;
 import com.photon.phresco.commons.model.SelectedFeature;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.configuration.Configuration;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.plugins.model.Mojos.ApplicationHandler;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.wizards.ComponentConfigWizard;
 import com.photon.phresco.util.Constants;
+import com.photon.phresco.util.PhrescoDynamicLoader;
 import com.photon.phresco.util.Utility;
 
 /**
@@ -85,7 +92,11 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private static Map<Button, Object> depVersionMap = new HashMap<Button, Object>();
 	private Label selectedCountLabel = null;
 	
-	protected AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
+	private static List<Configuration> configurations;
+	private static ApplicationProcessor applicationProcessor;
+	private static String featureName;
+	
+	public AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 	}
 	
@@ -147,6 +158,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
         versionColumn.setText("Version");
         versionColumn.setWidth(120);
         
+        TableColumn config = new TableColumn(table, SWT.LEFT, 4);
+        config.setText("");
+        config.setWidth(120);
+        
         for (int i = 0; i < features.size(); i++) {
             new TableItem(table, SWT.NONE);
         }
@@ -176,11 +191,12 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			int item_height = 17;
 			Image fake = new Image(table.getDisplay(), 1, item_height);
 			tableItem.setImage(0, fake); 
-					
+			String versionID = "";		
 			if(CollectionUtils.isNotEmpty(selectedFeatures)) {
 				for (SelectedFeature selectedFeature : selectedFeatures) {
 					String artifactGroupId = selectedFeature.getArtifactGroupId();
 					if(artifactGroupId.equals(artifactGroup.getId())) {
+						versionID = selectedFeature.getVersionID();
 						checkButton.setSelection(true);
 						selectedFeatures.remove(selectedFeature);
 						selectedCount++;
@@ -215,12 +231,23 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	        final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 	        final Text versionText = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 	        if (versions.size() > 1) {
+	        	int selectedVersion = 0;
+	        	int j = 0;
 		        for (ArtifactInfo artifactInfo : versions) {
-		        	combo.add(artifactInfo.getVersion()); 
+		        	combo.add(artifactInfo.getVersion());
+		        	if(StringUtils.isNotEmpty(versionID) && versionID.equals(artifactInfo.getId())) {
+		        		selectedVersion = j;
+		        	}
+		        	j++;
 				}
-		        combo.select(0);
+		        combo.select(selectedVersion);
 				editor.grabHorizontal = true;
 				editor.setEditor(combo, tableItem, 3);
+				if (checkButton.getSelection()) {
+		        	selectedArtifactGroupWithComboVersion.put(artifactGroup, combo.getText());
+		        } else if (selectedArtifactGroupWithComboVersion.containsKey(artifactGroup)) {
+		        	selectedArtifactGroupWithComboVersion.remove(artifactGroup);
+		        }
 				depVersionMap.put(checkButton, combo);
 	        } else {
 	        	versionText.setText(versions.get(0).getVersion());
@@ -230,7 +257,9 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 				depVersionMap.put(checkButton, versionText);
 	        }
 	        
-			combo.addSelectionListener(new SelectionAdapter() {
+	        componentConfiuration(table, artifactGroup, tableItem);	        
+			
+	        combo.addSelectionListener(new SelectionAdapter() {
 			    @Override
 			    public void widgetSelected(SelectionEvent e) {
 			    	String selectedComboVersion = combo.getItem(combo.getSelectionIndex());
@@ -290,7 +319,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			    }
 
 			});
-			  
+			
 	    	i++;
 	    }
 	    
@@ -300,7 +329,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	    
 	    return table;
 	}
-	
+
 	public abstract void renderPage();
 	
 	public Map<ArtifactGroup, String> getSelectedCheckBoxRows() {
@@ -529,5 +558,96 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
         		}
         	}
     	}
+	}
+	
+	private void componentConfiuration(final Table table, final ArtifactGroup artifactGroup, final TableItem tableItem) {
+		TableEditor editor;
+		try {
+			final ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
+			String techId = appInfo.getTechInfo().getId();
+			  List<CoreOption> appliesTo = artifactGroup.getAppliesTo();
+				for (CoreOption coreOption : appliesTo) {
+					if(coreOption.getTechId().equals(techId) && !artifactGroup.getPackaging().equals("jar")) {
+						editor = new TableEditor(table);
+						Button gearIcon = new Button(table, SWT.PUSH);
+						gearIcon.setText("configure");
+						editor.grabHorizontal =  true;
+						editor.setEditor(gearIcon, tableItem, 4);
+						gearIcon.addSelectionListener(new SelectionAdapter() {
+							
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								String appHandlerFile = PhrescoUtil.getApplicationHome() + File.separatorChar + DOT_PHRESCO_FOLDER + File.separatorChar + APPLICATION_HANDLER_INFO_FILE;
+								try {
+									MojoProcessor mojoProcessor = new MojoProcessor(new File(appHandlerFile));
+									ApplicationHandler applicationHandler = mojoProcessor.getApplicationHandler();
+									List<ArtifactGroup> artifactGroups = setArtifactGroup(applicationHandler);
+									String customerId = PhrescoUtil.getCustomerId();
+									ServiceManager serviceManager = PhrescoUtil.getServiceManager();
+									Customer customer = serviceManager.getCustomer(customerId);
+									RepoInfo repoInfo = customer.getRepoInfo();
+									// dynamic class loader
+									PhrescoDynamicLoader dynamicLoader = new PhrescoDynamicLoader(repoInfo, artifactGroups);
+									applicationProcessor = dynamicLoader.getApplicationProcessor(applicationHandler.getClazz());
+									featureName = artifactGroup.getName();
+									
+									configurations = applicationProcessor.preFeatureConfiguration(appInfo, featureName);
+									final WizardComposite wizardComposite = new WizardComposite(table.getParent());
+									BusyIndicator.showWhile(null, new Runnable() {
+										public void run() {
+											WizardDialog wizardControl = wizardComposite.getWizardControl(new ComponentConfigWizard());
+											wizardControl.open();
+										}
+									});
+								} catch (PhrescoException e1) {
+									PhrescoDialog.exceptionDialog(getShell(), e1);
+								}
+								super.widgetSelected(e);
+							}
+						});
+					}
+				}
+		} catch (PhrescoException e1) {
+			PhrescoDialog.exceptionDialog(getShell(), e1);
+		}
+	}
+	
+	private List<ArtifactGroup> setArtifactGroup(ApplicationHandler applicationHandler) {
+		List<ArtifactGroup> plugins = new ArrayList<ArtifactGroup>();
+		ArtifactGroup artifactGroup = new ArtifactGroup();
+		artifactGroup.setGroupId(applicationHandler.getGroupId());
+		artifactGroup.setArtifactId(applicationHandler.getArtifactId());
+		List<ArtifactInfo> artifactInfos = new ArrayList<ArtifactInfo>();
+		ArtifactInfo artifactInfo = new ArtifactInfo();
+		artifactInfo.setVersion(applicationHandler.getVersion());
+		artifactInfos.add(artifactInfo);
+		artifactGroup.setVersions(artifactInfos);
+		plugins.add(artifactGroup);
+		return plugins;
+	}
+	
+	public static List<Configuration> getConfigurations() {
+		return configurations;
+	}
+
+	public static void setConfigurations(List<Configuration> configurations) {
+		AbstractFeatureWizardPage.configurations = configurations;
+	}
+	
+	public static ApplicationProcessor getApplicationProcessor() {
+		return applicationProcessor;
+	}
+
+	public static void setApplicationProcessor(
+			ApplicationProcessor applicationProcessor) {
+		AbstractFeatureWizardPage.applicationProcessor = applicationProcessor;
+	}
+	
+	public static String getFeatureName() {
+		return featureName;
+	}
+
+	public static void setFeatureName(String featureName) {
+		AbstractFeatureWizardPage.featureName = featureName;
 	}
 }
