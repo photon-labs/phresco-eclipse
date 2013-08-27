@@ -307,6 +307,10 @@ public interface PhrescoConstants {
 	String ASTERICK     = "*";
 	String REMOTE_DEPLOYMENT_VALUE = "remoteDeploymentValue";
 	String VERSION_STATUS = "versionstatus";
+	String PROTOCOL = "protocol";
+	String ADDITIONAL_CONTEXT = "additional_context";
+	String DEPLOY_LABEL = "deployLabel";
+	String 	ADMIN_PASSWORD_LABEL = "admin_password_label";
 	
 	// Dynamic constants
 	

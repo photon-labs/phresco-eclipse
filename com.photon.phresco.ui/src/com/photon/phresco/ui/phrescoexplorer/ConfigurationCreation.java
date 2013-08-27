@@ -285,7 +285,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										if (value.equalsIgnoreCase("false")&& !protocolList.isDisposed() &&	protocolList.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
 											Text deployText = (Text) map.get(DEPLOY_DIR);
 											deployText.setVisible(true);
-											Label label =  (Label) map.get("deployLabel");
+											Label label =  (Label) map.get(DEPLOY_LABEL);
 											label.setVisible(true);
 										}
 									}
@@ -574,13 +574,16 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						}
 						else { 
 							Label defaults = new  Label(composite,  SWT.LEFT);
-							defaults.setText(propertyTemplate.getName() + ASTERICK);
+							if (!propertyTemplate.getKey().equalsIgnoreCase(ADDITIONAL_CONTEXT)) {
+								defaults.setText(propertyTemplate.getName() + ASTERICK);
+							} else {
+								defaults.setText(propertyTemplate.getName());
+							}
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-							Combo combo = (Combo) map.get("protocol");
-							System.out.println("combo = " + combo);
+							
+							Combo combo = (Combo) map.get(PROTOCOL);
 							if (combo != null) {
 								String protocol = combo.getText();
-								System.out.println("Text = " + protocol);
 								if (protocol.equalsIgnoreCase(HTTPS_PROTOCOL)) {
 									defaults.setText(propertyTemplate.getName() + ASTERICK);
 								}
@@ -595,7 +598,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							
 							if (propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR)) {
 								if (defaults != null) {
-									map.put("deployLabel", defaults);
+									map.put(DEPLOY_LABEL, defaults);
 								}
 							}
 							map.put(propertyTemplate.getKey(), nameText);
@@ -611,7 +614,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					numberText = new Text(composite, SWT.BORDER); 
 					numberText.setToolTipText("");
 					numberText.setLayoutData(new GridData(80,13));
-//					numberText.setLayoutData(data);
 					numberValidation();
 					map.put(propertyTemplate.getKey(), numberText);
 					
@@ -628,6 +630,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					Label defaults = new  Label(composite,  SWT.LEFT);
 					defaults.setText(propertyTemplate.getName());
 					defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+					map.put(ADMIN_PASSWORD_LABEL, defaults);
 					
 					passwordText = new Text(composite, SWT.PASSWORD | SWT.BORDER); 
 					passwordText.setToolTipText(ENVIRONMENT_NAME);
@@ -643,8 +646,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					@Override
 					public void handleEvent(Event event) {
 						Button button = (Button) event.widget;
-						Label deployLabel = (Label) map.get("deployLabel" + ASTERICK);
+						Label deployLabel = (Label) map.get(DEPLOY_LABEL);
 						Text deployDirectory = (Text) map.get(DEPLOY_DIR);
+						Label admin_passwordLabel = (Label) map.get(ADMIN_PASSWORD_LABEL);
 						boolean selection = button.getSelection();
 						if (selection) {
 							deployLabel.setEnabled(false);
@@ -652,11 +656,17 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							if (protocolList != null && !protocolList.isDisposed() && protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
 								certifacteList.setEnabled(true);
 							}
+							if (admin_passwordLabel != null) {
+								admin_passwordLabel.setText(admin_passwordLabel.getText() + ASTERICK);
+							}
 						} else {
 							certifacteList.setEnabled(false);
 							browserButton.setEnabled(false);
 							deployLabel.setEnabled(true);
 							deployDirectory.setEnabled(true);
+							if (admin_passwordLabel != null) {
+								admin_passwordLabel.setText(admin_passwordLabel.getText());
+							}
 						}
 					}
 				});
@@ -1048,7 +1058,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								protocolList.getText().equalsIgnoreCase(HTTPS_PROTOCOL) || propertyTemplate.getKey().equalsIgnoreCase(DEPLOY_DIR) && remoteStatus != null && remoteStatus.equals(Boolean.TRUE)) {
 							Text deployText = (Text) map.get(propertyTemplate.getKey());
 							deployText.setEnabled(false);
-							Label label =  (Label) map.get("deployLabel");
+							Label label =  (Label) map.get(DEPLOY_LABEL);
 							label.setEnabled(false);
 							continue;
 						}
@@ -1084,7 +1094,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								if (value.equalsIgnoreCase("false")&& !protocolList.isDisposed() &&	protocolList.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
 									Text deployText = (Text) map.get(DEPLOY_DIR);
 									deployText.setVisible(true);
-									Label label =  (Label) map.get("deployLabel");
+									Label label =  (Label) map.get(DEPLOY_LABEL);
 									label.setVisible(true);
 								}
 							}
