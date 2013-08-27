@@ -130,6 +130,10 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, PACKAGE_GOAL);
 
 			for (Parameter parameter : parameters) {
+				if (parameter.getKey().equalsIgnoreCase(PACK_MINIFIED_FILE)) {
+					continue;
+				}
+				
 				if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					String key = null;
 					Label Logs = new Label(composite, SWT.LEFT);
