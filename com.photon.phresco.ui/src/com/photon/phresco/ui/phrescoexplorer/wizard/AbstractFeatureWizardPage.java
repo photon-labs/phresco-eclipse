@@ -85,7 +85,6 @@ import com.photon.phresco.util.Utility;
 
 public abstract class AbstractFeatureWizardPage extends WizardPage implements PhrescoConstants {
 
-	private Map<ArtifactGroup, String> selectedArtifactGroupWithComboVersion = new HashMap<ArtifactGroup, String>();
 	private Map<ArtifactGroup, String> selectedArtifactGroup = new HashMap<ArtifactGroup, String>();
 	private static Map<String, Object>  depMap = new HashMap<String, Object>();
 	private static List<ArtifactGroup> artifactGroupList = new ArrayList<ArtifactGroup>();
@@ -243,11 +242,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		        combo.select(selectedVersion);
 				editor.grabHorizontal = true;
 				editor.setEditor(combo, tableItem, 3);
-				if (checkButton.getSelection()) {
-		        	selectedArtifactGroupWithComboVersion.put(artifactGroup, combo.getText());
-		        } else if (selectedArtifactGroupWithComboVersion.containsKey(artifactGroup)) {
-		        	selectedArtifactGroupWithComboVersion.remove(artifactGroup);
-		        }
 				depVersionMap.put(checkButton, combo);
 	        } else {
 	        	versionText.setText(versions.get(0).getVersion());
@@ -263,19 +257,19 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			    @Override
 			    public void widgetSelected(SelectionEvent e) {
 			    	String selectedComboVersion = combo.getItem(combo.getSelectionIndex());
-			        if (checkButton.getSelection()) {
-			        	selectedArtifactGroupWithComboVersion.put(artifactGroup, selectedComboVersion);
-			        } else if (selectedArtifactGroupWithComboVersion.containsKey(artifactGroup)) {
-			        	selectedArtifactGroupWithComboVersion.remove(artifactGroup);
+			    	if (checkButton.getSelection()) {
+			            selectedArtifactGroup.put(artifactGroup, selectedComboVersion);
+			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+		    			selectedArtifactGroup.remove(artifactGroup);
 			        }
 			    }
 			});
 			
 			String selectedVersion = versionText.getText();
 	    	
-	    	if (selectedVersion.equals("")) {
-	    		selectedVersion = KEY_EMPTY;
-	    	}
+	    	if(StringUtils.isEmpty(selectedVersion)) {
+	    		selectedVersion = combo.getText();
+        	}
 	    	
 			if (checkButton.getSelection()) {
 	            selectedArtifactGroup.put(artifactGroup, selectedVersion);
@@ -287,7 +281,9 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			    @Override
 			    public void widgetSelected(SelectionEvent e) {
 		        	String selectedVersion = versionText.getText();
-		        	
+		        	if(StringUtils.isEmpty(selectedVersion)) {
+		        		selectedVersion = combo.getText();
+		        	}
 		        	boolean selection = checkButton.getSelection();
 		        	if (selection) {
 		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
@@ -307,10 +303,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 						}
 		        	}
 		        	
-			    	if (selectedVersion.equals("")) {
-			    		selectedVersion = KEY_EMPTY;
-			    	}
-			    	
 			        if (checkButton.getSelection()) {
 			            selectedArtifactGroup.put(artifactGroup, selectedVersion);
 			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
@@ -336,12 +328,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		return selectedArtifactGroup;
 	}
 	
-	public Map<ArtifactGroup, String> getSelectedComboBoxRows() {
-		return selectedArtifactGroupWithComboVersion;
-	}
-	
 	public List<SelectedFeature> getSelectedItems() {
-		Map<ArtifactGroup, String> selectedComboBoxRows = getSelectedComboBoxRows();
 		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
 		
 		List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
@@ -355,9 +342,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		    selectedFeature.setModuleId(key.getId());
 		    selectedFeature.setType(key.getType().name());
 		    List<ArtifactInfo> versions = key.getVersions();
-		    if (value != null && KEY_EMPTY.equals(value)) {
-		    	value = selectedComboBoxRows.get(key);
-		    }
 		    for (ArtifactInfo artifactInfo : versions) {
 				if(artifactInfo.getVersion().equals(value)) {
 					selectedFeature.setVersionID(artifactInfo.getId());
@@ -592,6 +576,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 									featureName = artifactGroup.getName();
 									
 									configurations = applicationProcessor.preFeatureConfiguration(appInfo, featureName);
+									if (CollectionUtils.isEmpty(configurations)) {
+										PhrescoDialog.messageDialog(getShell(), "Configurations not available");
+										return;
+									}
 									final WizardComposite wizardComposite = new WizardComposite(table.getParent());
 									BusyIndicator.showWhile(null, new Runnable() {
 										public void run() {
