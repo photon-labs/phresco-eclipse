@@ -170,7 +170,8 @@ public interface PhrescoConstants {
 	String MAVEN_COMMAND	 = "mvn";
 	String BUILD			 = "build";
 	String BUILD_INFO        = "build.info";
-	String PACK_MINIFIED_FILE = "packMinifiedFiles";
+	String PACK_MINIFIED_FILE= "packMinifiedFiles";
+	String PACKAGE_TYPE      = "packageType";
 	
 	String BUILD_NO          = "No";
 	String BUILD_NAME		 = "BuildName";

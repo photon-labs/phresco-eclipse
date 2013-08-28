@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
@@ -52,6 +53,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 	private Shell buildDialog;	
 	private Shell generateDialog;
 	private Button envSelectionButton;
+	Map<String, String> typeMaps = new HashMap<String, String>();
 
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> map = new HashedMap();
@@ -190,8 +192,24 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 					GridData data = new GridData(GridData.FILL_BOTH);
 					checkBoxButton.setLayoutData(data);
 					dialog_height = dialog_height + comp_height;
-					System.out.println("Parameter key = " + parameter.getKey());
 					map.put(parameter.getKey(), checkBoxButton);
+				} else if (parameter.getKey().equalsIgnoreCase(PACKAGE_TYPE) &&  parameter.getType().equalsIgnoreCase(LIST)) {
+					Label Logs = new Label(composite, SWT.LEFT);
+					Logs.setText(parameter.getName().getValue().get(0).getValue());
+					Logs.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,false));
+
+					Combo listLogs = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+
+					List<Value> values = parameter.getPossibleValues().getValue();
+					for (Value value : values) {
+						listLogs.add(value.getValue());
+						typeMaps.put(value.getValue(), value.getKey());
+					}
+					GridData data = new GridData(GridData.FILL_HORIZONTAL);
+					listLogs.select(0);
+					listLogs.setLayoutData(data);
+					dialog_height = dialog_height + comp_height;
+					map.put(parameter.getKey(), listLogs); 
 				}
 			}
 
@@ -243,6 +261,17 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 						if (checkBoxButton != null && !checkBoxButton.isDisposed()) {
 							boolean selection = checkBoxButton.getSelection();
 							parameter.setValue(String.valueOf(selection));
+						}
+					}  else if (parameter.getType().equalsIgnoreCase(LIST)) {
+						Combo list =  (Combo) map.get(parameter.getKey());
+						if (list != null) {
+							String[] items = list.getItems();
+							for (String string : items) {
+								if (list.getText().equalsIgnoreCase(string)) {
+									String value = typeMaps.get(string);
+									parameter.setValue(value);
+								}
+							}
 						}
 					}
 				}
