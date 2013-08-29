@@ -128,7 +128,6 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		totalSize = features.size();
 		
 		Composite cmp = new Composite(jsLibGroups, SWT.None);
-		
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(cmp, SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		scrolledComposite.setAlwaysShowScrollBars(false);
@@ -234,8 +233,13 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	        	int j = 0;
 		        for (ArtifactInfo artifactInfo : versions) {
 		        	combo.add(artifactInfo.getVersion());
+		        	combo.setData(artifactInfo.getVersion(), artifactInfo);
 		        	if(StringUtils.isNotEmpty(versionID) && versionID.equals(artifactInfo.getId())) {
 		        		selectedVersion = j;
+		        	}
+		        	if(isDefaultFeature(artifactInfo)) {
+		        		checkButton.setEnabled(false);
+		        		checkButton.setSelection(true);
 		        	}
 		        	j++;
 				}
@@ -249,6 +253,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 				editor.grabHorizontal = true;
 				editor.setEditor(versionText, tableItem, 3);
 				depVersionMap.put(checkButton, versionText);
+				if(isDefaultFeature(versions.get(0))) {
+	        		checkButton.setEnabled(false);
+	        		checkButton.setSelection(true);
+	        	}
 	        }
 	        
 	        componentConfiuration(table, artifactGroup, tableItem);	        
@@ -262,6 +270,14 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
 		    			selectedArtifactGroup.remove(artifactGroup);
 			        }
+			    	
+			    	ArtifactInfo artifactInfo = (ArtifactInfo) combo.getData(selectedComboVersion);
+			    	if(isDefaultFeature(artifactInfo)) {
+		        		checkButton.setEnabled(false);
+		        		checkButton.setSelection(true);
+		        	} else {
+		        		checkButton.setEnabled(true);
+		        	}
 			    }
 			});
 			
@@ -612,6 +628,18 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		artifactGroup.setVersions(artifactInfos);
 		plugins.add(artifactGroup);
 		return plugins;
+	}
+	
+	private boolean isDefaultFeature(ArtifactInfo artifactInfo) {
+		List<RequiredOption> appliesToReqird = artifactInfo.getAppliesTo();
+		if (CollectionUtils.isNotEmpty(appliesToReqird)) {
+			for (RequiredOption requiredOption : appliesToReqird) {
+				if (requiredOption.isRequired()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public static List<Configuration> getConfigurations() {
