@@ -45,6 +45,7 @@ import com.photon.phresco.framework.impl.DocumentGeneratorImpl;
 import com.photon.phresco.plugins.model.Mojos.ApplicationHandler;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.util.ArchiveUtil;
 import com.photon.phresco.util.ArchiveUtil.ArchiveType;
 import com.photon.phresco.util.Constants;
@@ -430,17 +431,8 @@ public class ApplicationManagerUtil implements Constants {
 						File projectInfoPath = new File(dotPhrescoPathSb.toString() + PROJECT_INFO_FILE);
 						ProjectUtils.updateProjectInfo(projectInfo, projectInfoPath);
 					}
-					/*if (isCallEclipsePlugin(appInfo)) {
-						ApplicationManager applicationManager = PhrescoFrameworkFactory.getApplicationManager();
-						String baseDir = Utility.getProjectHome() + File.separator + appInfo.getAppDirName();
-						List<String> buildArgCmds = new ArrayList<String>();
-			            String pomFileName = Utility.getPomFileName(appInfo);
-						if(!POM_NAME.equals(pomFileName)) {
-							buildArgCmds.add(HYPHEN_F);
-							buildArgCmds.add(pomFileName);
-						}
-						applicationManager.performAction(projectInfo, ActionType.ECLIPSE, buildArgCmds, baseDir);
-                    }*/
+					String baseDir = PhrescoUtil.getProjectHome() + appInfo.getAppDirName();
+					Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
 				} catch (FileNotFoundException e) {
 					throw new PhrescoException(e);
 				} catch (IOException e) {
