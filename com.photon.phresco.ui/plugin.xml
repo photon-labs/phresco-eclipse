@@ -458,7 +458,7 @@
 				</command>
 				<command
 			          commandId="Download"
-			          icon="icons/deploy_icon.png"
+			          icon="icons/download.gif"
 			          id="%project.pdfreport.download.id"
 			          label="%project.pdfreport.download.name"
 			          style="push"
@@ -483,7 +483,7 @@
 				</command>
 				<command
 			          commandId="commit"
-			          icon="icons/deploy_icon.png"
+			          icon="icons/commit.gif"
 			          id="%project.scm.commit.id"
 			          label="%project.scm.commit.name"
 			          style="push"
