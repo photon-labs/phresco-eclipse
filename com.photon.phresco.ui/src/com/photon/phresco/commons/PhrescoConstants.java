@@ -312,6 +312,8 @@ public interface PhrescoConstants {
 	String ADDITIONAL_CONTEXT = "additional_context";
 	String DEPLOY_LABEL = "deployLabel";
 	String 	ADMIN_PASSWORD_LABEL = "admin_password_label";
+	String ACTIVE = "active";
+	String IN_ACTIVE = "In Active";
 	
 	// Dynamic constants
 	

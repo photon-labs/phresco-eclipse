@@ -69,7 +69,6 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 	private Text nameText;
 	private Text numberText;
 	private Text passwordText;
-	//	private Combo listLogs;
 	private static Map<String, Object> map = new HashMap<String, Object>();
 	private static Map<String, String> techValues = new HashMap<String, String>();
 	Map<String, String> typeMaps = new HashMap<String, String>();
@@ -133,16 +132,14 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 			}
 			boolean ifFunctional = SonarUtil.checkFunctionalDir();
 			if (ifFunctional) {
-				reportType.add("source");
-				reportType.add("functional");
+				reportType.add(FUNCTIONAL);
 			}
 			reportType.select(0);
 		}		
 
 		GridData data = new GridData();
-		data.horizontalAlignment = GridData.FILL;
 		data.horizontalSpan = 1;
-		data.grabExcessHorizontalSpace = true;
+		data.grabExcessHorizontalSpace = false;
 		reportType.setLayoutData(data);
 
 		try {
@@ -250,7 +247,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				functionalDir = File.separator + functionalDir;
 			}
 			sourceType = reportType.getText();
-			if (sourceType.contains("functional")) {
+			if (sourceType.contains(FUNCTIONAL)) {
 				String funDir = PhrescoUtil.getApplicationHome() + functionalDir + File.separatorChar + POM_FILENAME;
 				PomProcessor pomProcessor = new PomProcessor(new File(funDir));
 				Model model = pomProcessor.getModel();
@@ -259,7 +256,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 				builder.append(COLON);
 				builder.append(model.getArtifactId());
 				builder.append(COLON);
-				builder.append("functional");
+				builder.append(FUNCTIONAL);
 			} else {
 				Model model = processor.getModel();
 				builder.append(model.getGroupId());

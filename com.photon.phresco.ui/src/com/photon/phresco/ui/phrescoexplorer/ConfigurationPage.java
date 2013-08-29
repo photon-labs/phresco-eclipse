@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.commands.AbstractHandler;
@@ -40,6 +41,7 @@ import com.photon.phresco.impl.ConfigManagerImpl;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.util.Utility;
 
 import fr.opensagres.xdocreport.utils.StringUtils;
 
@@ -106,7 +108,20 @@ public class ConfigurationPage extends AbstractHandler implements  PhrescoConsta
 						TreeItem item = new TreeItem(itemTemplate, SWT.FILL);
 						String name = configuration.getName();
 						String description = configuration.getDesc();
-						item.setText(new String [] {name,description,""});
+						Properties prop = configuration.getProperties();
+						String protocol = (String) prop.get(PROTOCOL);
+						String host		= (String) prop.get(HOST);
+						String port 	= (String) prop.get(PORT);
+						if (StringUtils.isEmpty(protocol)) {
+							protocol = HOST;
+						}
+						boolean connectionAlive = Utility.isConnectionAlive(protocol, host, Integer.parseInt(port));
+						if (connectionAlive) {
+							item.setText(new String [] {name,description,ACTIVE});
+
+						} else {
+							item.setText(new String [] {name,description,IN_ACTIVE});
+						}
 					}
 				}
 			}

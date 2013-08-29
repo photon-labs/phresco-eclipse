@@ -494,18 +494,20 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								}
 							});
 							
-							protocolList.addListener(SWT.Selection, new Listener() {
-								@Override
-								public void handleEvent(Event event) {
-									Combo combo = (Combo) event.widget;
-									if (combo.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
-										browserButton.setEnabled(false);
-										comboDropDown.setEnabled(false);
-									} else if (combo.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
-										browserButton.setEnabled(true);
+							if (protocolList != null && !protocolList.isDisposed()) {
+								protocolList.addListener(SWT.Selection, new Listener() {
+									@Override
+									public void handleEvent(Event event) {
+										Combo combo = (Combo) event.widget;
+										if (combo.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
+											browserButton.setEnabled(false);
+											comboDropDown.setEnabled(false);
+										} else if (combo.getText().equalsIgnoreCase(HTTPS_PROTOCOL)) {
+											browserButton.setEnabled(true);
+										}
 									}
-								}
-							});
+								});
+							}
 							
 							buttonComposite.pack();
 							
@@ -582,7 +584,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							defaults.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 							
 							Combo combo = (Combo) map.get(PROTOCOL);
-							if (combo != null) {
+							if (combo != null && !combo.isDisposed()) {
 								String protocol = combo.getText();
 								if (protocol.equalsIgnoreCase(HTTPS_PROTOCOL)) {
 									defaults.setText(propertyTemplate.getName() + ASTERICK);
@@ -821,8 +823,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							defaultCheckBoxButton.setSelection(environment.isDefaultEnv());
 						}
 						
-						environments.remove(environment);
-						
 						GridLayout tableLayout = new GridLayout(2, false);
 						Composite composite = new Composite(envDialog, SWT.NONE);
 						composite.setLayout(tableLayout);
@@ -841,7 +841,10 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						Listener envSaveListener = new Listener() {
 							public void handleEvent(Event event) {
 								try {
-//									Environment environment = new Environment();
+									List<Configuration> oldConfigs = environment.getConfigurations();
+									
+									environments.remove(environment);
+									Environment environment = new Environment();
 									String description = descText.getText();
 									String environmentName = envText.getText();
 									boolean selection = defaultCheckBoxButton.getSelection();
@@ -857,7 +860,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									if (StringUtils.isNotEmpty(String.valueOf(selection))) {
 										environment.setDefaultEnv(selection);
 									}
-									List<Environment> envList = impl.getEnvironments();
+									if (CollectionUtils.isNotEmpty(oldConfigs)) {
+										environment.setConfigurations(oldConfigs);
+									}
 									if (selection) { 
 										for (Environment env : environments) {
 											boolean defaultEnv = env.isDefaultEnv();
@@ -1134,7 +1139,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						SettingsTemplate serverTemplates = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), typeList.getText());
 						List<PropertyTemplate> propertyTemplates  = serverTemplates.getProperties();
 						java.util.Properties properties = new java.util.Properties();
-						if ((Boolean) map.get(VERSION_STATUS)) {
+						if ((Boolean) map.get(VERSION_STATUS) != null && (Boolean) map.get(VERSION_STATUS)) {
 							PhrescoDialog.errorDialog(configDialog, Messages.WARNING,"please update the server or database version from appinfo");
 							return;
 						}
