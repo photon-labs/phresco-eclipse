@@ -772,7 +772,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			File configurationFile = PhrescoUtil.getConfigurationFile();
 			ConfigManagerImpl impl = new ConfigManagerImpl(configurationFile);
 
-			List<Environment> environments = impl.getEnvironments();
+			final List<Environment> environments = impl.getEnvironments();
 			if (CollectionUtils.isNotEmpty(environments)) {
 				for (final Environment environment : environments) {
 					if (environment.getName().equalsIgnoreCase(parentTree.getText())) {
@@ -797,7 +797,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						if (StringUtils.isNotEmpty(environment.getName())) {
 							envText.setText(environment.getName());
 						}
-						envText.setEnabled(false);
 
 						Label descLabel = new  Label(envDialog,  SWT.LEFT);
 						descLabel.setText(DESCRITPTION);
@@ -817,9 +816,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 
 						defaultCheckBoxButton = new Button(envDialog, SWT.CHECK);
 						defaultCheckBoxButton.setLayoutData(new GridData(75,20));
-						if (StringUtils.isNotEmpty(String.valueOf(environment.isDefaultEnv()))) {
+						if (StringUtils.isNotEmpty(String.valueOf(environment.isDefaultEnv())) && environment.isDefaultEnv()) {
+							defaultCheckBoxButton.setEnabled(false);
 							defaultCheckBoxButton.setSelection(environment.isDefaultEnv());
 						}
+						
+						environments.remove(environment);
 						
 						GridLayout tableLayout = new GridLayout(2, false);
 						Composite composite = new Composite(envDialog, SWT.NONE);
@@ -839,9 +841,15 @@ public class ConfigurationCreation  implements PhrescoConstants {
 						Listener envSaveListener = new Listener() {
 							public void handleEvent(Event event) {
 								try {
+//									Environment environment = new Environment();
 									String description = descText.getText();
+									String environmentName = envText.getText();
 									boolean selection = defaultCheckBoxButton.getSelection();
 									ConfigManagerImpl impl = new ConfigManagerImpl(PhrescoUtil.getConfigurationFile());
+									
+									if (StringUtils.isNotEmpty(environmentName)) {
+										environment.setName(environmentName);
+									}
 									
 									if (StringUtils.isNotEmpty(description)) {
 										environment.setDesc(description);
@@ -849,10 +857,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									if (StringUtils.isNotEmpty(String.valueOf(selection))) {
 										environment.setDefaultEnv(selection);
 									}
-
 									List<Environment> envList = impl.getEnvironments();
 									if (selection) { 
-										for (Environment env : envList) {
+										for (Environment env : environments) {
 											boolean defaultEnv = env.isDefaultEnv();
 											if (defaultEnv) {
 												env.setDefaultEnv(false);
@@ -860,7 +867,9 @@ public class ConfigurationCreation  implements PhrescoConstants {
 											}
 										}
 									}
-									impl.updateEnvironment(environment);
+									environments.add(environment);
+									impl.addEnvironments(environments);
+									
 									envDialog.setVisible(false);
 									ConfigurationPage configPage = new ConfigurationPage();
 									configPage.push();
