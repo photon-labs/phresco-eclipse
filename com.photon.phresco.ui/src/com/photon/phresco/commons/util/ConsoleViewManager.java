@@ -50,7 +50,7 @@ public class ConsoleViewManager {
 		
 	public ConsoleViewManager(String messageTitle) {		
 		fDefault = this;
-		fTitle = messageTitle;
+		fTitle = "Logs";
 	}
 	
 	public static ConsoleViewManager getDefault(String msgTitle) {
@@ -128,6 +128,7 @@ public class ConsoleViewManager {
 		if( fMessageConsole == null )
 			createMessageConsoleStream(fTitle);	
 		
+		fMessageConsole.clearConsole();
 		return fMessageConsole;
 	}
 	
