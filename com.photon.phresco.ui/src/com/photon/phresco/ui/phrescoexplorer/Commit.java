@@ -81,6 +81,7 @@ public class Commit extends AbstractHandler implements PhrescoConstants {
 		
 		@Override
 		public void addPages() {
+			this.setWindowTitle("Commit");
 			CommitScmPage scmPage = new CommitScmPage("Commit");
 			addPage(scmPage);
 			super.addPages();
