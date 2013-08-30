@@ -242,7 +242,7 @@
       <command
             defaultHandler="com.photon.phresco.ui.phrescoexplorer.EditProject"
             id="editProject"
-            name="Edit Project">
+            name="Edit Application">
         </command>
 
       <command
@@ -354,9 +354,8 @@
          		commandId="editProject"
          		icon="icons/edit_icon.png"
         	 	id="editProject"
-         		label="Edit Project"
-         		style="push"
-         		tooltip="%project.configuration.tooltip">
+         		label="Edit Application"
+         		style="push">
 			</command>
 
 			<command

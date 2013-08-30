@@ -214,7 +214,7 @@ public class Messages extends NLS {
 	public static String PROJECT_CREATED_SUCCESS_MSG = "Project created Successfully";
 	
 	//Edit Project
-	public static String EDIT_PROJECT_DIALOG_TITLE = "Edit Project"; 
+	public static String EDIT_PROJECT_DIALOG_TITLE = "Edit Application"; 
 	public static String PROJECT_UPDATED_SUCCESS_MSG = "Project updated Successfully";
 	
 	//Features
