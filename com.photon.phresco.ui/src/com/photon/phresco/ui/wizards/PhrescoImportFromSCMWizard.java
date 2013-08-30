@@ -107,15 +107,13 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 							PhrescoUtil.addM2Repo(path);
 							
 							ProjectManager.updateProjectIntoWorkspace(importedProject.getAppDirName());
-							
+							PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
 						} catch (Exception e) {
-							e.printStackTrace();
-							PhrescoDialog.errorDialog(getShell(), "ERROR", e.getLocalizedMessage()); //$NON-NLS-1$
+							PhrescoDialog.exceptionDialog(getShell(), e);
 						}
 		            }
 		        });
 				
-				PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
 				return true;
 			}
 		}
