@@ -198,6 +198,8 @@ public class Messages extends NLS {
 	public static String SELECT_DATABASE = "Select Database";
 	public static String SELECT_VERSION = "Select Version";
 	public static String SELECT_SERVER = "Select Server";
+	public static String TYPE = "Type";
+	public static String APP_CODE = "AppCode *";
 	
 	//Add Project
 	public static String PROJECT_CREATION_NAME="Phresco Project";

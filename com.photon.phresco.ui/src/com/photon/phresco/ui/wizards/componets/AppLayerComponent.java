@@ -28,6 +28,7 @@ import com.photon.phresco.commons.model.TechnologyInfo;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.LayerUtil;
 import com.photon.phresco.commons.util.PhrescoValidation;
+import com.photon.phresco.ui.resource.Messages;
 
 public class AppLayerComponent {
 	
@@ -49,7 +50,7 @@ public class AppLayerComponent {
 	public Composite getComponent(Button button) {
 		
 		Label appCodeLabel = new Label(composite, SWT.BOLD);
-		appCodeLabel.setText("AppCode *");
+		appCodeLabel.setText(Messages.APP_CODE);
 		appCodeLabel.setFont(DesignUtil.getLabelFont());
 
 		appCodeText = new Text(composite, SWT.BORDER);
@@ -78,7 +79,7 @@ public class AppLayerComponent {
 
 		if(CollectionUtils.isNotEmpty(techInfoList)) {
 			Label techNameLabel = new Label(composite, SWT.BOLD);
-			techNameLabel.setText("Technology");
+			techNameLabel.setText(Messages.TECHNOLOGY);
 			techNameLabel.setFont(DesignUtil.getLabelFont());
 			
 			String[] techNameArray = (String[]) techInfoList.toArray(new String[techInfoList.size()]);
@@ -89,7 +90,7 @@ public class AppLayerComponent {
 		
 		List<String> techVersionList = techVersionMap.get(techInfoList.get(0));
 		Label techVersionLabel = new Label(composite, SWT.BOLD);
-		techVersionLabel.setText("Version");
+		techVersionLabel.setText(Messages.VERSION);
 		techVersionLabel.setFont(DesignUtil.getLabelFont());
 
 		techVersionCombo = new Combo(composite, SWT.NONE | SWT.READ_ONLY | SWT.RESIZE);
