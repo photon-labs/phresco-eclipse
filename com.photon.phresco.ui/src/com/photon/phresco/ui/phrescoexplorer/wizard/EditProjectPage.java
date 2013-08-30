@@ -31,6 +31,7 @@ import com.photon.phresco.commons.model.DownloadInfo;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.WebService;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.PhrescoValidation;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
@@ -338,13 +339,15 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 		nameText = new Text(composite, SWT.BORDER);
 		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		nameText.setText(appInfo.getName());
-
+		PhrescoValidation.validateText(nameText);
+		
 		Label codeLable = new Label(composite, SWT.NONE);
 		codeLable.setText(Messages.CODE);
 
 		codeText = new Text(composite, SWT.BORDER);
 		codeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		codeText.setText(appInfo.getCode());
+		PhrescoValidation.validateText(codeText);
 
 		Label descLable = new Label(composite, SWT.NONE);
 		descLable.setText(Messages.DESCRIPTION);
@@ -364,7 +367,8 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 		appDirText = new Text(composite, SWT.BORDER);
 		appDirText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		appDirText.setText(appInfo.getAppDirName());
-
+		PhrescoValidation.validateText(appDirText);
+		
 		Label versionLabel = new Label(composite, SWT.NONE);
 		versionLabel.setText(Messages.VERSION);
 

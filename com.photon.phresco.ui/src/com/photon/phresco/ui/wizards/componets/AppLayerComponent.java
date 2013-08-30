@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -22,6 +27,7 @@ import com.photon.phresco.commons.model.TechnologyGroup;
 import com.photon.phresco.commons.model.TechnologyInfo;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.LayerUtil;
+import com.photon.phresco.commons.util.PhrescoValidation;
 
 public class AppLayerComponent {
 	
@@ -48,6 +54,7 @@ public class AppLayerComponent {
 
 		appCodeText = new Text(composite, SWT.BORDER);
 		appCodeText.setMessage("Enter AppCode");
+		PhrescoValidation.validateText(appCodeText);
 		
 		String appTypeId = (String) button.getData(button.getText());
 		setAppTypeId(appTypeId);

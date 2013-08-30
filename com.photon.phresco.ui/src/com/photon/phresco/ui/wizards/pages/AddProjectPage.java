@@ -25,6 +25,7 @@ import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.model.ApplicationType;
 import com.photon.phresco.commons.util.DesignUtil;
 import com.photon.phresco.commons.util.PhrescoUtil;
+import com.photon.phresco.commons.util.PhrescoValidation;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.model.BaseAction;
@@ -146,6 +147,7 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		projectTxt.setMessage(Messages.PROJECT_NAME_MSG_TEXT);
 		projectTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		projectTxt.setFocus();
+		PhrescoValidation.validateText(projectTxt);
 		
 		Label code = new Label(basicComposite, SWT.NONE);
 		code.setText(Messages.PROJECT_LABEL_CODE);
