@@ -1,5 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer.wizard;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -9,13 +10,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.photon.phresco.commons.PhrescoConstants;
+import com.photon.phresco.ui.PhrescoPlugin;
 import com.photon.phresco.ui.resource.Messages;
 
 /**
  * @author suresh_ma
  *
  */
-public class AddToRepoWizardPage extends WizardPage {
+public class AddToRepoWizardPage extends WizardPage implements PhrescoConstants {
 
 	public Combo typeCombo;
 	public Text applicationRepoURLText;
@@ -69,6 +72,13 @@ public class AddToRepoWizardPage extends WizardPage {
 		passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		passwordText.setLayoutData(gridData);
 
+		IPreferenceStore prefStore = PhrescoPlugin.getDefault().getPreferenceStore();
+		
+		if (prefStore != null) {
+			usernameText.setText(prefStore.getString(USER_ID));
+			passwordText.setText(prefStore.getString(PASSWORD));
+		}
+		
 		messageLabel = new Label(composite, SWT.NONE);
 		messageLabel.setText(Messages.MESSAGE);
 

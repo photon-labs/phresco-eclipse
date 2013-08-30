@@ -68,9 +68,9 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
-		ImageDescriptor myImage = ImageDescriptor.createFromURL(FileLocator.find(PhrescoPlugin.getDefault().getBundle(),
+/*		ImageDescriptor myImage = ImageDescriptor.createFromURL(FileLocator.find(PhrescoPlugin.getDefault().getBundle(),
 				new Path("icons/phresco.gif"),null));
-		super.setDefaultPageImageDescriptor(myImage);
+		super.setDefaultPageImageDescriptor(myImage);*/
 		super.setNeedsProgressMonitor(true);
 		super.setWindowTitle(Messages.PHRESCO_IMPORT_WINDOW_TITLE);
 
