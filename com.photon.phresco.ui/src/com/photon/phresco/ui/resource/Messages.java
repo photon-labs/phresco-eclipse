@@ -195,6 +195,9 @@ public class Messages extends NLS {
 	public static String COLAN = ":";
 	public static String MODULES = "Modules";
 	public static String BUILD_NOT_AVAILABLE = "Build not Available";
+	public static String SELECT_DATABASE = "Select Database";
+	public static String SELECT_VERSION = "Select Version";
+	public static String SELECT_SERVER = "Select Server";
 	
 	//Add Project
 	public static String PROJECT_CREATION_NAME="Phresco Project";

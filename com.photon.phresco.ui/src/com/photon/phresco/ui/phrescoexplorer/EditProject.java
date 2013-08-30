@@ -239,17 +239,18 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 					String serverId = ServerComponent.serverIdMap.get(serverName);
 					ArtifactGroupInfo artifactGroupInfo = new ArtifactGroupInfo();
 					artifactGroupInfo.setArtifactGroupId(serverId);
-
 					List<String> artifactInfoIds = new ArrayList<String>();
 					List<ArtifactInfo> artifactInfos = ServerComponent.serverVersionMap.get(serverName);
-					for (ArtifactInfo artifactInfo : artifactInfos) {
-						List<String> selectedVersionsList = Arrays.asList(selectedVersions);
-						if(selectedVersionsList.contains(artifactInfo.getVersion())) {
-							artifactInfoIds.add(artifactInfo.getId());
+					if (CollectionUtils.isNotEmpty(artifactInfos)) {
+						for (ArtifactInfo artifactInfo : artifactInfos) {
+							List<String> selectedVersionsList = Arrays.asList(selectedVersions);
+							if(selectedVersionsList.contains(artifactInfo.getVersion())) {
+								artifactInfoIds.add(artifactInfo.getId());
+							}
 						}
+						artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
+						artifactGroupInfos.add(artifactGroupInfo);
 					}
-					artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
-					artifactGroupInfos.add(artifactGroupInfo);
 					appInfo.setSelectedServers(artifactGroupInfos);
 				}
 			}
@@ -271,14 +272,16 @@ public class EditProject extends AbstractHandler implements PhrescoConstants {
 
 					List<String> artifactInfoIds = new ArrayList<String>();
 					List<ArtifactInfo> artifactInfos = DatabaseComponent.dbVersionMap.get(dataBaseName);
-					for (ArtifactInfo artifactInfo : artifactInfos) {
-						List<String> selectedVersionsList = Arrays.asList(selectedVersions);
-						if(selectedVersionsList.contains(artifactInfo.getVersion())) {
-							artifactInfoIds.add(artifactInfo.getId());
+					if (CollectionUtils.isNotEmpty(artifactInfos)) {
+						for (ArtifactInfo artifactInfo : artifactInfos) {
+							List<String> selectedVersionsList = Arrays.asList(selectedVersions);
+							if(selectedVersionsList.contains(artifactInfo.getVersion())) {
+								artifactInfoIds.add(artifactInfo.getId());
+							}
 						}
+						artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
+						artifactGroupInfos.add(artifactGroupInfo);
 					}
-					artifactGroupInfo.setArtifactInfoIds(artifactInfoIds);
-					artifactGroupInfos.add(artifactGroupInfo);
 					appInfo.setSelectedDatabases(artifactGroupInfos);
 				}
 			}

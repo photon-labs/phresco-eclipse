@@ -41,11 +41,7 @@ public class ServerComponent {
 			List<DownloadInfo> servers, String customerId, String techId, String platform, ArtifactGroupInfo artifactGroupInfo) throws PhrescoException {
 		List<String> serverNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : servers) {
-			if(artifactGroupInfo != null && artifactGroupInfo.getArtifactGroupId().equals(downloadInfo.getId())) {
-				serverNames.add(0, downloadInfo.getName());
-			} else {
-				serverNames.add(downloadInfo.getName());
-			}
+			serverNames.add(downloadInfo.getName());
 			serverIdMap.put(downloadInfo.getName(), downloadInfo.getId());
 			List<ArtifactInfo> versions = downloadInfo.getArtifactGroup().getVersions();
 			serverVersionMap.put(downloadInfo.getName(), versions);
@@ -57,47 +53,69 @@ public class ServerComponent {
 			String[] serverNamesArray = serverNames.toArray(new String[serverNames.size()]);
 			serverNameCombo = new Combo(serverGroup, SWT.BORDER | SWT.READ_ONLY);
 			serverNameCombo.setItems(serverNamesArray);
-			serverNameCombo.select(0);
+			serverNameCombo.add(Messages.SELECT_SERVER, 0);
+			if (artifactGroupInfo != null) {
+				setSelectedServer(artifactGroupInfo);
+			} else {
+				serverNameCombo.select(0);
+			}
 		}
 		
 		List<String> serverVersions = new ArrayList<String>();
-		List<ArtifactInfo> artifactInfos = serverVersionMap.get(serverNames.get(0));
-		for (ArtifactInfo artifactInfo : artifactInfos) {
-			serverVersionIdMap.put(artifactInfo.getId(), artifactInfo.getVersion());
-			serverVersions.add(artifactInfo.getVersion());
-		}
-		if(CollectionUtils.isNotEmpty(serverVersions)) {
-			Label versionLanel = new Label(serverGroup, SWT.NONE);
-			versionLanel.setText(Messages.VERSIONS);
-			String[] serverVersionsArray = serverVersions.toArray(new String[serverVersions.size()]);
-			serverVersionListBox = new org.eclipse.swt.widgets.List(serverGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
-			serverVersionListBox.setItems(serverVersionsArray);
-			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-			gridData.heightHint = 40;
-			serverVersionListBox.setLayoutData(gridData);
-			if(artifactGroupInfo != null) {
-				setSelectedSeverVersion(artifactGroupInfo);
-			} else {
-				serverVersionListBox.select(0);
+		List<ArtifactInfo> artifactInfos = serverVersionMap.get(serverNameCombo.getText());
+		Label versionLanel = new Label(serverGroup, SWT.NONE);
+		versionLanel.setText(Messages.VERSIONS);
+		
+		serverVersionListBox = new org.eclipse.swt.widgets.List(serverGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.heightHint = 40;
+		serverVersionListBox.setLayoutData(gridData);
+		
+		if (CollectionUtils.isNotEmpty(artifactInfos)) {
+			for (ArtifactInfo artifactInfo : artifactInfos) {
+				serverVersionIdMap.put(artifactInfo.getId(), artifactInfo.getVersion());
+				serverVersions.add(artifactInfo.getVersion());
 			}
+			String[] serverVersionsArray = serverVersions.toArray(new String[serverVersions.size()]);
+			serverVersionListBox.setItems(serverVersionsArray);
+			setSelectedSeverVersion(artifactGroupInfo);
+		} else {
+			serverVersionListBox.add(Messages.SELECT_VERSION, 0);
+			serverVersionListBox.select(0);
 		}
 		
 		serverNameCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				List<String> serverVersions = new ArrayList<String>();
-				List<ArtifactInfo> artifactInfos = serverVersionMap.get(serverNameCombo.getText());
-				for (ArtifactInfo artifactInfo : artifactInfos) {
-					serverVersions.add(artifactInfo.getVersion());
-				}
-				String[] versionsArray = serverVersions.toArray(new String[serverVersions.size()]);
+				
 				serverVersionListBox.removeAll();
-				serverVersionListBox.setItems(versionsArray);
+				if (Messages.SELECT_SERVER.equals(serverNameCombo.getText())) {
+					serverVersionListBox.add(Messages.SELECT_VERSION, 0);
+				} else {
+					List<String> serverVersions = new ArrayList<String>();
+					List<ArtifactInfo> artifactInfos = serverVersionMap.get(serverNameCombo.getText());
+					for (ArtifactInfo artifactInfo : artifactInfos) {
+						serverVersions.add(artifactInfo.getVersion());
+					}
+					String[] versionsArray = serverVersions.toArray(new String[serverVersions.size()]);
+					serverVersionListBox.setItems(versionsArray);
+				}
 				serverVersionListBox.select(0);
 				serverGroup.redraw();
 				super.widgetSelected(e);
 			}
 		});
+	}
+	
+	private void setSelectedServer(ArtifactGroupInfo artifactGroupInfo) {
+		String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
+		String[] items = serverNameCombo.getItems();
+		for (int i = 0; i < items.length; i++) {
+			String id = serverIdMap.get(items[i]);
+			if (artifactGroupId.equals(id)) {
+				serverNameCombo.select(i);
+			}
+		}
 	}
 
 	private void setSelectedSeverVersion(ArtifactGroupInfo artifactGroupInfo) {

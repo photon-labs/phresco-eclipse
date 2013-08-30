@@ -41,11 +41,7 @@ public class DatabaseComponent {
 			List<DownloadInfo> dataBases, String customerId, String techId, String platform, ArtifactGroupInfo artifactGroupInfo) throws PhrescoException {
 		List<String> dbNames = new ArrayList<String>();
 		for (DownloadInfo downloadInfo : dataBases) {
-			if(artifactGroupInfo != null && artifactGroupInfo.getArtifactGroupId().equals(downloadInfo.getId())) {
-				dbNames.add(0, downloadInfo.getName());
-			} else {
-				dbNames.add(downloadInfo.getName());
-			}
+			dbNames.add(downloadInfo.getName());
 			dbIdMap.put(downloadInfo.getName(), downloadInfo.getId());
 			List<ArtifactInfo> versions = downloadInfo.getArtifactGroup().getVersions();
 			dbVersionMap.put(downloadInfo.getName(), versions);
@@ -57,46 +53,68 @@ public class DatabaseComponent {
 			String[] serverNamesArray = dbNames.toArray(new String[dbNames.size()]);
 			dbNameCombo = new Combo(dbGroup, SWT.BORDER | SWT.READ_ONLY);
 			dbNameCombo.setItems(serverNamesArray);
-			dbNameCombo.select(0);
-		}
-		List<String> dbVersions = new ArrayList<String>();
-		List<ArtifactInfo> artifactInfos = dbVersionMap.get(dbNames.get(0));
-		for (ArtifactInfo artifactInfo : artifactInfos) {
-			dbVersionIdMap.put(artifactInfo.getId(), artifactInfo.getVersion());
-			dbVersions.add(artifactInfo.getVersion());
-		}
-		if(CollectionUtils.isNotEmpty(dbVersions)) {
-			Label versionLanel = new Label(dbGroup, SWT.NONE);
-			versionLanel.setText(Messages.VERSIONS);
-			String[] serverVersionsArray = dbVersions.toArray(new String[dbVersions.size()]);
-			dbVersionListBox = new org.eclipse.swt.widgets.List(dbGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
-			dbVersionListBox.setItems(serverVersionsArray);
-			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-			gridData.heightHint = 40;
-			dbVersionListBox.setLayoutData(gridData);
-			if(artifactGroupInfo != null) {
-				setSelectedDbVersion(artifactGroupInfo);
+			dbNameCombo.add(Messages.SELECT_DATABASE, 0);
+			if (artifactGroupInfo != null) {
+				setSelectedDatabase(artifactGroupInfo);
 			} else {
-				dbVersionListBox.select(0);
+				dbNameCombo.select(0);
 			}
+		}
+		
+		List<String> dbVersions = new ArrayList<String>();
+		List<ArtifactInfo> artifactInfos = dbVersionMap.get(dbNameCombo.getText());
+		Label versionLanel = new Label(dbGroup, SWT.NONE);
+		versionLanel.setText(Messages.VERSIONS);
+		
+		dbVersionListBox = new org.eclipse.swt.widgets.List(dbGroup, SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL);
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.heightHint = 40;
+		dbVersionListBox.setLayoutData(gridData);
+		
+		if (CollectionUtils.isNotEmpty(artifactInfos)) {
+			for (ArtifactInfo artifactInfo : artifactInfos) {
+				dbVersionIdMap.put(artifactInfo.getId(), artifactInfo.getVersion());
+				dbVersions.add(artifactInfo.getVersion());
+			}
+			String[] serverVersionsArray = dbVersions.toArray(new String[dbVersions.size()]);
+			dbVersionListBox.setItems(serverVersionsArray);
+			setSelectedDbVersion(artifactGroupInfo);
+		} else {
+			dbVersionListBox.add(Messages.SELECT_VERSION, 0);
+			dbVersionListBox.select(0);
 		}
 		
 		dbNameCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final List<String> dbVersions = new ArrayList<String>();
-				List<ArtifactInfo> artifactInfos = dbVersionMap.get(dbNameCombo.getText());
-				for (ArtifactInfo artifactInfo : artifactInfos) {
-					dbVersions.add(artifactInfo.getVersion());
-				}
-				String[] versionsArray = dbVersions.toArray(new String[dbVersions.size()]);
 				dbVersionListBox.removeAll();
-				dbVersionListBox.setItems(versionsArray);
+				if (Messages.SELECT_DATABASE.equals(dbNameCombo.getText())) {
+					dbVersionListBox.add(Messages.SELECT_VERSION, 0);
+				} else {
+					List<String> dbVersions = new ArrayList<String>();
+					List<ArtifactInfo> artifactInfos = dbVersionMap.get(dbNameCombo.getText());
+					for (ArtifactInfo artifactInfo : artifactInfos) {
+						dbVersions.add(artifactInfo.getVersion());
+					}
+					String[] versionsArray = dbVersions.toArray(new String[dbVersions.size()]);
+					dbVersionListBox.setItems(versionsArray);
+				}
 				dbVersionListBox.select(0);
 				dbGroup.redraw();
 				super.widgetSelected(e);
 			}
 		});
+	}
+	
+	private void setSelectedDatabase(ArtifactGroupInfo artifactGroupInfo) {
+		String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
+		String[] items = dbNameCombo.getItems();
+		for (int i = 0; i < items.length; i++) {
+			String id = dbIdMap.get(items[i]);
+			if (artifactGroupId.equals(id)) {
+				dbNameCombo.select(i);
+			}
+		}
 	}
 	
 	private void setSelectedDbVersion(ArtifactGroupInfo artifactGroupInfo) {
