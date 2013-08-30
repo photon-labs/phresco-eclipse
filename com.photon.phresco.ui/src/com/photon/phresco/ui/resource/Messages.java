@@ -205,7 +205,7 @@ public class Messages extends NLS {
 	public static String PROJECT_CREATION_NAME="Phresco Project";
 	public static String PROJECT_CREATION_DESC="Project Creation Page";
 	public static String TECHNOLOGY_WIZARD_NAME="Technology";
-	public static String TECHNOLOGY_WIZARD_DESC="Technology Selection Page";
+	public static String TECHNOLOGY_WIZARD_DESC="Project Creation Page";
 	public static String PROJECT_BUTTON_NAME="Project name *";
 	public static String PROJECT_NAME_MSG_TEXT="Name of the project";
 	public static String PROJECT_LABEL_CODE="Code";

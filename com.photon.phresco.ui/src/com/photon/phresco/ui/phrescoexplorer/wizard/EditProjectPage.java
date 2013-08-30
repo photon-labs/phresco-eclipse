@@ -379,9 +379,10 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 		Label techLabel = new Label(composite, SWT.NONE);
 		techLabel.setText(Messages.TECHNOLOGY);
 
-		Text techText = new Text(composite, SWT.BORDER | SWT.READ_ONLY);
+		Text techText = new Text(composite, SWT.BORDER);
 		techText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		techText.setText(appInfo.getTechInfo().getName() + Messages.HYPHEN + appInfo.getTechInfo().getVersion());
+		techText.setEnabled(false);
 	}
 
 	
