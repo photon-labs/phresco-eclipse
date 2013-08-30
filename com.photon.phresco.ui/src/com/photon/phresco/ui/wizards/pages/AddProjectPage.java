@@ -156,7 +156,6 @@ public class AddProjectPage extends WizardPage implements IWizardPage, PhrescoCo
 		codeTxt = new Text(basicComposite, SWT.BORDER);
 		codeTxt.setMessage(Messages.PROJECT_CODE_MSG_TEXT);
 		codeTxt.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		codeTxt.setEditable(false);
 		
 		projectTxt.addKeyListener(new KeyListener() {
 			@Override

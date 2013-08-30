@@ -26,11 +26,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -45,7 +42,6 @@ import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.TechnologyInfo;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.ui.PhrescoPlugin;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.componets.AppLayerComponent;
@@ -130,7 +126,6 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 				projectInfo.setDescription(description);
 				projectInfo.setProjectCode(projectCode);
 				projectInfo.setVersion(version);
-				projectInfo.setProjectCode(projectName);
 			}
 			if(wizardPage instanceof TechnologyPage) {
 				TechnologyPage technologyPage = (TechnologyPage) wizardPage;
