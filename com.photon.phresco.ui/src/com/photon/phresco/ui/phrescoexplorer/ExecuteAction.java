@@ -39,7 +39,7 @@ public class ExecuteAction implements PhrescoConstants  {
 
 	public void execute() {
 		 try {
-			 List<String> buildArgCmds = null;
+			 List<String> buildArgCmds = new ArrayList<String>();
 			 if (configurationFile.exists() && configurationFile.length() > 0) {
 				 MojoProcessor processor = new MojoProcessor(configurationFile);
 				 List<Parameter> parameters = processor.getConfiguration(goal).getParameters().getParameter();
@@ -54,6 +54,7 @@ public class ExecuteAction implements PhrescoConstants  {
 			 if(!POM_FILENAME.equals(pomFileName)) {
 				 buildArgCmds.add(pomFileName);
 			 }
+			 buildArgCmds.add(HYPHEN_N);
 			 String workingDirectory = PhrescoUtil.getApplicationHome().toString();
 			 manager.getApplicationProcessor().preBuild(applicationInfo);
 			 BufferedReader performAction = performAction(info, type, buildArgCmds, workingDirectory);

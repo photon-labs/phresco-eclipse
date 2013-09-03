@@ -142,6 +142,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 			String applicationHome = PhrescoUtil.getApplicationHome();
 			List<String> mavenArgCommands = PhrescoUtil.getMavenArgCommands(parameters);
+			mavenArgCommands.add(HYPHEN_N);
 			BufferedInputStream performAction = applicationManager.performAction(projectInfo, ActionType.FUNCTIONAL_TEST, mavenArgCommands, applicationHome);
 
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(performAction));
