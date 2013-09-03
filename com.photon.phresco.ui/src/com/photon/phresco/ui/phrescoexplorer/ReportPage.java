@@ -77,6 +77,9 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		reportDialog.setLayout(layout);
 		reportDialog.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
+		int dialog_height = 130;
+		int comp_height = 10;
+		
 		Composite composite = new Composite(reportDialog, SWT.NONE);
 		GridLayout compLayout = new GridLayout(2, false);
 		composite.setLayout(compLayout);
@@ -91,6 +94,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		reportTypeCombo.setItems(reportItems);
 		reportTypeCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		reportTypeCombo.select(0);
+		dialog_height = dialog_height + comp_height;
 		
 		Label pdfReportNameLabel = new Label(composite, SWT.NONE);
 		pdfReportNameLabel.setText(Messages.PDF_REPORT_NAME);
@@ -99,6 +103,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		pdfReportNameText = new Text(composite, SWT.BORDER);
 		pdfReportNameText.setMessage(Messages.PDF_REPORT_NAME);
 		pdfReportNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		dialog_height = dialog_height + comp_height;
 		
 		Composite buttonComposite = new Composite(reportDialog, SWT.RIGHT);
 		GridLayout buttonLayout = new GridLayout(2, false);
@@ -140,7 +145,7 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 		close.addListener(SWT.Selection, closeListener);
 		
 		int x = reportDialog.getSize().x - 400;
-		int y = reportDialog.getSize().y - 360;
+		int y = dialog_height;
 		
 		reportDialog.setSize(x, y);
 		Point location = new Point(x, y);

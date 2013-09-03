@@ -156,7 +156,8 @@ public class Messages extends NLS {
 	public static String OTHER_CREDENTIALS="Other Credentials";
 	public static String USER_NAME="*Username";
 	public static String USER_PWD="*Password";
-	public static String REVISION="*Revision";
+	public static String REQ_REVISION="*Revision";
+	public static String REVISION = "Revision";
 	public static String HEAD_REVISION="HeadRevision";
 	public static String TEST_CHECKOUT="Test Checkout";
 	public static String LOGIN_ID="User Id";

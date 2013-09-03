@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -82,16 +83,17 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 			return;
 		}
 		
-		
 		IPreferenceStore prefStore = PhrescoPlugin.getDefault().getPreferenceStore();
 		
 		if (prefStore != null) {
 			loginUserName = prefStore.getString(USER_ID);
 			loginPassword = prefStore.getString(PASSWORD);
 		}
+		Composite parentComposite = new Composite(parent, SWT.NONE);
+		parentComposite.setLayout(new GridLayout(1, false));
+		parentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-        Composite composite = new Composite(parent, 0);
-        setControl(composite);
+        Composite composite = new Composite(parentComposite, 0);
         GridLayout layout = new GridLayout(2, false);
         layout.marginLeft = 25;
         layout.horizontalSpacing = 5;
@@ -134,18 +136,38 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         password.setText(loginPassword);
         password.setLayoutData(new GridData(160,15));
         
-		final Label lblHeadRevision = new Label(composite, SWT.NONE);
-		lblHeadRevision.setText(Messages.REVISION);
-		lblHeadRevision.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
-		
-		headRevisionButton = new Button(composite, SWT.CHECK);
+        Composite revisionComposite = new Composite(parentComposite, SWT.NONE);
+        GridLayout revisionLayout = new GridLayout(1, false);
+        revisionLayout.marginLeft = 25;
+        revisionLayout.horizontalSpacing = 5;
+        revisionLayout.verticalSpacing = 10;
+        revisionComposite.setLayout(revisionLayout);
+        revisionComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+        final Group revisionGroup = new Group(revisionComposite, SWT.NONE);
+        revisionGroup.setLayout(new GridLayout(3, false));
+		revisionGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        revisionGroup.setText(Messages.REVISION);
+        
+		headRevisionButton = new Button(revisionGroup, SWT.RADIO);
 		headRevisionButton.setText(Messages.HEAD_REVISION);
 		headRevisionButton.setLayoutData(new GridData(80,13));
+		headRevisionButton.setSelection(true);
 		
-		final Label revisionLabel = new Label(composite, SWT.NONE);
-		revisionText = new Text(composite, SWT.BORDER);
+		final Button revisionCombo = new Button(revisionGroup, SWT.RADIO);
+		revisionCombo.setText(Messages.REVISION);
+		
+		revisionText = new Text(revisionGroup, SWT.BORDER);
 		revisionText.setLayoutData(new GridData(160,13));
+		revisionText.setEnabled(false);
 		
+		composite = new Composite(parentComposite, 0);
+        GridLayout gridLayout = new GridLayout(2, false);
+        gridLayout.marginLeft = 25;
+        gridLayout.horizontalSpacing = 5;
+        gridLayout.verticalSpacing = 10;
+        composite.setLayout(gridLayout);
+        
 		final Label lblTestCheckout = new Label(composite, SWT.NONE);
 		lblTestCheckout.setText(Messages.TEST_CHECKOUT);
 		testCheckOutButton = new Button(composite, SWT.CHECK);
@@ -181,18 +203,31 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
         testRepoPasswordText.setEnabled(false);
         testRepoPasswordText.setLayoutData(new GridData(160,15));
 		
-        final Label testRepoLblHeadRevision = new Label(composite, SWT.NONE);
-		testRepoLblHeadRevision.setText(Messages.REVISION);
-		testRepoLblHeadRevision.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+        Composite testRevisionComposite = new Composite(parentComposite, SWT.NONE);
+        GridLayout testRevisionLayout = new GridLayout(1, false);
+        testRevisionLayout.marginLeft = 25;
+        testRevisionLayout.horizontalSpacing = 5;
+        testRevisionLayout.verticalSpacing = 10;
+        testRevisionComposite.setLayout(testRevisionLayout);
+        testRevisionComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+        final Group testRevisionGroup = new Group(testRevisionComposite, SWT.NONE);
+        testRevisionGroup.setLayout(new GridLayout(3, false));
+        testRevisionGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        testRevisionGroup.setText(Messages.REVISION);
+        
+        repoUrlHeadRevisionButton = new Button(testRevisionGroup, SWT.RADIO);
+        repoUrlHeadRevisionButton.setText(Messages.HEAD_REVISION);
+        repoUrlHeadRevisionButton.setLayoutData(new GridData(80,13));
+        repoUrlHeadRevisionButton.setSelection(true);
 		
-		repoUrlHeadRevisionButton = new Button(composite, SWT.CHECK);
-		repoUrlHeadRevisionButton.setText(Messages.HEAD_REVISION);
-		repoUrlHeadRevisionButton.setLayoutData(new GridData(80,13));
+		Button testRevisionButton = new Button(testRevisionGroup, SWT.RADIO);
+		testRevisionButton.setText(Messages.REVISION);
 		
-		new Label(composite, SWT.NONE);
-		testRepoRevisionText = new Text(composite, SWT.BORDER);
+		testRepoRevisionText = new Text(testRevisionGroup, SWT.BORDER);
 		testRepoRevisionText.setLayoutData(new GridData(160,13));
-		
+		testRepoRevisionText.setEnabled(false);
+        
 		testCheckOutButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -205,7 +240,7 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					testRepoUsernameText.setVisible(true);
 					testRepopasswordLabel.setVisible(true);
 					testRepoPasswordText.setVisible(true);
-					testRepoLblHeadRevision.setVisible(true);
+					testRevisionGroup.setVisible(true);
 					repoUrlHeadRevisionButton.setVisible(true);
 					testRepoRevisionText.setVisible(true);
 				} else {
@@ -217,8 +252,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 					testRepoUsernameText.setVisible(false);
 					testRepopasswordLabel.setVisible(false);
 					testRepoPasswordText.setVisible(false);
-					testRepoLblHeadRevision.setVisible(false);
 					repoUrlHeadRevisionButton.setVisible(false);
+					testRevisionGroup.setVisible(false);
 					testRepoRevisionText.setVisible(false);
 				}
 				super.widgetSelected(e);
@@ -226,9 +261,10 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		});
 		// To hide for default selection scm type Git
 		
-		lblHeadRevision.setVisible(false);
+//		lblHeadRevision.setVisible(false);
+		revisionGroup.setVisible(false);
 		headRevisionButton.setVisible(false);
-		revisionLabel.setVisible(false);
+		revisionCombo.setVisible(false);
 		revisionText.setVisible(false);
 		lblTestCheckout.setVisible(false);
 		testCheckOutButton.setVisible(false);
@@ -244,9 +280,9 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		testRepoUsernameText.setVisible(false);
 		testRepopasswordLabel.setVisible(false);
 		testRepoPasswordText.setVisible(false);
-		testRepoLblHeadRevision.setVisible(false);
 		repoUrlHeadRevisionButton.setVisible(false);
 		testRepoRevisionText.setVisible(false);
+		testRevisionGroup.setVisible(false);
 		
 		// To handle based on SCM type selection
 		gitRadio.addSelectionListener(new SelectionAdapter() {
@@ -255,9 +291,10 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		        // Handle the selection event
 		    	boolean selection = gitRadio.getSelection();
 		    	if (selection) {
-		    		lblHeadRevision.setVisible(false);
+//		    		lblHeadRevision.setVisible(false);
+		    		revisionGroup.setVisible(false);
 		    		headRevisionButton.setVisible(false);
-		    		revisionLabel.setVisible(false);
+		    		revisionCombo.setVisible(false);
 		    		revisionText.setVisible(false);
 		    		lblTestCheckout.setVisible(false);
 		    		testCheckOutButton.setVisible(false);
@@ -271,13 +308,14 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 		    		testRepoUsernameText.setVisible(false);
 		    		testRepopasswordLabel.setVisible(false);
 		    		testRepoPasswordText.setVisible(false);
-		    		testRepoLblHeadRevision.setVisible(false);
 		    		repoUrlHeadRevisionButton.setVisible(false);
+		    		testRevisionGroup.setVisible(false);
 		    		testRepoRevisionText.setVisible(false);
 		    	} else {
-		    		lblHeadRevision.setVisible(true);
+//		    		lblHeadRevision.setVisible(true);
+		    		revisionGroup.setVisible(true);
 		    		headRevisionButton.setVisible(true);
-		    		revisionLabel.setVisible(true);
+		    		revisionCombo.setVisible(true);
 		    		revisionText.setVisible(true);
 		    		lblTestCheckout.setVisible(true);
 		    		testCheckOutButton.setVisible(true);
@@ -292,8 +330,8 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 						testRepoUsernameText.setVisible(true);
 						testRepopasswordLabel.setVisible(true);
 						testRepoPasswordText.setVisible(true);
-						testRepoLblHeadRevision.setVisible(true);
 						repoUrlHeadRevisionButton.setVisible(true);
+						testRevisionGroup.setVisible(true);
 						testRepoRevisionText.setVisible(true);
 		    		}
 		    	}
@@ -352,6 +390,6 @@ public class ImportFromSCMPage extends WizardPage implements PhrescoConstants {
 				}
 		    }
 		}); 
-		
+		setControl(parentComposite);
 	}
 }

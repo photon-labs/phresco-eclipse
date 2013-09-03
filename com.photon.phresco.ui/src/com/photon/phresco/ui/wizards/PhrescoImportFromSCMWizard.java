@@ -75,19 +75,23 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 							String scmUrl = scmPage.repoURLText.getText();
 							String username = scmPage.userName.getText();
 							String password = scmPage.password.getText();
-							String revision = scmPage.revisionText.getText();
+							boolean headRevision = scmPage.headRevisionButton.getSelection();
+							String revision = "";
 							String testRepoUsername = scmPage.testRepoUsernameText.getText();
 							String testRepoPassword = scmPage.testRepoPasswordText.getText();
 							String testRepoUrl = scmPage.testRepoUrlText.getText();
 							boolean selection = scmPage.repoUrlHeadRevisionButton.getSelection();
 							String testRepoRevision = "";
-							
+							if(headRevision) {
+								revision = HEAD_REVISION;
+							} else {
+								revision = scmPage.revisionText.getText();
+							}
 							if(selection) {
 								testRepoRevision = HEAD_REVISION;
 							} else {
 								testRepoRevision = scmPage.testRepoRevisionText.getText();
 							}
-							
 							String projectHome = PhrescoUtil.getProjectHome();
 							ApplicationInfo importedProject = SCMManagerUtil.importProject(scmType, scmUrl, username, password, STR_EMPTY, revision, projectHome);
 							

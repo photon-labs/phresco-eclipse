@@ -74,14 +74,14 @@ public class UpdateWizardPage extends WizardPage implements PhrescoConstants {
 		final Group revisionGroup = new Group(parentComposite, SWT.NONE);
 		revisionGroup.setLayout(new GridLayout(3, false));
 		revisionGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		revisionGroup.setText("Revision");
+		revisionGroup.setText(Messages.REVISION);
 
 		headRevision = new Button(revisionGroup, SWT.RADIO);
-		headRevision.setText("Head Revision");
+		headRevision.setText(Messages.HEAD_REVISION);
 		headRevision.setSelection(true);
 
 		revision = new Button(revisionGroup, SWT.RADIO);
-		revision.setText("Revision");
+		revision.setText(Messages.REVISION);
 
 		revisionText = new Text(revisionGroup, SWT.BORDER);
 		revisionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));

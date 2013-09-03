@@ -21,6 +21,7 @@ package com.photon.phresco.ui.phrescoexplorer.wizard;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +31,9 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
@@ -38,6 +42,8 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -51,6 +57,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -59,6 +67,7 @@ import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
+import com.photon.phresco.commons.model.ArtifactElement;
 import com.photon.phresco.commons.model.ArtifactGroup;
 import com.photon.phresco.commons.model.ArtifactInfo;
 import com.photon.phresco.commons.model.CoreOption;
@@ -90,102 +99,103 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	private static List<ArtifactGroup> artifactGroupList = new ArrayList<ArtifactGroup>();
 	private static Map<Button, Object> depVersionMap = new HashMap<Button, Object>();
 	private Label selectedCountLabel = null;
-	
+
 	private static List<Configuration> configurations;
 	private static ApplicationProcessor applicationProcessor;
 	private static String featureName;
-	
+
 	public AbstractFeatureWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 	}
-	
+
 	public void renderFeatureTable(final Composite composite, String featureName, List<ArtifactGroup> features) {
-		
+
 		Group jsLibGroups = new Group(composite, SWT.SHADOW_ETCHED_IN);
-		
+
 		jsLibGroups.setText(featureName);
 		GridLayout mainLayout = new GridLayout(1, false);
 		jsLibGroups.setLayout(mainLayout);
 		jsLibGroups.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		
+
 		selectedCountLabel = new Label(jsLibGroups, SWT.NONE);
-		
+
 		renderTable(jsLibGroups, features);
-		
+
 		jsLibGroups.setBounds(0, 5, 300, 175);
-	    jsLibGroups.pack();
-		
+		jsLibGroups.pack();
+
 	}
-	
+
 	int totalSize;
 	int selectedCount = 0;
-	
+
 	private void setSelectedCountSize() {
 		selectedCountLabel.setText("  Selected (" + selectedCount+"/"+totalSize+")");
 	}
-	
+
 	private Table renderTable(Group jsLibGroups, final List<ArtifactGroup> features) {
+		final ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 		totalSize = features.size();
-		
+
 		Composite cmp = new Composite(jsLibGroups, SWT.None);
 		final ScrolledComposite scrolledComposite = new ScrolledComposite(cmp, SWT.V_SCROLL);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		scrolledComposite.setAlwaysShowScrollBars(false);
 		scrolledComposite.setBounds(5, 5, 500, 350);
-		
+
 		Table table = new Table(scrolledComposite, SWT.BORDER | SWT.MULTI);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		table.setLayoutData(new GridData());
-		
+
 		table.setBounds(0, 0, 490, 320);
+
+		TableColumn checkBoxColumn = new TableColumn(table, SWT.LEFT, 0);
+		checkBoxColumn.setText("");
+		checkBoxColumn.setWidth(25);
+
+		TableColumn nameColumn = new TableColumn(table, SWT.LEFT, 1);
+		nameColumn.setText("Name");
+		nameColumn.setWidth(160);
+
+		TableColumn versionColumn = new TableColumn(table, SWT.LEFT, 2);
+		versionColumn.setText("Version");
+		versionColumn.setWidth(120);
 		
-        TableColumn checkBoxColumn = new TableColumn(table, SWT.LEFT, 0);
-        checkBoxColumn.setText("");
-        checkBoxColumn.setWidth(25);
-        
-	    TableColumn nameColumn = new TableColumn(table, SWT.LEFT, 1);
-        nameColumn.setText("Name");
-        nameColumn.setWidth(140);
-        
-        TableColumn descColumn = new TableColumn(table, SWT.LEFT, 2);
-        descColumn.setText("Description");
-        descColumn.setWidth(160);
-        
-        TableColumn versionColumn = new TableColumn(table, SWT.LEFT, 3);
-        versionColumn.setText("Version");
-        versionColumn.setWidth(120);
-        
-        TableColumn config = new TableColumn(table, SWT.LEFT, 4);
-        config.setText("");
-        config.setWidth(120);
-        
-        for (int i = 0; i < features.size(); i++) {
-            new TableItem(table, SWT.NONE);
-        }
-        
-	    TableItem[] items = table.getItems();
-	    
-	    int i = 0;
-	    List<SelectedFeature> selectedFeatures = null;
+		TableColumn descColumn = new TableColumn(table, SWT.LEFT, 3);
+		descColumn.setText("Description");
+		descColumn.setWidth(80);
+
+		TableColumn config = new TableColumn(table, SWT.LEFT, 4);
+		config.setText("");
+		config.setWidth(120);
+
+		for (int i = 0; i < features.size(); i++) {
+			new TableItem(table, SWT.NONE);
+		}
+
+		TableItem[] items = table.getItems();
+
+		int i = 0;
+		List<SelectedFeature> selectedFeatures = null;
 		try {
 			selectedFeatures = getSelectedFeatures();
 		} catch (PhrescoException e1) {
 			PhrescoDialog.exceptionDialog(getShell(), e1);
 		}
-		
-	    
-	    for (final ArtifactGroup artifactGroup : features) {
-	    	artifactGroupList.add(artifactGroup);
-	    	final TableItem tableItem = items[i];
-	    	TableEditor editor = new TableEditor(table);
+
+
+		for (final ArtifactGroup artifactGroup : features) {
+			artifactGroupList.add(artifactGroup);
+			final TableItem tableItem = items[i];
+			TableEditor editor = new TableEditor(table);
 			final Button checkButton = new Button(table, SWT.CHECK);
 			depMap.put(artifactGroup.getId(), checkButton);
 			checkButton.pack();
 			editor.minimumWidth = checkButton.getSize().x;
 			editor.horizontalAlignment = SWT.LEFT;
 			editor.setEditor(checkButton, tableItem, 0);
-			
+
 			int item_height = 17;
 			Image fake = new Image(table.getDisplay(), 1, item_height);
 			tableItem.setImage(0, fake); 
@@ -203,174 +213,188 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 					}
 				}
 			}
-			  
+
 			editor = new TableEditor(table);
 			Text text = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
 			text.setText(artifactGroup.getDisplayName());
 			text.setToolTipText(artifactGroup.getDisplayName());
 			editor.grabHorizontal = true;
 			editor.setEditor(text, tableItem, 1);
-			  
-			editor = new TableEditor(table);
-			text = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
-			if (artifactGroup.getDescription() != null) {
-				text.setText(artifactGroup.getDescription());
-				text.setToolTipText(artifactGroup.getDescription());
-			} else {
-				text.setText("");
-			}
-			
-			editor.grabHorizontal = true;
-			editor.setEditor(text, tableItem, 2);
 
 			editor = new TableEditor(table);
-	        List<ArtifactInfo> versions = artifactGroup.getVersions();
-	        
-	        final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
-	        final Text versionText = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
-	        if (versions.size() > 1) {
-	        	int selectedVersion = 0;
-	        	int j = 0;
-		        for (ArtifactInfo artifactInfo : versions) {
-		        	combo.add(artifactInfo.getVersion());
-		        	combo.setData(artifactInfo.getVersion(), artifactInfo);
-		        	if(StringUtils.isNotEmpty(versionID) && versionID.equals(artifactInfo.getId())) {
-		        		selectedVersion = j;
-		        	}
-		        	if(isDefaultFeature(artifactInfo)) {
-		        		checkButton.setEnabled(false);
-		        		checkButton.setSelection(true);
-		        	}
-		        	j++;
-				}
-		        combo.select(selectedVersion);
-				editor.grabHorizontal = true;
-				editor.setEditor(combo, tableItem, 3);
-				depVersionMap.put(checkButton, combo);
-	        } else {
-	        	versionText.setText(versions.get(0).getVersion());
-	        	versionText.setToolTipText(versions.get(0).getVersion());
-				editor.grabHorizontal = true;
-				editor.setEditor(versionText, tableItem, 3);
-				depVersionMap.put(checkButton, versionText);
-				if(isDefaultFeature(versions.get(0))) {
-	        		checkButton.setEnabled(false);
-	        		checkButton.setSelection(true);
-	        	}
-	        }
-	        
-	        componentConfiuration(table, artifactGroup, tableItem);	        
+			Label label = new Label(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY | SWT.CENTER);
 			
-	        combo.addSelectionListener(new SelectionAdapter() {
-			    @Override
-			    public void widgetSelected(SelectionEvent e) {
-			    	String selectedComboVersion = combo.getItem(combo.getSelectionIndex());
-			    	if (checkButton.getSelection()) {
-			            selectedArtifactGroup.put(artifactGroup, selectedComboVersion);
-			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
-		    			selectedArtifactGroup.remove(artifactGroup);
-			        }
-			    	
-			    	ArtifactInfo artifactInfo = (ArtifactInfo) combo.getData(selectedComboVersion);
-			    	if(isDefaultFeature(artifactInfo)) {
-		        		checkButton.setEnabled(false);
-		        		checkButton.setSelection(true);
-		        	} else {
-		        		checkButton.setEnabled(true);
-		        	}
-			    }
+			Bundle bundle = FrameworkUtil.getBundle(AbstractFeatureWizardPage.class);
+			URL url = FileLocator.find(bundle, new Path(ICONS + File.separatorChar + IMG_DESC_GIF), null);
+			ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(url);
+			final Image image = imageDescriptor.createImage();
+			label.setImage(image);
+			editor.grabHorizontal = true;
+			editor.setEditor(label, tableItem, 3);
+			label.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseDown(MouseEvent e) {
+					try {
+						ArtifactElement message = serviceManager.getArtifactDescription(artifactGroup.getId());
+						String description = message.getDescription();
+						String[] ok = {"Ok"};
+						MessageDialog dialog = new MessageDialog(getShell(), "Description", null, description, 2, ok, 1);
+						dialog.open();
+					} catch (PhrescoException e1) {
+						PhrescoDialog.exceptionDialog(getShell(), e1);
+					}
+					super.mouseDown(e);
+				}
 			});
 			
+			editor = new TableEditor(table);
+			List<ArtifactInfo> versions = artifactGroup.getVersions();
+
+			final CCombo combo = new CCombo(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
+			final Text versionText = new Text(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY);
+			if (versions.size() > 1) {
+				int selectedVersion = 0;
+				int j = 0;
+				for (ArtifactInfo artifactInfo : versions) {
+					combo.add(artifactInfo.getVersion());
+					combo.setData(artifactInfo.getVersion(), artifactInfo);
+					if(StringUtils.isNotEmpty(versionID) && versionID.equals(artifactInfo.getId())) {
+						selectedVersion = j;
+					}
+					if(isDefaultFeature(artifactInfo)) {
+						checkButton.setEnabled(false);
+						checkButton.setSelection(true);
+					}
+					j++;
+				}
+				combo.select(selectedVersion);
+				editor.grabHorizontal = true;
+				editor.setEditor(combo, tableItem, 2);
+				depVersionMap.put(checkButton, combo);
+			} else {
+				versionText.setText(versions.get(0).getVersion());
+				versionText.setToolTipText(versions.get(0).getVersion());
+				editor.grabHorizontal = true;
+				editor.setEditor(versionText, tableItem, 2);
+				depVersionMap.put(checkButton, versionText);
+				if(isDefaultFeature(versions.get(0))) {
+					checkButton.setEnabled(false);
+					checkButton.setSelection(true);
+				}
+			}
+
+			componentConfiuration(table, artifactGroup, tableItem);	        
+
+			combo.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					String selectedComboVersion = combo.getItem(combo.getSelectionIndex());
+					if (checkButton.getSelection()) {
+						selectedArtifactGroup.put(artifactGroup, selectedComboVersion);
+					} else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+						selectedArtifactGroup.remove(artifactGroup);
+					}
+
+					ArtifactInfo artifactInfo = (ArtifactInfo) combo.getData(selectedComboVersion);
+					if(isDefaultFeature(artifactInfo)) {
+						checkButton.setEnabled(false);
+						checkButton.setSelection(true);
+					} else {
+						checkButton.setEnabled(true);
+					}
+				}
+			});
+
 			String selectedVersion = versionText.getText();
-	    	
-	    	if(StringUtils.isEmpty(selectedVersion)) {
-	    		selectedVersion = combo.getText();
-        	}
-	    	
+
+			if(StringUtils.isEmpty(selectedVersion)) {
+				selectedVersion = combo.getText();
+			}
+
 			if (checkButton.getSelection()) {
-	            selectedArtifactGroup.put(artifactGroup, selectedVersion);
-	        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
-    			selectedArtifactGroup.remove(artifactGroup);
-	        }
-			
+				selectedArtifactGroup.put(artifactGroup, selectedVersion);
+			} else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+				selectedArtifactGroup.remove(artifactGroup);
+			}
+
 			checkButton.addSelectionListener(new SelectionAdapter() {
-			    @Override
-			    public void widgetSelected(SelectionEvent e) {
-		        	String selectedVersion = versionText.getText();
-		        	if(StringUtils.isEmpty(selectedVersion)) {
-		        		selectedVersion = combo.getText();
-		        	}
-		        	boolean selection = checkButton.getSelection();
-		        	if (selection) {
-		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
-		        		for (ArtifactInfo artifactInfo : artifactInfos) {
-				        	selectDependency(artifactInfo);
-				        	
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					String selectedVersion = versionText.getText();
+					if(StringUtils.isEmpty(selectedVersion)) {
+						selectedVersion = combo.getText();
+					}
+					boolean selection = checkButton.getSelection();
+					if (selection) {
+						List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
+						for (ArtifactInfo artifactInfo : artifactInfos) {
+							selectDependency(artifactInfo);
+
 							selectedCount++;
 							setSelectedCountSize();
 						}
-		        	}  else {
-		        		List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
-		        		for (ArtifactInfo artifactInfo : artifactInfos) {
-				        	deSelectDependency(artifactInfo);
-				        	
+					}  else {
+						List<ArtifactInfo> artifactInfos = artifactGroup.getVersions();
+						for (ArtifactInfo artifactInfo : artifactInfos) {
+							deSelectDependency(artifactInfo);
+
 							selectedCount--;
 							setSelectedCountSize();
 						}
-		        	}
-		        	
-			        if (checkButton.getSelection()) {
-			            selectedArtifactGroup.put(artifactGroup, selectedVersion);
-			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
-            			selectedArtifactGroup.remove(artifactGroup);
-			        }
-			    }
+					}
+
+					if (checkButton.getSelection()) {
+						selectedArtifactGroup.put(artifactGroup, selectedVersion);
+					} else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+						selectedArtifactGroup.remove(artifactGroup);
+					}
+				}
 
 			});
-			
-	    	i++;
-	    }
-	    
-	    if (selectedCount == 0) {
-	    	setSelectedCountSize();
-	    }
-	    
-	    return table;
+
+			i++;
+		}
+
+		if (selectedCount == 0) {
+			setSelectedCountSize();
+		}
+
+		return table;
 	}
 
 	public abstract void renderPage();
-	
+
 	public Map<ArtifactGroup, String> getSelectedCheckBoxRows() {
 		return selectedArtifactGroup;
 	}
-	
+
 	public List<SelectedFeature> getSelectedItems() {
 		Map<ArtifactGroup, String> selectedCheckBoxRows = getSelectedCheckBoxRows();
-		
+
 		List<SelectedFeature> selectedFeatures = new ArrayList<SelectedFeature>();
 		Iterator entries = selectedCheckBoxRows.entrySet().iterator();
 		while (entries.hasNext()) {
 			SelectedFeature selectedFeature = new SelectedFeature();
-		    Map.Entry entry = (Map.Entry) entries.next();
-		    ArtifactGroup key = (ArtifactGroup)entry.getKey();
-		    
-		    String value = (String)entry.getValue();
-		    selectedFeature.setModuleId(key.getId());
-		    selectedFeature.setType(key.getType().name());
-		    List<ArtifactInfo> versions = key.getVersions();
-		    for (ArtifactInfo artifactInfo : versions) {
+			Map.Entry entry = (Map.Entry) entries.next();
+			ArtifactGroup key = (ArtifactGroup)entry.getKey();
+
+			String value = (String)entry.getValue();
+			selectedFeature.setModuleId(key.getId());
+			selectedFeature.setType(key.getType().name());
+			List<ArtifactInfo> versions = key.getVersions();
+			for (ArtifactInfo artifactInfo : versions) {
 				if(artifactInfo.getVersion().equals(value)) {
 					selectedFeature.setVersionID(artifactInfo.getId());
 				}
 			}
-		    
-		    selectedFeatures.add(selectedFeature);
+
+			selectedFeatures.add(selectedFeature);
 		}
 		return selectedFeatures;
 	}
-	
+
 	private List<SelectedFeature> getSelectedFeatures() throws PhrescoException {
-		
+
 		List<SelectedFeature> listFeatures = new ArrayList<SelectedFeature>();
 		try {
 			ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
@@ -405,10 +429,10 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		} catch (PhrescoException e) {
 			throw new PhrescoException(e);
 		}
-		
+
 		return listFeatures;
 	}
-	
+
 	/**
 	 * Creates the artifact information.
 	 *
@@ -457,7 +481,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 
 		return slctFeature;
 	}
-	
+
 	/**
 	 * Gets the scope.
 	 *
@@ -491,131 +515,142 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			}
 		}
 	}
-	
+
 	private void selectDependency(ArtifactInfo artifactInfo) {
 		List<String> dependentIds = artifactInfo.getDependencyIds();
-    	if (CollectionUtils.isNotEmpty(dependentIds)) {
-        	for (String depId : dependentIds) {
-        		for (final ArtifactGroup artifactGroup : artifactGroupList) {
-        			List<ArtifactInfo> versions = artifactGroup.getVersions();
-        			if (CollectionUtils.isNotEmpty(versions)) {
-        				for (ArtifactInfo artInfo : versions) {
+		if (CollectionUtils.isNotEmpty(dependentIds)) {
+			for (String depId : dependentIds) {
+				for (final ArtifactGroup artifactGroup : artifactGroupList) {
+					List<ArtifactInfo> versions = artifactGroup.getVersions();
+					if (CollectionUtils.isNotEmpty(versions)) {
+						for (ArtifactInfo artInfo : versions) {
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
-		        				button.setSelection(true);
-		        				button.setEnabled(false);
-		        				Object object = depVersionMap.get(button);
-		        				String selectedVersion = "";
-		        				if(object instanceof CCombo) {
-		        					CCombo combo = (CCombo) object;
-		        					combo.removeAll();
-		        					combo.add(artInfo.getVersion());
-		        					combo.select(0);
-		        					selectedVersion = combo.getText();
-		        				} else if(object instanceof Text) {
-		        					Text text = (Text) object;
-		        					text.setText(artInfo.getVersion());
-		        					selectedVersion = text.getText();
-		        				}
-		        				if (button.getSelection()) {
-		    			            selectedArtifactGroup.put(artifactGroup, selectedVersion);
-		    			        } else if (selectedArtifactGroup.containsKey(artifactGroup)) {
-		                			selectedArtifactGroup.remove(artifactGroup);
-		    			        }
+								button.setSelection(true);
+								button.setEnabled(false);
+								Object object = depVersionMap.get(button);
+								String selectedVersion = "";
+								if(object instanceof CCombo) {
+									CCombo combo = (CCombo) object;
+									combo.removeAll();
+									combo.add(artInfo.getVersion());
+									combo.select(0);
+									selectedVersion = combo.getText();
+								} else if(object instanceof Text) {
+									Text text = (Text) object;
+									text.setText(artInfo.getVersion());
+									selectedVersion = text.getText();
+								}
+								if (button.getSelection()) {
+									selectedArtifactGroup.put(artifactGroup, selectedVersion);
+								} else if (selectedArtifactGroup.containsKey(artifactGroup)) {
+									selectedArtifactGroup.remove(artifactGroup);
+								}
 								selectedCount++;
 								setSelectedCountSize();
 								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
-	        						selectDependency(artInfo);
-	        					}
+									selectDependency(artInfo);
+								}
 							} 
 						}
-        			}
-        		}
-        	}
-    	}
+					}
+				}
+			}
+		}
 	}
-	
+
 	private void deSelectDependency(ArtifactInfo artifactInfo) {
 		List<String> dependentIds = artifactInfo.getDependencyIds();
-    	if (CollectionUtils.isNotEmpty(dependentIds)) {
-        	for (String depId : dependentIds) {
-        		for (final ArtifactGroup artifactGroup : artifactGroupList) {
-        			List<ArtifactInfo> versions = artifactGroup.getVersions();
-        			if (CollectionUtils.isNotEmpty(versions)) {
-        				for (ArtifactInfo artInfo : versions) {
+		if (CollectionUtils.isNotEmpty(dependentIds)) {
+			for (String depId : dependentIds) {
+				for (final ArtifactGroup artifactGroup : artifactGroupList) {
+					List<ArtifactInfo> versions = artifactGroup.getVersions();
+					if (CollectionUtils.isNotEmpty(versions)) {
+						for (ArtifactInfo artInfo : versions) {
 							if (artInfo.getId().equalsIgnoreCase(depId)) {
 								Button button = (Button) depMap.get(artifactGroup.getId());
-		        				button.setSelection(false);
-		        				button.setEnabled(true);
+								button.setSelection(false);
+								button.setEnabled(true);
 								selectedCount--;
 								setSelectedCountSize();
 								if(CollectionUtils.isNotEmpty(artInfo.getDependencyIds())) {
 									deSelectDependency(artInfo);
-	        					}
+								}
 							} 
 						}
-        			}
-        		}
-        	}
-    	}
+					}
+				}
+			}
+		}
 	}
-	
+
 	private void componentConfiuration(final Table table, final ArtifactGroup artifactGroup, final TableItem tableItem) {
 		TableEditor editor;
 		try {
 			final ApplicationInfo appInfo = PhrescoUtil.getApplicationInfo();
 			String techId = appInfo.getTechInfo().getId();
-			  List<CoreOption> appliesTo = artifactGroup.getAppliesTo();
-				for (CoreOption coreOption : appliesTo) {
-					if(coreOption.getTechId().equals(techId) && !artifactGroup.getPackaging().equals("jar")) {
-						editor = new TableEditor(table);
-						Button gearIcon = new Button(table, SWT.PUSH);
-						gearIcon.setText("configure");
-						editor.grabHorizontal =  true;
-						editor.setEditor(gearIcon, tableItem, 4);
-						gearIcon.addSelectionListener(new SelectionAdapter() {
-							
-							@Override
-							public void widgetSelected(SelectionEvent e) {
-								String appHandlerFile = PhrescoUtil.getApplicationHome() + File.separatorChar + DOT_PHRESCO_FOLDER + File.separatorChar + APPLICATION_HANDLER_INFO_FILE;
-								try {
-									MojoProcessor mojoProcessor = new MojoProcessor(new File(appHandlerFile));
-									ApplicationHandler applicationHandler = mojoProcessor.getApplicationHandler();
-									List<ArtifactGroup> artifactGroups = setArtifactGroup(applicationHandler);
-									String customerId = PhrescoUtil.getCustomerId();
-									ServiceManager serviceManager = PhrescoUtil.getServiceManager();
-									Customer customer = serviceManager.getCustomer(customerId);
-									RepoInfo repoInfo = customer.getRepoInfo();
-									// dynamic class loader
-									PhrescoDynamicLoader dynamicLoader = new PhrescoDynamicLoader(repoInfo, artifactGroups);
-									applicationProcessor = dynamicLoader.getApplicationProcessor(applicationHandler.getClazz());
-									featureName = artifactGroup.getName();
-									
-									configurations = applicationProcessor.preFeatureConfiguration(appInfo, featureName);
-									if (CollectionUtils.isEmpty(configurations)) {
-										PhrescoDialog.messageDialog(getShell(), "Configurations not available");
-										return;
-									}
-									final WizardComposite wizardComposite = new WizardComposite(table.getParent());
-									BusyIndicator.showWhile(null, new Runnable() {
-										public void run() {
-											WizardDialog wizardControl = wizardComposite.getWizardControl(new ComponentConfigWizard());
-											wizardControl.open();
-										}
-									});
-								} catch (PhrescoException e1) {
-									PhrescoDialog.exceptionDialog(getShell(), e1);
+			List<CoreOption> appliesTo = artifactGroup.getAppliesTo();
+			for (CoreOption coreOption : appliesTo) {
+				if (coreOption.getTechId().equals(techId) && !coreOption.isCore() && !artifactGroup.getType().equals(REQ_JAVASCRIPT_TYPE_MODULE) && artifactGroup.getPackaging().equalsIgnoreCase(ZIP_FILE)) {
+					editor = new TableEditor(table);
+					Label label = new Label(table, SWT.NONE | SWT.BORDER | SWT.READ_ONLY | SWT.CENTER);
+					Bundle bundle = FrameworkUtil.getBundle(AbstractFeatureWizardPage.class);
+					URL url = FileLocator.find(bundle, new Path(ICONS + File.separatorChar  + IMG_SETTINGS_GIF), null);
+					ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(url);
+					final Image image = imageDescriptor.createImage();
+					label.setImage(image);
+					editor.grabHorizontal =  true;
+					editor.setEditor(label, tableItem, 4);
+					
+					label.addMouseListener(new MouseAdapter() {
+						
+						@Override
+						public void mouseDown(MouseEvent e) {
+							String appHandlerFile = PhrescoUtil.getApplicationHome() + File.separatorChar + DOT_PHRESCO_FOLDER + File.separatorChar + APPLICATION_HANDLER_INFO_FILE;
+							try {
+								MojoProcessor mojoProcessor = new MojoProcessor(new File(appHandlerFile));
+								ApplicationHandler applicationHandler = mojoProcessor.getApplicationHandler();
+								List<ArtifactGroup> artifactGroups = setArtifactGroup(applicationHandler);
+								String customerId = PhrescoUtil.getCustomerId();
+								ServiceManager serviceManager = PhrescoUtil.getServiceManager();
+								Customer customer = serviceManager.getCustomer(customerId);
+								RepoInfo repoInfo = customer.getRepoInfo();
+								// dynamic class loader
+								PhrescoDynamicLoader dynamicLoader = new PhrescoDynamicLoader(repoInfo, artifactGroups);
+								applicationProcessor = dynamicLoader.getApplicationProcessor(applicationHandler.getClazz());
+								featureName = artifactGroup.getName();
+
+								configurations = applicationProcessor.preFeatureConfiguration(appInfo, featureName);
+								if (CollectionUtils.isEmpty(configurations)) {
+									PhrescoDialog.messageDialog(getShell(), "Configurations not available");
+									return;
 								}
-								super.widgetSelected(e);
+								final WizardComposite wizardComposite = new WizardComposite(table.getParent());
+								BusyIndicator.showWhile(null, new Runnable() {
+									public void run() {
+										WizardDialog wizardControl = wizardComposite.getWizardControl(new ComponentConfigWizard());
+										wizardControl.open();
+									}
+								});
+							} catch (PhrescoException e1) {
+								PhrescoDialog.exceptionDialog(getShell(), e1);
 							}
-						});
-					}
+							super.mouseDown(e);
+						}
+					});
+				} else {
+					editor = new TableEditor(table);
+					Label label = new Label(table, SWT.BORDER);
+					label.setText("");
+					editor.grabHorizontal =  true;
+					editor.setEditor(label, tableItem, 4);
 				}
+			}
 		} catch (PhrescoException e1) {
 			PhrescoDialog.exceptionDialog(getShell(), e1);
 		}
 	}
-	
+
 	private List<ArtifactGroup> setArtifactGroup(ApplicationHandler applicationHandler) {
 		List<ArtifactGroup> plugins = new ArrayList<ArtifactGroup>();
 		ArtifactGroup artifactGroup = new ArtifactGroup();
@@ -629,7 +664,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		plugins.add(artifactGroup);
 		return plugins;
 	}
-	
+
 	private boolean isDefaultFeature(ArtifactInfo artifactInfo) {
 		List<RequiredOption> appliesToReqird = artifactInfo.getAppliesTo();
 		if (CollectionUtils.isNotEmpty(appliesToReqird)) {
@@ -641,7 +676,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 		}
 		return false;
 	}
-	
+
 	public static List<Configuration> getConfigurations() {
 		return configurations;
 	}
@@ -649,7 +684,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 	public static void setConfigurations(List<Configuration> configurations) {
 		AbstractFeatureWizardPage.configurations = configurations;
 	}
-	
+
 	public static ApplicationProcessor getApplicationProcessor() {
 		return applicationProcessor;
 	}
@@ -658,7 +693,7 @@ public abstract class AbstractFeatureWizardPage extends WizardPage implements Ph
 			ApplicationProcessor applicationProcessor) {
 		AbstractFeatureWizardPage.applicationProcessor = applicationProcessor;
 	}
-	
+
 	public static String getFeatureName() {
 		return featureName;
 	}

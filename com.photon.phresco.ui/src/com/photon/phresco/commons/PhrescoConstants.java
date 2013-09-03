@@ -181,6 +181,10 @@ public interface PhrescoConstants {
 	String TYPE_PASSWORD = "password";
 	String ALL 				= "All";
 	String TYPE				= "Type";
+	String REQ_JAVASCRIPT_TYPE_MODULE = "JAVASCRIPT";
+	String ICONS = "icons";
+	String IMG_DESC_GIF = "description.gif";
+	String IMG_SETTINGS_GIF = "settings.gif";
 	
 	// Deploy constants
 	
