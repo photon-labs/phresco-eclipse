@@ -52,7 +52,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 
 	private Shell buildDialog;	
 	private Shell generateDialog;
-	private Button envSelectionButton;
+//	private Button envSelectionButton;
 	Map<String, String> typeMaps = new HashMap<String, String>();
 
 	@SuppressWarnings("unchecked")
@@ -111,7 +111,7 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 		buildDialog = new Shell(dialog, SWT.CLOSE | SWT.TITLE);
 
 		int dialog_height = 130;
-		int comp_height = 17;
+		int comp_height = 22;
 
 		buildDialog.setText(Messages.BUILD);
 		buildDialog.setLayout(new GridLayout(1, false));
@@ -156,9 +156,9 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 						}
 						@SuppressWarnings("unchecked")
 						List<Value> values = (List<Value>) entry.getValue();
-						if (CollectionUtils.isNotEmpty(values)) {
+						if (CollectionUtils.isNotEmpty(values) && key.equals(parameter.getKey()) && Boolean.valueOf(parameter.getMultiple())) {
 							for (Value value : values) {
-								envSelectionButton = new Button(group, SWT.CHECK);
+								Button envSelectionButton = new Button(group, SWT.CHECK);
 								envSelectionButton.setText(value.getValue());
 								envSelectionButton.addSelectionListener(new SelectionAdapter() {
 									@Override
@@ -172,12 +172,27 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 										}
 									}
 								});
-								dialog_height = dialog_height + comp_height;
+								dialog_height = dialog_height + comp_height + 3;
 								envSelectionButton.pack();
 							}
+						} else if (key.equals(parameter.getKey())) {
+							final Combo dynParamCombo = new Combo(group, SWT.READ_ONLY | SWT.BORDER);
+							for (Value value : values) {
+								dynParamCombo.add(value.getValue());
+							}
+							dynParamCombo.select(0);
+							buttons.add(0, dynParamCombo.getText());
+							dynParamCombo.addSelectionListener(new SelectionAdapter() {
+								@Override
+								public void widgetSelected(SelectionEvent e) {
+									buttons.set(0, dynParamCombo.getText());
+									super.widgetSelected(e);
+								}
+							});
+							dialog_height = dialog_height + comp_height + 3;
 						}
 					}
-					map.put(key, buttons);
+					map.put(parameter.getKey(), buttons);
 					group.pack();
 				} else if (parameter.getType().equalsIgnoreCase(BOOLEAN)) {
 					if (parameter.getKey().equalsIgnoreCase(SHOW_SETTINGS)) {
