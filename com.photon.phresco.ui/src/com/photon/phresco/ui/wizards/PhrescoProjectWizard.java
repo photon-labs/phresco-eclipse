@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,9 +43,7 @@ import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.ui.model.BaseAction;
 import com.photon.phresco.ui.resource.Messages;
-import com.photon.phresco.ui.wizards.componets.AppLayerComponent;
-import com.photon.phresco.ui.wizards.componets.MobLayerComponent;
-import com.photon.phresco.ui.wizards.componets.WebLayerComponent;
+import com.photon.phresco.ui.wizards.componets.LayerComponent;
 import com.photon.phresco.ui.wizards.pages.AddProjectPage;
 import com.photon.phresco.ui.wizards.pages.TechnologyPage;
 
@@ -129,35 +126,10 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 			}
 			if(wizardPage instanceof TechnologyPage) {
 				TechnologyPage technologyPage = (TechnologyPage) wizardPage;
-				List<AppLayerComponent> appLayerComponents = technologyPage.appLayerComponents;
 				String appVersion = projectInfo.getVersion();
-				if(CollectionUtils.isNotEmpty(appLayerComponents)) {
-					for (AppLayerComponent appLayerComponent : appLayerComponents) {
-						String appCode = appLayerComponent.appCodeText.getText();
-						if(StringUtils.isEmpty(appCode)) {
-							PhrescoDialog.errorDialog(getShell(), Messages.WARNING, Messages.WARN_APPCODE_EMPTY);
-							return false;
-						}
-						ApplicationInfo appInfo = new ApplicationInfo();
-						String techName = appLayerComponent.techNameCombo.getText();
-						String techId = appLayerComponent.getTechIdMap().get(techName);
-						String version = appLayerComponent.techVersionCombo.getText();
-						appInfo.setAppDirName(appCode);
-						appInfo.setCode(appCode);
-						appInfo.setName(appCode);
-						appInfo.setVersion(appVersion);
-						TechnologyInfo techInfo = new TechnologyInfo();
-						techInfo.setAppTypeId(appLayerComponent.getAppTypeId());
-						techInfo.setId(techId);
-						techInfo.setName(techName);
-						techInfo.setVersion(version);
-						appInfo.setTechInfo(techInfo);
-						appInfos.add(appInfo);
-					}
-				}
-				List<WebLayerComponent> webLayerComponents = technologyPage.webLayerComponents;
+				List<LayerComponent> webLayerComponents = technologyPage.layerComponents;
 				if(CollectionUtils.isNotEmpty(webLayerComponents)) {
-					for (WebLayerComponent webLayerComponent : webLayerComponents) {
+					for (LayerComponent webLayerComponent : webLayerComponents) {
 						ApplicationInfo appInfo = new ApplicationInfo();
 						String appCode = webLayerComponent.appCodeText.getText();
 						if(StringUtils.isEmpty(appCode)) {
@@ -176,35 +148,6 @@ public class PhrescoProjectWizard extends Wizard implements INewWizard {
 						techInfo.setAppTypeId(webLayerComponent.getAppTypeId());
 						techInfo.setId(techId);
 						techInfo.setName(techName);
-						techInfo.setVersion(version);
-						appInfo.setTechInfo(techInfo);
-						appInfos.add(appInfo);
-					}
-				}
-				List<MobLayerComponent> mobLayerComponents = technologyPage.mobLayerComponents;
-				if(CollectionUtils.isNotEmpty(mobLayerComponents)) {
-					for (MobLayerComponent mobLayerComponent : mobLayerComponents) {
-						ApplicationInfo appInfo = new ApplicationInfo();
-						String appCode = mobLayerComponent.appCodeText.getText();
-						if(StringUtils.isEmpty(appCode)) {
-							PhrescoDialog.errorDialog(getShell(), Messages.WARNING, Messages.WARN_APPCODE_EMPTY);
-							return false;
-						}
-						String techGroupName = mobLayerComponent.techGroupNameCombo.getText();
-						Map<String, String> techGroupIdMap = mobLayerComponent.getTechGroupIdMap();
-						String techGroupId = techGroupIdMap.get(techGroupName);
-						String techName = mobLayerComponent.techNameCombo.getText();
-						String techId = mobLayerComponent.getTechIdMap().get(techGroupName + techName);
-						String version = mobLayerComponent.techVersionCombo.getText();
-						appInfo.setAppDirName(appCode);
-						appInfo.setCode(appCode);
-						appInfo.setName(appCode);
-						appInfo.setVersion(appVersion);
-						TechnologyInfo techInfo = new TechnologyInfo();
-						techInfo.setAppTypeId(mobLayerComponent.getAppTypeId());
-						techInfo.setId(techId);
-						techInfo.setName(techName);
-						techInfo.setTechGroupId(techGroupId);
 						techInfo.setVersion(version);
 						appInfo.setTechInfo(techInfo);
 						appInfos.add(appInfo);
