@@ -140,6 +140,7 @@ public class LoginPrefrence
             setMessage(Messages.LOGIN_SUCCESSFUL);
             
             PhrescoDialog.messageDialog(getShell(), Messages.LOGIN_SUCCESSFUL);
+            getShell().close();
         } 
         return result;
     }
