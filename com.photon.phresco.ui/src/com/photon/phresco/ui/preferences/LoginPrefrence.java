@@ -1,18 +1,20 @@
 package com.photon.phresco.ui.preferences;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -45,11 +47,13 @@ public class LoginPrefrence
 	extends PreferencePage
 	implements IWorkbenchPreferencePage, PhrescoConstants {
 
+	private Text serviceURL;
     private Text userName;
     private Text password;
     private IPreferenceStore prefStore;
     private boolean isLoggedIn;
     private String jarName = "/com.photon.phresco.plugin.jar";
+    private String defaultServiceURL = null;
     
 	public LoginPrefrence() {
 		super();
@@ -69,27 +73,56 @@ public class LoginPrefrence
         label.setForeground(new Color(null, new RGB(0, 0, 0)));
         label.setFont(new Font(null, STR_EMPTY, 10, SWT.BOLD));
 
-        GridLayout layout = new GridLayout(2, false);
-        layout.verticalSpacing = 6;
-
+        GridLayout layout = new GridLayout(1, false);
         Composite composite = new Composite(parent, 0);
         composite.setLayout(layout);
 
-        Label userNameLabel = new Label(composite, SWT.LEFT);
+        final Button urlOption = new Button(composite, SWT.CHECK);
+        urlOption.setText("Poiniting to different Service URL");
+        
+        GridLayout gridLayout = new GridLayout(2, false);
+        gridLayout.verticalSpacing = 6;
+
+        Composite layoutComposite = new Composite(parent, 0);
+        layoutComposite.setLayout(gridLayout);
+        
+        Label serviceURLLabel = new Label(layoutComposite, SWT.LEFT);
+        serviceURLLabel.setText("Service URL");
+        serviceURL = new Text(layoutComposite, SWT.BORDER);
+        serviceURL.setText(getServiceURL());
+        serviceURLLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
+        serviceURL.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        serviceURL.setEnabled(false);
+        
+        urlOption.addSelectionListener(new SelectionAdapter() {
+        	
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		    	
+		    	if (urlOption.getSelection()) {
+		    		serviceURL.setEnabled(true);
+		    	} else {
+		    		serviceURL.setText(getServiceURL());
+		    		serviceURL.setEnabled(false);
+		    	}
+		    }
+		});
+        
+        Label userNameLabel = new Label(layoutComposite, SWT.LEFT);
         userNameLabel.setText(Messages.LOGIN_ID);
-        userName = new Text(composite, SWT.BORDER);
+        userName = new Text(layoutComposite, SWT.BORDER);
         userNameLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
         userName.setLayoutData(new GridData(140,13));
 
-        Label passwordLabel = new Label(composite, SWT.LEFT);
+        Label passwordLabel = new Label(layoutComposite, SWT.LEFT);
         passwordLabel.setText(Messages.LOGIN_PWD);
-        password = new Text(composite, SWT.BORDER);
+        password = new Text(layoutComposite, SWT.BORDER);
         password.setEchoChar(CHAR_ASTERISK);
         passwordLabel.setFont(new Font(null, STR_EMPTY, 9, SWT.BOLD));
         password.setLayoutData(new GridData(140,13));
 
         setDefaultValues();
-        return composite;
+        return layoutComposite;
     }
     
     public void init(IWorkbench workbench) {
@@ -104,18 +137,40 @@ public class LoginPrefrence
         PhrescoPlugin.getDefault().savePluginPreferences();
     }
 
-    public boolean performOk() {
-    	String jarPath="";
-		try {
-			File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			String jarDir = f.getParentFile().getPath();
-			jarPath = jarDir+jarName;
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+	private String getServiceURL() {
+		
+		if (defaultServiceURL == null) {
+	    	String jarPath="";
+			try {
+				File f = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+				String jarDir = f.getParentFile().getPath();
+				jarPath = jarDir+jarName;
+				
+				defaultServiceURL = PhrescoUtil.getServiceURL(jarPath);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				defaultServiceURL = PhrescoConstants.DEFAULT_SERVICE_URL;
+			}
 		}
+		
+		String loginServiceURL = serviceURL.getText();
+		
+		if (defaultServiceURL == null) {
+			defaultServiceURL = PhrescoConstants.DEFAULT_SERVICE_URL;
+		}
+		
+		if (loginServiceURL == null || loginServiceURL.trim().equals("")) {
+			loginServiceURL = defaultServiceURL;
+		}
+		
+		return loginServiceURL;
+	}
+	
+    public boolean performOk() {
+
         
-    	final String serviceURL = PhrescoUtil.getServiceURL(jarPath);
+    	final String serviceURL = getServiceURL();
     	
         boolean result = false;
         prefStore = getPreferenceStore();
