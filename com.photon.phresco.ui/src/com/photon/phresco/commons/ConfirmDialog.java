@@ -26,8 +26,6 @@ import java.io.OutputStream;
 import java.security.KeyStore;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.preference.IPreferenceNode;

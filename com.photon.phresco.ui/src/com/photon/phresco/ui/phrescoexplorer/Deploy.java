@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.TableEditor;
@@ -51,14 +52,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.photon.phresco.commons.ConfirmDialog;
-import com.photon.phresco.commons.FrameworkConstants;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
@@ -91,9 +90,9 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 	private Combo listLogs;
 	private Shell downloadDialog; 
 
-	Map<String, String> deploytypeMaps = new HashedMap();
-	private static Map<String, Object> deploymap = new HashedMap();
-
+	Map<String, String> deploytypeMaps = new HashMap<String, String>();
+	private static Map<String, Object> deploymap = new HashMap<String, Object>();
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -240,9 +239,12 @@ public class Deploy extends AbstractHandler implements PhrescoConstants {
 						deleteButton.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
+								BuildInfo buildInfo = (BuildInfo) deleteButton.getData(BUILD_INFO_VALUE);
+								String buildName = buildInfo.getBuildName();
+								boolean openConfirm = MessageDialog.openConfirm(deployDialog, "Delete Build", Messages.PHRESCO_DELETE_BUILD_WARNING + STR_SPACE + buildName);
 								BuildInfo selectedBuildInfo = (BuildInfo) deleteButton.getData(BUILD_INFO_VALUE);
 								List<BuildInfo> buildInfos = (List<BuildInfo>) deleteButton.getData(BUILD_INFOS);
-								if(selectedBuildInfo != null) {
+								if(selectedBuildInfo != null && openConfirm) {
 									delete(buildInfos, selectedBuildInfo, downloadDialog);
 								}
 								super.widgetSelected(e);
