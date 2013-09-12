@@ -133,6 +133,16 @@ public class PdfDownloadPage extends AbstractHandler implements PhrescoConstants
 				editor.grabHorizontal = true;
 				editor.setEditor(configureButtonPan, item, 2);
 			}
+			Button closeButton = new Button(downloadDialog, SWT.PUSH);
+			closeButton.setText(Messages.CLOSE);
+			closeButton.setLayoutData(new GridData(SWT.RIGHT, SWT.END, false, false));
+			closeButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					downloadDialog.close();
+					super.widgetSelected(e);
+				}
+			});
 			downloadDialog.open();
 		} catch (PhrescoException e) {
 			PhrescoDialog.exceptionDialog(downloadDialog, e);

@@ -35,8 +35,10 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.ProjectManager;
 import com.photon.phresco.commons.util.SCMManagerUtil;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.ui.wizards.pages.ImportFromSCMPage;
+import com.photon.phresco.util.Utility;
 
 /**
  * Wizard to handle phresco import from scm
@@ -109,6 +111,9 @@ public class PhrescoImportFromSCMWizard extends Wizard implements IImportWizard,
 							String path = PhrescoUtil.getProjectHome() + File.separator + importedProject.getAppDirName()
 									+ File.separator;
 							PhrescoUtil.addM2Repo(path);
+							
+							String baseDir = PhrescoUtil.getProjectHome() + importedProject.getAppDirName();
+							Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
 							
 							ProjectManager.updateProjectIntoWorkspace(importedProject.getAppDirName());
 							PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);

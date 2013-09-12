@@ -43,7 +43,9 @@ import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.util.Utility;
 
 /**
  * @author suresh_ma
@@ -282,6 +284,9 @@ public class PhrescoImportWizard extends MavenImportWizard {
 			  project.create(description, monitor);
 		  }
 
+		    String baseDir = PhrescoUtil.getProjectHome() + projectName;
+			Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
+			
 		  if(!project.isOpen()) {
 			  project.open(monitor);
 		  }

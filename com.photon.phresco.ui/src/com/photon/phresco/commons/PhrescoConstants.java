@@ -28,7 +28,7 @@ package com.photon.phresco.commons;
 public interface PhrescoConstants {
 	
 //	String DEFAULT_SERVICE_URL = "http://172.16.17.117:7070/service-testing/rest/api";
-	String DEFAULT_SERVICE_URL = "http://172.16.17.117:7070/service-testing/rest/api";
+	String DEFAULT_SERVICE_URL = "http://172.16.17.117:7070/service/rest/api";
 //	String DEFAULT_SERVICE_URL = "http://localhost:3030/service/rest/api";
 	String SONAR_REPORT_URL = "http://localhost:9000/dashboard/index/";
 	
@@ -274,8 +274,8 @@ public interface PhrescoConstants {
 	String LOGO = "logo";
 	String THEME = "theme";
 	String TECHNOLOGY_NAME = "technologyName";
-	
-	
+	String PDF_REPORT_INFO = "phresco-pdf-report-info.xml";
+	String PDF_GOAL = "pdf-report";
 	
 	
 	

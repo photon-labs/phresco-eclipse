@@ -128,6 +128,8 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 						reportType.add(value.getValue());
 						techValues.put(value.getValue(), value.getKey());
 					}
+				} else if ("src".equals(codeValidationReportType.getValidateAgainst().getKey())) {
+					reportType.add("source");
 				}
 			}
 			boolean ifFunctional = SonarUtil.checkFunctionalDir();
@@ -281,7 +283,7 @@ public class Code extends AbstractHandler implements PhrescoConstants {
 							}
 						}
 					}
-				}
+				} 
 			}
 			return builder.toString();
 		} catch (PhrescoException e) {

@@ -1,9 +1,6 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,21 +35,17 @@ import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
-import com.photon.phresco.commons.model.ProjectInfo;
-import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.dynamicParameter.DependantParameters;
 import com.photon.phresco.dynamicParameter.DynamicPossibleValues;
 import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.framework.api.ActionType;
-import com.photon.phresco.framework.api.ApplicationManager;
-import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 import com.phresco.pom.exception.PhrescoPomException;
@@ -136,18 +129,16 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 	/**
 	 * @param functionalDialog
 	 */
-	private void runFunctionalTest(List<Parameter> parameters, final Shell functionalDialog) {
-		ApplicationManager applicationManager = new ApplicationManagerImpl();
+	private void runFunctionalTest(final Shell functionalDialog) {
 		try {
-			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
-			String applicationHome = PhrescoUtil.getApplicationHome();
-			List<String> mavenArgCommands = PhrescoUtil.getMavenArgCommands(parameters);
-			mavenArgCommands.add(HYPHEN_N);
-			BufferedInputStream performAction = applicationManager.performAction(projectInfo, ActionType.FUNCTIONAL_TEST, mavenArgCommands, applicationHome);
-
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(performAction));
-			ConsoleViewManager.getDefault("functional test").println(bufferedReader);
+			String goal = PhrescoUtil.getPomProcessor().getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
+			String phrescoFunctionalFilePath = PhrescoUtil.getPhrescoPluginInfoFilePath(FUNCTIONAL, "");
+			goal = Constants.PHASE_FUNCTIONAL_TEST + HYPHEN + goal;
+			ExecuteAction action = new ExecuteAction(new File(phrescoFunctionalFilePath), goal, ActionType.FUNCTIONAL_TEST, "Functional Test");
+			action.execute();
 		} catch (PhrescoException e) {
+			PhrescoDialog.exceptionDialog(functionalDialog, e);
+		} catch (PhrescoPomException e) {
 			PhrescoDialog.exceptionDialog(functionalDialog, e);
 		}
 	}
@@ -174,7 +165,10 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			ApplicationInfo applicationInfo = PhrescoUtil.getApplicationInfo();
 			DynamicPossibleValues possibleValues = new DynamicPossibleValues();
 			Map<String, DependantParameters> watcherMap = new HashMap<String, DependantParameters>();
-			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, "functional-test-webdriver");
+			PomProcessor pomProcessor = PhrescoUtil.getPomProcessor();
+			String seleniumToolType = pomProcessor.getProperty(Constants.POM_PROP_KEY_FUNCTEST_SELENIUM_TOOL);
+			String goal = Constants.PHASE_FUNCTIONAL_TEST + HYPHEN + seleniumToolType;
+			Map<String, Object> maps = possibleValues.setPossibleValuesInReq(processor, applicationInfo, parameters, watcherMap, goal);
 
 			for (final Parameter parameter : parameters) {
 				String type = parameter.getType();
@@ -360,7 +354,7 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 					}
 					BusyIndicator.showWhile(null, new Runnable() {
 						public void run() {
-							runFunctionalTest(parameters, dialog);
+							runFunctionalTest(dialog);
 						}
 					});
 					dialog.close();
@@ -368,6 +362,8 @@ public class Functional extends AbstractHandler implements PhrescoConstants {
 			});
 			
 		} catch (PhrescoException e) {
+			PhrescoDialog.exceptionDialog(functionalDialog, e);
+		} catch (PhrescoPomException e) {
 			PhrescoDialog.exceptionDialog(functionalDialog, e);
 		}
 		functionalDialog.setSize(400, dialog_height);

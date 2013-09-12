@@ -1,11 +1,8 @@
 package com.photon.phresco.ui.phrescoexplorer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,11 +39,9 @@ import com.photon.phresco.commons.model.ApplicationInfo;
 import com.photon.phresco.commons.model.Customer;
 import com.photon.phresco.commons.model.ProjectInfo;
 import com.photon.phresco.commons.model.Technology;
-import com.photon.phresco.commons.util.ConsoleViewManager;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.framework.api.ActionType;
 import com.photon.phresco.framework.api.ApplicationManager;
 import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
@@ -54,6 +49,7 @@ import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Para
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
 import com.photon.phresco.plugins.util.MojoProcessor;
 import com.photon.phresco.service.client.api.ServiceManager;
+import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.resource.Messages;
 import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
@@ -397,7 +393,6 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 			if("Detailed".equals(report)) {
 				reportDataType = "detail";
 			}
-			ApplicationManager applicationManager = new ApplicationManagerImpl();
 			ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 			String customerId = projectInfo.getCustomerIds().get(0);
 
@@ -441,11 +436,8 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 				}
 			}
 			mojo.save();
-			List<String> buildArgCmds = getMavenArgCommands(parameters);
-			buildArgCmds.add(HYPHEN_N);
-			String workingDirectory = PhrescoUtil.getApplicationHome();
-			BufferedInputStream inputStream = applicationManager.performAction(projectInfo, ActionType.PDF_REPORT, buildArgCmds, workingDirectory);
-			ConsoleViewManager.getDefault("PDF Report Console").println(new BufferedReader(new InputStreamReader(inputStream)));
+			ExecuteAction action = new ExecuteAction(PhrescoUtil.getPdfReportInfoPath(), PDF_GOAL, ActionType.PDF_REPORT, "Pdf Report");
+			action.execute();
 		} catch (Exception e) {
 			throw new PhrescoException("exception occured in the Print As PDF functionality");
 		}

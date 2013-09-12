@@ -231,6 +231,11 @@ public class PhrescoUtil implements PhrescoConstants {
 		return unitTestconfigPath;
 	}
 	
+	public static File getPdfReportInfoPath() {
+		File pdfReportInfo = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PDF_REPORT_INFO);
+		return pdfReportInfo;
+	}
+	
 	public static ProjectInfo getProjectInfo() throws PhrescoException {
 		try {
 			File projectFilePath = new File(getApplicationHome() + File.separator + DOT_PHRESCO_FOLDER + File.separator + PROJECT_INFO);
