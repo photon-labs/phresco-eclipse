@@ -648,7 +648,6 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								certifacteList.setEnabled(true);
 							}
 							if (passwordText != null) {
-								System.out.println("Password Label is not null");
 								passwordText.setEnabled(true);
 							}
 						} else {
