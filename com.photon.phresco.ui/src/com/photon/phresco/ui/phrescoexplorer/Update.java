@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
@@ -38,7 +39,7 @@ public class Update extends AbstractHandler implements PhrescoConstants {
 		// To check the user has logged in
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
 		if(serviceManager == null) {
-			PhrescoDialog.errorDialog(shell,Messages.WARNING, Messages.PHRESCO_LOGIN_WARNING);
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return null;
 		}
 		

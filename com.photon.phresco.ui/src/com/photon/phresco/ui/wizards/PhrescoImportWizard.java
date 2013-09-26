@@ -40,11 +40,11 @@ import org.eclipse.ui.IWorkbench;
 import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.util.PhrescoUtil;
-import com.photon.phresco.exception.PhrescoException;
 import com.photon.phresco.service.client.api.ServiceManager;
 import com.photon.phresco.ui.PhrescoNature;
 import com.photon.phresco.ui.model.ActionType;
 import com.photon.phresco.ui.resource.Messages;
+import com.photon.phresco.util.Constants;
 import com.photon.phresco.util.Utility;
 
 /**
@@ -52,258 +52,277 @@ import com.photon.phresco.util.Utility;
  *
  */
 public class PhrescoImportWizard extends MavenImportWizard {
-	
+
 	private ImportWizardPage page;
 	private LifecycleMappingPage lifecycleMappingPage;
 	private List<String> locations;
 	private boolean showLocation = true;
 	//private LifecycleMappingConfiguration mappingConfiguration;
 
-	  public PhrescoImportWizard() {
-	    setNeedsProgressMonitor(true);
-	    setWindowTitle("Phresco Import Wizard");
-	  }
+	public PhrescoImportWizard() {
+		setNeedsProgressMonitor(true);
+		setWindowTitle("Phresco Import Wizard");
+	}
 
-	  public PhrescoImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {
-	    this.locations = locations;
-	    this.showLocation = false;
-	    setNeedsProgressMonitor(true);
-	  }
+	public PhrescoImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {
+		this.locations = locations;
+		this.showLocation = false;
+		setNeedsProgressMonitor(true);
+	}
 
-	  public void init(IWorkbench workbench, IStructuredSelection selection) {
-	    super.init(workbench, selection);
-	    if(locations == null || locations.isEmpty()) {
-	      IPath location = SelectionUtil.getSelectedLocation(selection);
-	      if(location != null) {
-	        locations = Collections.singletonList(location.toOSString());
-	      }
-	    }
-	  }
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		super.init(workbench, selection);
+		if(locations == null || locations.isEmpty()) {
+			IPath location = SelectionUtil.getSelectedLocation(selection);
+			if(location != null) {
+				locations = Collections.singletonList(location.toOSString());
+			}
+		}
+	}
 
-	  public void addPages() {
+	public void addPages() {
 		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
 		if(serviceManager == null) {
 			Shell shell = new Shell();
 			ConfirmDialog.getConfirmDialog().showConfirm(shell);
 			return;
 		}
-	    page = new ImportWizardPage(importConfiguration, workingSets);
-	    page.setLocations(locations);
-	    page.setShowLocation(showLocation);
-	    addPage(page);  
+		page = new ImportWizardPage(importConfiguration, workingSets);
+		page.setLocations(locations);
+		page.setShowLocation(showLocation);
+		addPage(page);  
 
-	    lifecycleMappingPage = new LifecycleMappingPage();
-	    addPage(lifecycleMappingPage);
-	  }
+		lifecycleMappingPage = new LifecycleMappingPage();
+		addPage(lifecycleMappingPage);
+	}
 
-	  @SuppressWarnings("deprecation")
-	  public boolean performFinish() {
-		  
-		  //mkleint: this sounds wrong.
-		  if(!page.isPageComplete()) {
-			  return false;
-		  }
+	@SuppressWarnings("deprecation")
+	public boolean performFinish() {
 
-		  final MavenPlugin plugin = MavenPlugin.getDefault();
-		  final List<IMavenDiscoveryProposal> proposals = getMavenDiscoveryProposals();
-		  final Collection<MavenProjectInfo> projects = getProjects();
-		  try {
-			  getContainer().run(true, true, new IRunnableWithProgress() {
-				  @SuppressWarnings("static-access")
-				  public void run(final IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
-					  // Use the monitor from run() in order to provide progress to the wizard 
-					  Job job = new AbstactCreateMavenProjectJob("import Phresco project job created", workingSets) {
+		//mkleint: this sounds wrong.
+		if(!page.isPageComplete()) {
+			return false;
+		}
 
-						  @Override
-						  protected List<IProject> doCreateMavenProjects(IProgressMonitor pm) throws CoreException {
-							  SubMonitor monitor = SubMonitor.convert(progressMonitor, 101);
-							  try {
-								  IMavenDiscovery discovery = getDiscovery();
-								  boolean restartRequired = false;
-								  if(discovery != null && !proposals.isEmpty()) {
-									  //restartRequired = discovery.isRestartRequired(proposals, monitor);
-									  // No restart required, install prior to importing
-									  if(!restartRequired) {
-										  //discovery.implement(proposals, monitor.newChild(50));
-									  }
-								  }
-								  // Import projects
-								  monitor.beginTask("Phresco project import in progress", proposals.isEmpty() ? 100 : 50);
+		final Shell shell = getShell();
 
-								  for(MavenProjectInfo inf : projects){
-									  IProject project = create(inf, importConfiguration, monitor);
-									  addNature(project,monitor);
-								  }
-								  List<IMavenProjectImportResult> results = plugin.getProjectConfigurationManager().importProjects(
-										  projects, importConfiguration, monitor.newChild(proposals.isEmpty() ? 100 : 50));
+		final MavenPlugin plugin = MavenPlugin.getDefault();
+		final List<IMavenDiscoveryProposal> proposals = getMavenDiscoveryProposals();
+		final Collection<MavenProjectInfo> projects = getProjects();
+		for (MavenProjectInfo mavenProjectInfo : projects) {
+			File pomFile = mavenProjectInfo.getPomFile();
+			File projectDir = pomFile.getParentFile();
+			String projectParent = projectDir.getParentFile().getAbsolutePath() + File.separatorChar + projectDir.getName();
+			if(!isPhrescoProject(projectParent)) {
+				PhrescoDialog.errorDialog(shell, "Dialog", "Project "+ projectDir.getName() + " Not a phresco Project");
+				return false;
+			}
+		}
+		try {
+			getContainer().run(true, true, new IRunnableWithProgress() {
+				@SuppressWarnings("static-access")
+				public void run(final IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
+					// Use the monitor from run() in order to provide progress to the wizard 
+					Job job = new AbstactCreateMavenProjectJob("import Phresco project job created", workingSets) {
 
-								  // Restart required, schedule job
-								  if(restartRequired && !proposals.isEmpty()) {
-									  //discovery.implement(proposals, monitor.newChild(1));
-								  }
-            
-								  return toProjects(results);
-							  } finally {
-								  monitor.done();
-							  }
-						  }
-					  };
-					  job.setRule(plugin.getProjectConfigurationManager().getRule());
-					  job.schedule();
-					  job.join();
-				  }
-			  });
-			  return true;
-		  } catch(InvocationTargetException e) {
-			  // TODO This doesn't seem like it should occur
-		  } catch(InterruptedException e) {
-			  // User cancelled operation, we don't return the 
-		  }
-		  
-		  PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
-		  
-		  return false;
-	  }
+						@Override
+						protected List<IProject> doCreateMavenProjects(IProgressMonitor pm) throws CoreException {
+							SubMonitor monitor = SubMonitor.convert(progressMonitor, 101);
+							try {
+								IMavenDiscovery discovery = getDiscovery();
+								boolean restartRequired = false;
+								if(discovery != null && !proposals.isEmpty()) {
+									//restartRequired = discovery.isRestartRequired(proposals, monitor);
+									// No restart required, install prior to importing
+									if(!restartRequired) {
+										//discovery.implement(proposals, monitor.newChild(50));
+									}
+								}
+								// Import projects
+								monitor.beginTask("Phresco project import in progress", proposals.isEmpty() ? 100 : 50);
 
-	  /* (non-Javadoc)
-	   * @see org.eclipse.jface.wizard.Wizard#canFinish()
-	   */
-	  @Override
-	  public boolean canFinish() {
-		  if(isCurrentPageKnown()) {
-			  // Discovery pages aren't added to the wizard in case they need to go away
-			  IWizardPage cPage = getContainer().getCurrentPage();
-			  while(cPage != null && cPage.isPageComplete()) {
-				  cPage = cPage.getNextPage();
-			  }
-			  return cPage == null || cPage.isPageComplete();
-		  }
+								for(MavenProjectInfo inf : projects){
+									IProject project = create(inf, importConfiguration, monitor);
+									addNature(project,monitor);
+								}
+								List<IMavenProjectImportResult> results = plugin.getProjectConfigurationManager().importProjects(
+										projects, importConfiguration, monitor.newChild(proposals.isEmpty() ? 100 : 50));
 
-		  //in here make sure that the lifecycle page is hidden from view when the mappings are fine
-		  //but disable finish when there are some problems (thus force people to at least look at the other page)
-		  boolean complete = page.isPageComplete();
-		  if (complete && getContainer().getCurrentPage() == page) { //only apply this logic on the first page
-			  /**LifecycleMappingConfiguration mapping = getMappingConfiguration();
-			   * if (mapping == null || !mapping.isMappingComplete()) {
-			   * return false;
+								// Restart required, schedule job
+								if(restartRequired && !proposals.isEmpty()) {
+									//discovery.implement(proposals, monitor.newChild(1));
+								}
+
+								return toProjects(results);
+							} finally {
+								monitor.done();
+							}
+						}
+					};
+					job.setRule(plugin.getProjectConfigurationManager().getRule());
+					job.schedule();
+					job.join();
+				}
+			});
+			return true;
+		} catch(InvocationTargetException e) {
+			// TODO This doesn't seem like it should occur
+		} catch(InterruptedException e) {
+			// User cancelled operation, we don't return the 
+		}
+
+		PhrescoDialog.messageDialog(getShell(), Messages.IMPORT_PROJECT_SUCCESS_MSG);
+
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.Wizard#canFinish()
+	 */
+	@Override
+	public boolean canFinish() {
+		if(isCurrentPageKnown()) {
+			// Discovery pages aren't added to the wizard in case they need to go away
+			IWizardPage cPage = getContainer().getCurrentPage();
+			while(cPage != null && cPage.isPageComplete()) {
+				cPage = cPage.getNextPage();
+			}
+			return cPage == null || cPage.isPageComplete();
+		}
+
+		//in here make sure that the lifecycle page is hidden from view when the mappings are fine
+		//but disable finish when there are some problems (thus force people to at least look at the other page)
+		boolean complete = page.isPageComplete();
+		if (complete && getContainer().getCurrentPage() == page) { //only apply this logic on the first page
+			/**LifecycleMappingConfiguration mapping = getMappingConfiguration();
+			 * if (mapping == null || !mapping.isMappingComplete()) {
+			 * return false;
 	       }*/
-		  }
-		  return super.canFinish();
-	  }
+		}
+		return super.canFinish();
+	}
 
-	  /*
-	   * Is the current page known by the wizard (ie, has it been passed to addPage())
-	   */
-	  private boolean isCurrentPageKnown() {
-	    for(IWizardPage p : getPages()) {
-	      if(p == getContainer().getCurrentPage()) {
-	        return false;
-	      }
-	    }
-	    return true;
-	  }
+	/*
+	 * Is the current page known by the wizard (ie, has it been passed to addPage())
+	 */
+	private boolean isCurrentPageKnown() {
+		for(IWizardPage p : getPages()) {
+			if(p == getContainer().getCurrentPage()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	  /**
-	   * @return
-	   */
-	 private List<IMavenDiscoveryProposal> getMavenDiscoveryProposals() {
-	    return lifecycleMappingPage.getSelectedDiscoveryProposals();
-	  }
+	/**
+	 * @return
+	 */
+	private List<IMavenDiscoveryProposal> getMavenDiscoveryProposals() {
+		return lifecycleMappingPage.getSelectedDiscoveryProposals();
+	}
 
-	  public Collection<MavenProjectInfo> getProjects() {
-	    return page.getProjects();
-	  }
+	public Collection<MavenProjectInfo> getProjects() {
+		return page.getProjects();
+	}
 
-	  
-	  
-	  private static void addNature(IProject project,IProgressMonitor monitor) throws CoreException {
-		  if (!project.hasNature(PhrescoNature.NATURE_ID)) {
-			  IProjectDescription description = project.getDescription();
-			  String[] prevNatures = description.getNatureIds();
-			  String[] newNatures = new String[prevNatures.length + 1];
-			  System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-			  newNatures[prevNatures.length] = PhrescoNature.NATURE_ID;
-			  description.setNatureIds(newNatures);
-			  project.setDescription(description, monitor);
-		  }
-	  }
-  
-	  @SuppressWarnings("deprecation")
+
+
+	private static void addNature(IProject project,IProgressMonitor monitor) throws CoreException {
+		if (!project.hasNature(PhrescoNature.NATURE_ID)) {
+			IProjectDescription description = project.getDescription();
+			String[] prevNatures = description.getNatureIds();
+			String[] newNatures = new String[prevNatures.length + 1];
+			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+			newNatures[prevNatures.length] = PhrescoNature.NATURE_ID;
+			description.setNatureIds(newNatures);
+			project.setDescription(description, monitor);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
 	private IProject create(MavenProjectInfo projectInfo, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
-		  IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		  IWorkspaceRoot root = workspace.getRoot();
-	   
-		  File pomFile = projectInfo.getPomFile(); 
-		  Model model = projectInfo.getModel();
-//		  Model model = projectInfo.getModel();
-	    
-		  String projectName = configuration.getProjectName(model);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
 
-		  File projectDir = pomFile.getParentFile();
-		  String projectParent = projectDir.getParentFile().getAbsolutePath();
+		File pomFile = projectInfo.getPomFile(); 
+		Model model = projectInfo.getModel();
+		//		  Model model = projectInfo.getModel();
 
-		  if (projectInfo.getBasedirRename() == MavenProjectInfo.RENAME_REQUIRED) {
-			  File newProject = new File(projectDir.getParent(), projectName);
-			  if(!projectDir.equals(newProject)) {
-				  boolean renamed = projectDir.renameTo(newProject);
-				  if(!renamed) {
-					  StringBuilder msg = new StringBuilder();
-					  msg.append(NLS.bind("error", projectDir.getAbsolutePath())).append('.');
-					  if (newProject.exists()) {
-						  msg.append(NLS.bind("error", newProject.getAbsolutePath()));
-					  }
-					  //throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg.toString(), null));
-				  }
-				  projectInfo.setPomFile(getCanonicalPomFile(newProject));
-				  projectDir = newProject;
-			  }
-		  } else {
-			  if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
-				  // immediately under workspace root, project name must match filesystem directory name
-				  projectName = projectDir.getName();
-			  }
-		  }
-		  monitor.subTask(NLS.bind("project", projectName));
+		String projectName = configuration.getProjectName(model);
 
-		  IProject project = root.getProject(projectName);
-		  if(project.exists()) {
-			  //console.logError("Project " + projectName + " already exists");
-			  return null;
-		  }
+		File projectDir = pomFile.getParentFile();
+		String projectParent = projectDir.getParentFile().getAbsolutePath();
 
-		  if(projectDir.equals(root.getLocation().toFile())) {
-			  //console.logError("Can't create project " + projectName + " at Workspace folder");
-			  return null;
-		  }
+		if (projectInfo.getBasedirRename() == MavenProjectInfo.RENAME_REQUIRED) {
+			File newProject = new File(projectDir.getParent(), projectName);
+			if(!projectDir.equals(newProject)) {
+				boolean renamed = projectDir.renameTo(newProject);
+				if(!renamed) {
+					StringBuilder msg = new StringBuilder();
+					msg.append(NLS.bind("error", projectDir.getAbsolutePath())).append('.');
+					if (newProject.exists()) {
+						msg.append(NLS.bind("error", newProject.getAbsolutePath()));
+					}
+					//throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg.toString(), null));
+				}
+				projectInfo.setPomFile(getCanonicalPomFile(newProject));
+				projectDir = newProject;
+			}
+		} else {
+			if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
+				// immediately under workspace root, project name must match filesystem directory name
+				projectName = projectDir.getName();
+			}
+		}
+		monitor.subTask(NLS.bind("project", projectName));
 
-		  if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
-			  project.create(monitor);
-		  } else {
-			  IProjectDescription description = workspace.newProjectDescription(projectName);
-			  description.setLocation(new Path(projectDir.getAbsolutePath()));
-			  project.create(description, monitor);
-		  }
+		IProject project = root.getProject(projectName);
+		if(project.exists()) {
+			//console.logError("Project " + projectName + " already exists");
+			return null;
+		}
 
-		    String baseDir = PhrescoUtil.getProjectHome() + projectName;
-			Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
-			
-		  if(!project.isOpen()) {
-			  project.open(monitor);
-		  }
+		if(projectDir.equals(root.getLocation().toFile())) {
+			//console.logError("Can't create project " + projectName + " at Workspace folder");
+			return null;
+		}
 
-		  //ResolverConfiguration resolverConfiguration = configuration.getResolverConfiguration();
-		  //enableBasicMavenNature(project, resolverConfiguration, monitor);
+		if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
+			project.create(monitor);
+		} else {
+			IProjectDescription description = workspace.newProjectDescription(projectName);
+			description.setLocation(new Path(projectDir.getAbsolutePath()));
+			project.create(description, monitor);
+		}
 
-		  return project;
-	  }
-  
-	  private File getCanonicalPomFile(File projectDir) throws CoreException {
-		  try {
-			  return new File(projectDir.getCanonicalFile(), IMavenConstants.POM_FILE_NAME);
-		  } catch(IOException ex) {
-			  ex.printStackTrace();
-		  }
-		  return null;
-	  }
+		String baseDir = PhrescoUtil.getProjectHome() + projectName;
+		Utility.executeCommand("mvn " +ActionType.ECLIPSE.getActionType(), baseDir);
+
+		if(!project.isOpen()) {
+			project.open(monitor);
+		}
+
+		//ResolverConfiguration resolverConfiguration = configuration.getResolverConfiguration();
+		//enableBasicMavenNature(project, resolverConfiguration, monitor);
+
+		return project;
+	}
+
+	private File getCanonicalPomFile(File projectDir) throws CoreException {
+		try {
+			return new File(projectDir.getCanonicalFile(), IMavenConstants.POM_FILE_NAME);
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	private boolean isPhrescoProject(String baseDir) {
+		File projectInfoPath = new File(baseDir + File.separatorChar + Constants.DOT_PHRESCO_FOLDER + File.separatorChar + Constants.PROJECT_INFO_FILE);
+		if(projectInfoPath.exists()) {
+			return true;
+		}
+		return false;
+	}
 
 }

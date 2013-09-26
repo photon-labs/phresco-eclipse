@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.google.gson.Gson;
+import com.photon.phresco.commons.ConfirmDialog;
 import com.photon.phresco.commons.PhrescoConstants;
 import com.photon.phresco.commons.PhrescoDialog;
 import com.photon.phresco.commons.model.ApplicationInfo;
@@ -42,8 +43,6 @@ import com.photon.phresco.commons.model.Technology;
 import com.photon.phresco.commons.util.PhrescoUtil;
 import com.photon.phresco.commons.util.QualityUtil;
 import com.photon.phresco.exception.PhrescoException;
-import com.photon.phresco.framework.api.ApplicationManager;
-import com.photon.phresco.framework.impl.ApplicationManagerImpl;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.MavenCommands.MavenCommand;
 import com.photon.phresco.plugins.model.Mojos.Mojo.Configuration.Parameters.Parameter.PossibleValues.Value;
@@ -66,6 +65,11 @@ public class ReportPage  extends AbstractHandler implements PhrescoConstants {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		Shell shell = HandlerUtil.getActiveShell(event);
+		ServiceManager serviceManager = PhrescoUtil.getServiceManager(PhrescoUtil.getUserId());
+		if(serviceManager == null) {
+			ConfirmDialog.getConfirmDialog().showConfirm(shell);
+			return null;
+		}
 		final Shell reportDialog = new Shell(shell, SWT.APPLICATION_MODAL |  SWT.DIALOG_TRIM | SWT.MIN | SWT.TITLE);
 		reportDialog.setText(Messages.PDF_REPORT_DIALOG_TITLE);
 		GridLayout layout = new GridLayout(1, false);

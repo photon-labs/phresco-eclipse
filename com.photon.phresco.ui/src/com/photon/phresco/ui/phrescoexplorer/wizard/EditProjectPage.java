@@ -352,7 +352,7 @@ public class EditProjectPage extends WizardPage implements PhrescoConstants {
 		Label descLable = new Label(composite, SWT.NONE);
 		descLable.setText(Messages.DESCRIPTION);
 
-		descText = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		descText = new Text(composite, SWT.BORDER | SWT.MULTI);
 		GridData descGridData = new GridData();
 		descGridData.widthHint = 100;
 		descGridData.heightHint = 40;
