@@ -139,8 +139,11 @@ public class Build extends AbstractHandler implements PhrescoConstants {
 				if (parameter.getType().equalsIgnoreCase(DYNAMIC_PARAMETER)) {
 					String key = null;
 					Label Logs = new Label(composite, SWT.LEFT);
-					Logs.setText(parameter.getName().getValue().get(0).getValue());
-
+					if (parameter.getKey().equalsIgnoreCase(ENVIRONMENT_NAMES)) {
+						Logs.setText(parameter.getName().getValue().get(0).getValue() + ASTERICK);
+					} else {
+						Logs.setText(parameter.getName().getValue().get(0).getValue());
+					}
 					Group group = new Group(composite, SWT.SHADOW_IN);
 					group.setText(parameter.getName().getValue().get(0).getValue());
 					group.setLayout(new GridLayout(1, false));

@@ -172,6 +172,7 @@ public interface PhrescoConstants {
 	String BUILD_INFO        = "build.info";
 	String PACK_MINIFIED_FILE= "packMinifiedFiles";
 	String PACKAGE_TYPE      = "packageType";
+	String ENVIRONMENT_NAMES = "environmentName";
 	
 	String BUILD_NO          = "No";
 	String BUILD_NAME		 = "BuildName";
@@ -181,6 +182,7 @@ public interface PhrescoConstants {
 	String TYPE_PASSWORD = "password";
 	String ALL 				= "All";
 	String TYPE				= "Type";
+	String TYPES 			= "type";
 	String REQ_JAVASCRIPT_TYPE_MODULE = "JAVASCRIPT";
 	String ICONS = "icons";
 	String IMG_DESC_GIF = "description.gif";
@@ -311,6 +313,7 @@ public interface PhrescoConstants {
 	String CERTIFICATES = "certificates";
 	String ASTERICK     = "*";
 	String REMOTE_DEPLOYMENT_VALUE = "remoteDeploymentValue";
+	String REMOTE_DEPLOYMENT = "remoteDeployment";
 	String VERSION_STATUS = "versionstatus";
 	String PROTOCOL = "protocol";
 	String ADDITIONAL_CONTEXT = "additional_context";
@@ -318,6 +321,7 @@ public interface PhrescoConstants {
 	String 	ADMIN_PASSWORD_LABEL = "admin_password_label";
 	String ACTIVE = "active";
 	String IN_ACTIVE = "In Active";
+	String ARTIFACT_GROUP_VALUES = "artifactGroupValues";
 	
 	// Dynamic constants
 	

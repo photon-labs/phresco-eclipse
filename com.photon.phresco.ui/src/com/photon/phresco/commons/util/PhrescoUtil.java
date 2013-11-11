@@ -310,10 +310,21 @@ public class PhrescoUtil implements PhrescoConstants {
 		}
 	}
 	
+//	public static PomProcessor getPomProcessor() throws PhrescoException {
+//		String applicationHome = getApplicationHome();
+//		try {
+//			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
+//		} catch (PhrescoPomException e) {
+//			throw new PhrescoException(e);
+//		}
+//	}
+	
+	
 	public static PomProcessor getPomProcessor() throws PhrescoException {
 		String applicationHome = getApplicationHome();
 		try {
-			return new PomProcessor(new File(applicationHome + File.separatorChar + POM_FILENAME));
+			String phrescoPomFile = Utility.getPhrescoPomFile(PhrescoUtil.getApplicationInfo());
+			return new PomProcessor(new File(applicationHome + File.separatorChar + phrescoPomFile));
 		} catch (PhrescoPomException e) {
 			throw new PhrescoException(e);
 		}

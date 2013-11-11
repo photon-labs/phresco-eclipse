@@ -6,8 +6,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -278,7 +280,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 									public void handleEvent(Event event) {
 										Button button = (Button) event.widget;
 										selection = button.getSelection();
-										if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+										if (propertyTemplate.getKey().equalsIgnoreCase(REMOTE_DEPLOYMENT)) {
 											map.put(REMOTE_DEPLOYMENT_VALUE, selection);
 										}
 										String value = String.valueOf(selection);
@@ -290,7 +292,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 										}
 									}
 								});
-								if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+								if (propertyTemplate.getKey().equalsIgnoreCase(REMOTE_DEPLOYMENT)) {
 									map.put(REMOTE_DEPLOYMENT_VALUE, selection);
 								}
 								if (required && selection == false) {
@@ -401,7 +403,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			GridData data = new GridData(GridData.FILL_HORIZONTAL);
 
-			ServiceManager serviceManager = PhrescoUtil.getServiceManager();
+			final ServiceManager serviceManager = PhrescoUtil.getServiceManager();
 			SettingsTemplate serverTemplate = serviceManager.getConfigTemplateByTechId(PhrescoUtil.getTechId(), types);
 			
 			List<PropertyTemplate> propertyTemplates  = serverTemplate.getProperties();
@@ -504,11 +506,16 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 							List<ArtifactGroupInfo> selectedServers = projectInfo.getAppInfos().get(0).getSelectedServers();
+							Set<String> serverType = new HashSet<String>();
 							if (CollectionUtils.isNotEmpty(selectedServers)) {
 								for (ArtifactGroupInfo artifactGroupInfo : selectedServers) {
 									String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
-									DownloadInfo downloads = serviceManager.getDownloadInfo(artifactGroupId);
-									comboDropDown.add(downloads.getName());
+									DownloadInfo downloadInfo = serviceManager.getDownloadInfo(artifactGroupId);
+									map.put(downloadInfo.getName(), artifactGroupInfo.getArtifactGroupId());
+									serverType.add(downloadInfo.getName());
+								}
+								for (String downloadInfo : serverType) {
+									comboDropDown.add(downloadInfo);
 									comboDropDown.select(0);
 								}
 							}
@@ -522,15 +529,21 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							comboDropDown.setLayoutData(data);
 							ProjectInfo projectInfo = PhrescoUtil.getProjectInfo();
 							List<ArtifactGroupInfo> selectedDatabases = projectInfo.getAppInfos().get(0).getSelectedDatabases();
+							Set<String> databaseType = new HashSet<String>();
 							if (CollectionUtils.isNotEmpty(selectedDatabases)) {
 								for (ArtifactGroupInfo artifactGroupInfo : selectedDatabases) {
 									String artifactGroupId = artifactGroupInfo.getArtifactGroupId();
-									DownloadInfo downloads = serviceManager.getDownloadInfo(artifactGroupId);
-									comboDropDown.add(downloads.getName());
+									DownloadInfo downloadInfo = serviceManager.getDownloadInfo(artifactGroupId);
+									map.put(downloadInfo.getName(), artifactGroupInfo.getArtifactGroupId());
+									databaseType.add(downloadInfo.getName());
+								}
+								for (String downloadInfo : databaseType) {
+									comboDropDown.add(downloadInfo);
 									comboDropDown.select(0);
 								}
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
+							selectVersion(serviceManager);
 						}  else if (propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 							
 							Label defaults = new  Label(composite,  SWT.LEFT);
@@ -547,15 +560,23 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								values = projectInfo.getAppInfos().get(0).getSelectedDatabases();
 							}
 							if (CollectionUtils.isNotEmpty(values)) {
-								for (ArtifactGroupInfo artifactGroupInfo : values) {
-									for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
-										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
-										comboDropDown.add(artifactInfo.getVersion());
+								map.put(ARTIFACT_GROUP_VALUES, values);
+								Combo artifactGroupCombo = (Combo) map.get(TYPES);
+								if (artifactGroupCombo != null && !artifactGroupCombo.isDisposed()) {
+									String artifactGroupId = (String) map.get(artifactGroupCombo.getText());
+									for (ArtifactGroupInfo artifactGroupInfo : values) {
+										if (artifactGroupInfo.getArtifactGroupId().equalsIgnoreCase(artifactGroupId)) {
+											for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
+												ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
+												comboDropDown.add(artifactInfo.getVersion());
+											}
+										}
 									}
 								}
 								comboDropDown.select(0);
 							}
 							map.put(propertyTemplate.getKey(), comboDropDown);
+							selectVersion(serviceManager);
 						}
 						else { 
 							Label defaults = new  Label(composite,  SWT.LEFT);
@@ -683,6 +704,39 @@ public class ConfigurationCreation  implements PhrescoConstants {
 		composite.pack();
 		composite.redraw();
 		return composite;
+	}
+
+	private void selectVersion(final ServiceManager serviceManager) {
+		Combo combo = (Combo) map.get(TYPES);
+		if (combo != null && !combo.isDisposed()) {
+			combo.addListener(SWT.Selection, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					Combo combo = (Combo) event.widget;
+					Combo versionCombo = (Combo) map.get(VERSION);
+					versionCombo.removeAll();
+					if (combo != null) {
+						String downloadInfoName = combo.getText();
+						String artifactGroupId = (String) map.get(downloadInfoName);
+						List<ArtifactGroupInfo> values = (List<ArtifactGroupInfo>) map.get(ARTIFACT_GROUP_VALUES);
+						ArtifactInfo artifactInfo;
+						for (ArtifactGroupInfo artifactGroupInfo : values) {
+							if (artifactGroupInfo.getArtifactGroupId().equalsIgnoreCase(artifactGroupId)) {
+								for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
+									try {
+										artifactInfo = serviceManager.getArtifactInfo(artifct);
+										versionCombo.add(artifactInfo.getVersion());
+									} catch (PhrescoException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+							versionCombo.select(0);
+						}
+					}
+				}
+			});
+		}
 	}
 
 	private RemoteCertificateInfo authenticateServer(String host, String port) {
@@ -1038,6 +1092,12 @@ public class ConfigurationCreation  implements PhrescoConstants {
 							|| propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) || propertyTemplate.getName().equalsIgnoreCase(VERSION)) {
 						Combo comboDropDown = (Combo) map.get(propertyTemplate.getKey());
 						
+						Combo combo = null;
+						
+						if (propertyTemplate.getName().equalsIgnoreCase(SERVER_TYPE) || propertyTemplate.getName().equalsIgnoreCase(DB_TYPE) ) {
+							combo = (Combo) map.get(propertyTemplate.getKey());
+						}
+						
 						if (propertyTemplate.getKey().equalsIgnoreCase(VERSION)) {
 							comboDropDown.removeAll();
 							List<ArtifactGroupInfo> values = null;
@@ -1048,10 +1108,15 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								values = projectInfo.getAppInfos().get(0).getSelectedDatabases();
 							}
 							if (CollectionUtils.isNotEmpty(values)) {
-								for (ArtifactGroupInfo artifactGroupInfo : values) {
-									for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
-										ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
-										comboDropDown.add(artifactInfo.getVersion());
+								if (combo != null && !combo.isDisposed()) {
+									String artifactGroupId = (String) map.get(combo.getText());
+									for (ArtifactGroupInfo artifactGroupInfo : values) {
+										if (artifactGroupInfo.getArtifactGroupId().equalsIgnoreCase(artifactGroupId)) {
+											for(String artifct: artifactGroupInfo.getArtifactInfoIds()){
+												ArtifactInfo artifactInfo = serviceManager.getArtifactInfo(artifct);
+												comboDropDown.add(artifactInfo.getVersion());
+											}
+										}
 									}
 								}
 								comboDropDown.select(0);
@@ -1097,7 +1162,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 					if (checkBoxButton != null) {
 						final String value = (String) prop.get(propertyTemplate.getKey().replaceAll("\\s", ""));
 						checkBoxButton.setSelection(Boolean.parseBoolean(value));
-						if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+						if (propertyTemplate.getKey().equalsIgnoreCase(REMOTE_DEPLOYMENT)) {
 							map.put(REMOTE_DEPLOYMENT_VALUE, Boolean.parseBoolean(value));
 						}
 						checkBoxButton.addListener(SWT.Selection, new Listener() {
@@ -1106,7 +1171,7 @@ public class ConfigurationCreation  implements PhrescoConstants {
 								Button button = (Button) event.widget;
 								boolean selection = button.getSelection();
 								String value = String.valueOf(selection);
-								if (propertyTemplate.getKey().equalsIgnoreCase("remoteDeployment")) {
+								if (propertyTemplate.getKey().equalsIgnoreCase(REMOTE_DEPLOYMENT)) {
 									map.put(REMOTE_DEPLOYMENT_VALUE, selection);
 								}
 								if (value.equalsIgnoreCase("false")&& !protocolList.isDisposed() &&	protocolList.getText().equalsIgnoreCase(HTTP_PROTOCOL)) {
